@@ -1,0 +1,62 @@
+!************************************************************
+! This test is aimed to reproduce the evolution
+! of the primordial gas based on the Galli&Palla 1998 paper
+! within the framework of Friedmann cosmological models 
+! from redshift z=10^4 to z=0.
+! It includes the evaluation of H+ recombination based on 
+! Sasaki & Takahara (1993) paper.
+! For additional details see Galli&Palla A&A, 335, 403, 1998. 
+!************************************************************
+
+KROME-X notes:
+- output files (legacy name): abundances.dat (fort.22).
+- -useFileIdx is not needed: the reactions that referenced other rates
+  by file index are written out in networks/earlyUniverse.knet; the
+  legacy ODE modifier (dn = 0 for everything but He above z = 2243) is
+  the network's freeze directive.
+- -computeElectrons is SolverOpts::conserve = 3: after each solve the
+  electrons neutralize the ions. This matters here: the freeze stops
+  dn(e-)/dt above z = 2243 while He recombines, and without the
+  recomputation the electrons stay ~16 % too high for the whole run
+  (final e- 0.15 instead of 1.2e-4 per nucleus, final Tgas 16 K instead
+  of 0.9 K). conserve = 1 is not a substitute: it restores the input
+  charge and never moves a frozen species.
+- the legacy cosmology constants and setters are parameters: hubble0 and
+  omega0 (REQUIRED by EXPANSION and elec_recomb_ST93), zredshift, Trad
+  (the network parameter of legacy user_Trad); Tcmb = 2.73 K is the
+  legacy temperature floor (legacy phys_Tcmb, not changed by the
+  redshift).
+- 2.0.0: the H2 cooling is H2 (Glover & Abel 2008, the LTE limit of
+  Hollenbach & McKee 1979 / Galli & Palla 1998 below 2e3 K); the Galli &
+  Palla 1998 fit of legacy -cooling=H2GP98 was removed. The comparison
+  with legacy below is that of v2.0.0-benchmark (H2GP98 in both codes);
+  the change moves Tgas by < 5e-6 and the abundances by < 3e-4 (the H2
+  cooling is negligible in this run).
+- species in KROME-X (alphabetical) order; plot.py picks them by name
+  (He, He+, He++, HeH+).
+- KROME-X vs legacy (5000 redshift steps): H, He, D, e-, H+ agree to
+  < 0.3 % over the whole run, H2 to 0.7 %, HD to 1 % (3 % at z ~ 2000
+  where it is 5e-31); the trace ions to < 6 % except D+ (1e-15 per
+  nucleus), 18 % at z ~ 14 and 0.2 % at the end;
+  Tgas agrees to < 1 % down to z = 100 and is 3.8 % lower at z = 10
+  (0.904 K vs 0.939 K). The cause is elec_recomb_ST93: legacy hard-codes
+  h = 0.704 there, while KROME-X derives h from the hubble0 parameter with
+  1 Mpc = 3.0857e24 cm, i.e. h = 0.7053 from the legacy Hubble0 (which
+  used 1 Mpc = 3.08e24 cm). With p.hubble0 set so that ST93 sees
+  h = 0.704, the final Tgas agrees to 0.8 %.
+- 2.0.0: the driver takes 1 Mpc from krome::constants (IAU, 3.0857e24
+  cm), so its Hubble0 (the redshift steps and the EXPANSION cooling) and
+  the h of ST93 are the same h = 0.704; legacy mixed h = 0.704 in ST93
+  with H0 = 100 x 0.7053 km/s/Mpc elsewhere. Against v2.0.0-benchmark,
+  Tgas moves by < 4.1e-5 (final 0.90394 K) and the abundances by < 2e-3;
+  the comparison with legacy above is that of v2.0.0-benchmark.
+- 2.0.0: the H, D and He I recombination and their CMB photoionization are
+  RECFAST 1.5.2's (Seager, Sasselov & Scott 1999; Wong, Moss & Scott 2008;
+  Rubino-Martin et al. 2010; the recfast_* rates, see docs/manual.md)
+  instead of Sasaki & Takahara 1993 (H, D) and the GP98 fits (He). The
+  ionization history follows RECFAST run in this cosmology within 2.5 % (z
+  = 950; tests/test_recfast.py): x_e = 0.125 at z = 1100 (RECFAST 0.128)
+  and the freeze-out x_e = 1.62e-4 per H at z = 10 (RECFAST 1.63e-4; ST93
+  gave 1.29e-4). With more electrons, more H2 (1.85e-6 at z = 10, 1.10e-6
+  with ST93) and HD (1.5e-9, 5.9e-10), and a warmer gas at the end (1.33
+  K, 0.90 K). The legacy comparison above is that of v2.0.0-benchmark.

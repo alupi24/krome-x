@@ -1,0 +1,9 @@
+# legacy tests/rtchem (a DEV test): a semi-infinite slab irradiated by
+# 10 x the Draine flux, attenuated by the photochemistry and by dust
+# legacy -photoBins=10: the photon bins are runtime setup in KROME-X
+# (Radiation + PhotoModule in test.cpp: 10 linear bins 5-13.6 eV)
+# legacy -sh: no Fortran headers in KROME-X (dropped)
+# (the network path is relative to the KROME-X folder)
+
+[project]
+network = "networks/COthin_rt.knet"

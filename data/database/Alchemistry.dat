@@ -1,0 +1,318 @@
+##########################
+##########################
+#Numbers refers to Starik+2014, Combustion and Flame 161, 1659
+# REV refers to reverse reactions.
+
+@type: Al-21 H2O (3body)
+@reacts: Al,O,H2O
+@prods: AlO,H2O
+@rate: 2.317d-31/Tgas
+
+@type: Al-21 O2 (3body)
+@reacts: Al,O,O2
+@prods: AlO,O2
+@rate: 9.101d-31/Tgas
+
+@type: Al-21 H2 (3body)
+@reacts: Al,O,H2
+@prods: AlO,H2
+@rate: 9.101d-31/Tgas
+
+@type: Al-22
+@reacts: Al,O2
+@prods: AlO,O
+@rate: 3.836d-11*Tgas**(.17)
+
+@type: Al-23
+@reacts: AlO,O2
+@prods: AlO2,O
+@rate: 1.182d-11*Tgas**(.5)*exp(-1.315d4*invT)
+
+@type: Al-24
+@reacts: AlO2
+@prods: AlO,O
+@rate: 1.661d-9*exp(-44564.6*invT)
+
+@type: Al-25
+@reacts: Al2O
+@prods: AlO,Al
+@rate: 1.661d-9*exp(-67035.7*invT)
+
+@type: Al-26
+@reacts: Al2O2
+@prods: AlO,AlO
+@rate: 1.661d-9*exp(-59335.7*invT)
+
+@type: Al-27
+@reacts: Al2O2
+@prods: Al,AlO2
+@rate: 1.661d-9*exp(-74937.1*invT)
+
+@type: Al-28
+@reacts: Al2O2
+@prods: Al2O,O
+@rate: 1.661d-9*exp(-52466.*invT)
+
+@type: Al-29
+@reacts: Al2O3
+@prods: Al2O2,O
+@rate: 4.982d-9*exp(-49144.4*invT)
+
+@type: Al-30
+@reacts: Al2O3
+@prods: AlO2,AlO
+@rate: 4.982d-9*exp(-63915.4*invT)
+
+@type: Al-31
+@reacts: Al,H2O
+@prods: AlOH,H
+@rate: 3.255d-10*Tgas**(-.09)*exp(-3744.*invT) + 4.616d-18*Tgas**(2.06)*exp(-438.*invT)
+
+@type: Al-32 (3body)
+@reacts: Al,H2O,H2O
+@prods: AlO2H2,H2
+@rate: 3.198e-33*Tgas**(.5)
+
+@type: Al-33 (3body)
+@reacts: Al,H2O,H2O
+@prods: AlOH,H,H2O
+@rate: 3.198e-33*Tgas**(.5)*exp(-1260.*invT)
+
+@type: Al-36 (3body)
+@reacts: AlO,H
+@prods: AlOH
+@rate: 5.489d-33*Tgas**(.5)*ntot
+
+@type: Al-37 (3body)
+@reacts: Al,OH
+@prods: AlOH
+@rate: 5.957d-33*Tgas**(.5)*ntot
+
+@type: Al-38
+@reacts: AlOH,H
+@prods: AlO,H2
+@rate: 4.417d-16*Tgas**(.82)*exp(-7844.*invT)
+
+@type: Al-39 (3body)
+@reacts: Al,H
+@prods: AlH
+@rate: 2.600d-33*Tgas**(.5)*ntot
+
+@type: Al-45
+@reacts: AlOH,O
+@prods: AlO,OH
+@rate: 1.251d-11*Tgas**(.5)*exp(-4450.*invT)
+
+@type: Al-46 (3body)
+@reacts: AlO,OH
+@prods: AlO2H
+@rate: 7.226e-33*Tgas**(.5)*ntot
+
+@type: Al-47
+@reacts: AlO,AlH
+@prods: AlOH,Al
+@rate: 4.218d-11*Tgas**(.17)
+
+@type: Al-48 (3body)
+@reacts: AlO2,H
+@prods: AlO2H
+@rate: 6.04d-33*Tgas**(.5)*ntot
+
+@type: Al-49 (3body)
+@reacts: AlOH,O
+@prods: AlO2H
+@rate: 8.107d-33*Tgas**(.5)*ntot
+
+@type: Al-52
+@reacts: AlO2,H2O
+@prods: AlO2H,OH
+@rate: 4.367d-22*Tgas**(3.26)*exp(-3430.*invT)
+
+@type: Al-53
+@reacts: AlO2,H2
+@prods: AlO2H,H
+@rate: 7.672d-14*Tgas**(1.39)*exp(-2940.*invT)
+
+@type: Al-54
+@reacts: AlO2,OH
+@prods: AlO2H,O
+@rate: 4.268d-11*Tgas**(.17)
+
+@type: Al-55
+@reacts: AlO2H,O
+@prods: AlOH,O2
+@rate: 3.554d-11*Tgas**(.17)
+
+@type: Al-56
+@reacts: AlO2H,H
+@prods: AlO2H2
+@rate: 1.227d-10*Tgas**(.17)
+
+@type: Al-57
+@reacts: AlOH,OH
+@prods: AlO2H2
+@rate: 4.118d-11*Tgas**(.16)*exp(23.*invT)
+
+@type: Al-58
+@reacts: AlO2H2,OH
+@prods: AlO3H3
+@rate: 4.218d-11*Tgas**(.15)*exp(48.*invT)
+
+
+
+
+
+@type: Al-21 H2O (3body) (REV)
+@reacts: AlO,H2O
+@prods:Al,O,H2O
+@rate: 2.317d-31/Tgas * revKc(Tgas, (/idx_AlO/), (/idx_Al,idx_O/))
+
+@type: Al-21 O2 (3body) (REV)
+@reacts: AlO,O2
+@prods:Al,O,O2
+@rate: 9.101d-31/Tgas * revKc(Tgas, (/idx_AlO/), (/idx_Al,idx_O/))
+
+@type: Al-21 H2 (3body) (REV)
+@reacts: AlO,H2
+@prods:Al,O,H2
+@rate: 9.101d-31/Tgas * revKc(Tgas, (/idx_AlO/), (/idx_Al,idx_O/))
+
+@type: Al-22 (REV)
+@reacts: AlO,O
+@prods:Al,O2
+@rate: 3.836d-11*Tgas**(.17) * revKc(Tgas, (/idx_AlO,idx_O/), (/idx_Al,idx_O2/))
+
+@type: Al-23 (REV)
+@reacts: AlO2,O
+@prods:AlO,O2
+@rate: 1.182d-11*Tgas**(.5)*exp(-1.315d4*invT) * revKc(Tgas, (/idx_AlO2,idx_O/), (/idx_AlO,idx_O2/))
+
+@type: Al-24 (REV)
+@reacts: AlO,O
+@prods:AlO2
+@rate: 1.661d-9*exp(-44564.6*invT) * revKc(Tgas, (/idx_AlO,idx_O/), (/idx_AlO2/))
+
+@type: Al-25 (REV)
+@reacts: AlO,Al
+@prods:Al2O
+@rate: 1.661d-9*exp(-67035.7*invT) * revKc(Tgas, (/idx_AlO,idx_Al/), (/idx_Al2O/))
+
+@type: Al-26 (REV)
+@reacts: AlO,AlO
+@prods:Al2O2
+@rate: 1.661d-9*exp(-59335.7*invT) * revKc(Tgas, (/idx_AlO,idx_AlO/), (/idx_Al2O2/))
+
+@type: Al-27 (REV)
+@reacts: Al,AlO2
+@prods:Al2O2
+@rate: 1.661d-9*exp(-74937.1*invT) * revKc(Tgas, (/idx_Al,idx_AlO2/), (/idx_Al2O2/))
+
+@type: Al-28 (REV)
+@reacts: Al2O,O
+@prods:Al2O2
+@rate: 1.661d-9*exp(-52466.*invT) * revKc(Tgas, (/idx_Al2O,idx_O/), (/idx_Al2O2/))
+
+@type: Al-29 (REV)
+@reacts: Al2O2,O
+@prods:Al2O3
+@rate: 4.982d-9*exp(-49144.4*invT) * revKc(Tgas, (/idx_Al2O2,idx_O/), (/idx_Al2O3/))
+
+@type: Al-30 (REV)
+@reacts: AlO2,AlO
+@prods:Al2O3
+@rate: 4.982d-9*exp(-63915.4*invT) * revKc(Tgas, (/idx_AlO2,idx_AlO/), (/idx_Al2O3/))
+
+@type: Al-31 (REV)
+@reacts: AlOH,H
+@prods:Al,H2O
+@rate: (3.255d-10*Tgas**(-.09)*exp(-3744.*invT) + 4.616d-18*Tgas**(2.06)*exp(-438.*invT)) * revKc(Tgas, (/idx_AlOH,idx_H/), (/idx_Al,idx_H2O/))
+
+@type: Al-32 (3body) (REV)
+@reacts: AlO2H2,H2
+@prods:Al,H2O,H2O
+@rate: 3.198e-33*Tgas**(.5) * revKc(Tgas, (/idx_AlO2H2,idx_H2/), (/idx_Al,idx_H2O,idx_H2O/))
+
+@type: Al-33 (3body) (REV)
+@reacts: AlOH,H,H2O
+@prods:Al,H2O,H2O
+@rate: 3.198e-33*Tgas**(.5)*exp(-1260.*invT) * revKc(Tgas, (/idx_AlOH,idx_H/), (/idx_Al/))
+
+@type: Al-36 (3body) (REV)
+@reacts: AlOH
+@prods:AlO,H
+@rate: 5.489d-33*Tgas**(.5)*ntot * revKc(Tgas, (/idx_AlOH/), (/idx_AlO,idx_H/))
+
+@type: Al-37 (3body) (REV)
+@reacts: AlOH
+@prods:Al,OH
+@rate: 5.957d-33*Tgas**(.5)*ntot * revKc(Tgas, (/idx_AlOH/), (/idx_Al,idx_OH/))
+
+@type: Al-38 (REV)
+@reacts: AlO,H2
+@prods:AlOH,H
+@rate: 4.417d-16*Tgas**(.82)*exp(-7844.*invT) * revKc(Tgas, (/idx_AlO,idx_H2/), (/idx_AlOH,idx_H/))
+
+@type: Al-39 (3body) (REV)
+@reacts: AlH
+@prods:Al,H
+@rate: 2.600d-33*Tgas**(.5)*ntot * revKc(Tgas, (/idx_AlH/), (/idx_Al,idx_H/))
+
+@type: Al-45 (REV)
+@reacts: AlO,OH
+@prods:AlOH,O
+@rate: 1.251d-11*Tgas**(.5)*exp(-4450.*invT) * revKc(Tgas, (/idx_AlO,idx_OH/), (/idx_AlOH,idx_O/))
+
+@type: Al-46 (3body) (REV)
+@reacts: AlO2H
+@prods:AlO,OH
+@rate: 7.226e-33*Tgas**(.5)*ntot * revKc(Tgas, (/idx_AlO2H/), (/idx_AlO,idx_OH/))
+
+@type: Al-47 (REV)
+@reacts: AlOH,Al
+@prods:AlO,AlH
+@rate: 4.218d-11*Tgas**(.17) * revKc(Tgas, (/idx_AlOH,idx_Al/), (/idx_AlO,idx_AlH/))
+
+@type: Al-48 (3body) (REV)
+@reacts: AlO2H
+@prods:AlO2,H
+@rate: 6.04d-33*Tgas**(.5)*ntot * revKc(Tgas, (/idx_AlO2H/), (/idx_AlO2,idx_H/))
+
+@type: Al-49 (3body) (REV)
+@reacts: AlO2H
+@prods:AlOH,O
+@rate: 8.107d-33*Tgas**(.5)*ntot * revKc(Tgas, (/idx_AlO2H/), (/idx_AlOH,idx_O/))
+
+@type: Al-52 (REV)
+@reacts: AlO2H,OH
+@prods:AlO2,H2O
+@rate: 4.367d-22*Tgas**(3.26)*exp(-3430.*invT) * revKc(Tgas, (/idx_AlO2H,idx_OH/), (/idx_AlO2,idx_H2O/))
+
+@type: Al-53 (REV)
+@reacts: AlO2H,H
+@prods:AlO2,H2
+@rate: 7.672d-14*Tgas**(1.39)*exp(-2940.*invT) * revKc(Tgas, (/idx_AlO2H,idx_H/), (/idx_AlO2,idx_H2/))
+
+@type: Al-54 (REV)
+@reacts: AlO2H,O
+@prods:AlO2,OH
+@rate: 4.268d-11*Tgas**(.17) * revKc(Tgas, (/idx_AlO2H,idx_O/), (/idx_AlO2,idx_OH/))
+
+@type: Al-55 (REV)
+@reacts: AlOH,O2
+@prods:AlO2H,O
+@rate: 3.554d-11*Tgas**(.17) * revKc(Tgas, (/idx_AlOH,idx_O2/), (/idx_AlO2H,idx_O/))
+
+@type: Al-56 (REV)
+@reacts: AlO2H2
+@prods:AlO2H,H
+@rate: 1.227d-10*Tgas**(.17) * revKc(Tgas, (/idx_AlO2H2/), (/idx_AlO2H,idx_H/))
+
+@type: Al-57 (REV)
+@reacts: AlO2H2
+@prods:AlOH,OH
+@rate: 4.118d-11*Tgas**(.16)*exp(23.*invT) * revKc(Tgas, (/idx_AlO2H2/), (/idx_AlOH,idx_OH/))
+
+@type: Al-58 (REV)
+@reacts: AlO3H3
+@prods:AlO2H2,OH
+@rate: 4.218d-11*Tgas**(.15)*exp(48.*invT) * revKc(Tgas, (/idx_AlO3H3/), (/idx_AlO2H2,idx_OH/))

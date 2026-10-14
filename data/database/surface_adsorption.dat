@@ -1,0 +1,109 @@
+@var:[nspec] imsqrt = get_imass_sqrt()
+@var:[ndust] ads_stick = dust_stick_array(Tgas,krome_dust_T)
+@var: sqrTgas = sqrt(Tgas)
+
+#Adsorption rate for H from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: adsorption
+@reacts: H
+@prods: H_dust
+@limits:
+@rate: dust_adsorption_rate(xdust(auto_jdust-nmols), imsqrt(idx_H),ads_stick(auto_jdust-nmols),krome_dust_asize2(auto_jdust-nmols),sqrTgas)
+
+#Adsorption rate for H2 from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: adsorption
+@reacts: H2
+@prods: H2_dust
+@limits:
+@rate: dust_adsorption_rate(xdust(auto_jdust-nmols), imsqrt(idx_H2),ads_stick(auto_jdust-nmols),krome_dust_asize2(auto_jdust-nmols),sqrTgas)
+
+#Adsorption rate for O from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: adsorption
+@reacts: O
+@prods: O_dust
+@limits:
+@rate: dust_adsorption_rate(xdust(auto_jdust-nmols), imsqrt(idx_O),ads_stick(auto_jdust-nmols),krome_dust_asize2(auto_jdust-nmols),sqrTgas)
+
+#Adsorption rate for O2 from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: adsorption
+@reacts: O2
+@prods: O2_dust
+@limits:
+@rate: dust_adsorption_rate(xdust(auto_jdust-nmols), imsqrt(idx_O2),ads_stick(auto_jdust-nmols),krome_dust_asize2(auto_jdust-nmols),sqrTgas)
+
+#Adsorption rate for O3 from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: adsorption
+@reacts: O3
+@prods: O3_dust
+@limits:
+@rate: dust_adsorption_rate(xdust(auto_jdust-nmols), imsqrt(idx_O3),ads_stick(auto_jdust-nmols),krome_dust_asize2(auto_jdust-nmols),sqrTgas)
+
+#Adsorption rate for OH from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: adsorption
+@reacts: OH
+@prods: OH_dust
+@limits:
+@rate: dust_adsorption_rate(xdust(auto_jdust-nmols), imsqrt(idx_OH),ads_stick(auto_jdust-nmols),krome_dust_asize2(auto_jdust-nmols),sqrTgas)
+
+#Adsorption rate for CO from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: adsorption
+@reacts: CO
+@prods: CO_dust
+@limits:
+@rate: dust_adsorption_rate(xdust(auto_jdust-nmols), imsqrt(idx_CO),ads_stick(auto_jdust-nmols),krome_dust_asize2(auto_jdust-nmols),sqrTgas)
+
+#Adsorption rate for CO2 from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: adsorption
+@reacts: CO2
+@prods: CO2_dust
+@limits:
+@rate: dust_adsorption_rate(xdust(auto_jdust-nmols), imsqrt(idx_CO2),ads_stick(auto_jdust-nmols),krome_dust_asize2(auto_jdust-nmols),sqrTgas)
+
+#Adsorption rate for H2O from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: adsorption
+@reacts: H2O
+@prods: H2O_dust
+@limits:
+@rate: dust_adsorption_rate(xdust(auto_jdust-nmols), imsqrt(idx_H2O),ads_stick(auto_jdust-nmols),krome_dust_asize2(auto_jdust-nmols),sqrTgas)
+
+#Adsorption rate for HO2 from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: adsorption
+@reacts: HO2
+@prods: HO2_dust
+@limits:
+@rate: dust_adsorption_rate(xdust(auto_jdust-nmols), imsqrt(idx_HO2),ads_stick(auto_jdust-nmols),krome_dust_asize2(auto_jdust-nmols),sqrTgas)
+
+#Adsorption rate for H2O2 from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: adsorption
+@reacts: H2O2
+@prods: H2O2_dust
+@limits:
+@rate: dust_adsorption_rate(xdust(auto_jdust-nmols), imsqrt(idx_H2O2),ads_stick(auto_jdust-nmols),krome_dust_asize2(auto_jdust-nmols),sqrTgas)
+
+#Adsorption rate for HCO from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: adsorption
+@reacts: HCO
+@prods: HCO_dust
+@limits:
+@rate: dust_adsorption_rate(xdust(auto_jdust-nmols), imsqrt(idx_HCO),ads_stick(auto_jdust-nmols),krome_dust_asize2(auto_jdust-nmols),sqrTgas)
+
+#Adsorption rate for H2CO from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: adsorption
+@reacts: H2CO
+@prods: H2CO_dust
+@limits:
+@rate: dust_adsorption_rate(xdust(auto_jdust-nmols), imsqrt(idx_H2CO),ads_stick(auto_jdust-nmols),krome_dust_asize2(auto_jdust-nmols),sqrTgas)
+
+#Adsorption rate for CH3O from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: adsorption
+@reacts: CH3O
+@prods: CH3O_dust
+@limits:
+@rate: dust_adsorption_rate(xdust(auto_jdust-nmols), imsqrt(idx_CH3O),ads_stick(auto_jdust-nmols),krome_dust_asize2(auto_jdust-nmols),sqrTgas)
+
+#Adsorption rate for CH3OH from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: adsorption
+@reacts: CH3OH
+@prods: CH3OH_dust
+@limits:
+@rate: dust_adsorption_rate(xdust(auto_jdust-nmols), imsqrt(idx_CH3OH),ads_stick(auto_jdust-nmols),krome_dust_asize2(auto_jdust-nmols),sqrTgas)
+

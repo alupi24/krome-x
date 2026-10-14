@@ -1,0 +1,2824 @@
+######################################
+######################################
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Li, E
+@prods: Li+,E, E
+@limits: 1.160452d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 5.4d0, 0d0, 0.139d-06, 0.4380d0, 0.41d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Li+, E
+@prods: Li++,E, E
+@limits: 4.641808d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 75.6d0, 1d0, 0.201d-08, 0.2090d0, 0.23d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Li++, E
+@prods: Li+++,E, E
+@limits: 5.802260d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 122.4d0, 1d0, 0.960d-09, 0.5820d0, 0.17d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Be, E
+@prods: Be+,E, E
+@limits: 1.160452d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 9.3d0, 0d0, 0.102d-06, 0.3750d0, 0.27d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Be+, E
+@prods: Be++,E, E
+@limits: 1.160452d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 18.2d0, 1d0, 0.208d-07, 0.4390d0, 0.21d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Be++, E
+@prods: Be+++,E, E
+@limits: 8.123163d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 153.9d0, 0d0, 0.267d-08, 0.6120d0, 0.27d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Be+++, E
+@prods: Be++++,E, E
+@limits: 1.160452d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 217.7d0, 1d0, 0.427d-09, 0.6580d0, 0.15d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: B, E
+@prods: B+,E, E
+@limits: 1.160452d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 8.3d0, 0d0, 0.649d-07, 0.2000d0, 0.26d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: B+, E
+@prods: B++,E, E
+@limits: 2.320904d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 25.2d0, 1d0, 0.124d-07, 0.2670d0, 0.22d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: B++, E
+@prods: B+++,E, E
+@limits: 2.320904d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 37.9d0, 1d0, 0.327d-08, 0.2950d0, 0.23d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: B+++, E
+@prods: B++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 259.4d0, 1d0, 0.495d-09, 0.4890d0, 0.09d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: B++++, E
+@prods: B+++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 340.2d0, 1d0, 0.219d-09, 0.6570d0, 0.15d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: C, E
+@prods: C+,E, E
+@limits: 1.160452d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 11.3d0, 0d0, 0.685d-07, 0.1930d0, 0.25d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: C+, E
+@prods: C++,E, E
+@limits: 1.160452d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 24.4d0, 1d0, 0.186d-07, 0.2860d0, 0.24d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: C++, E
+@prods: C+++,E, E
+@limits: 2.320904d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 47.9d0, 1d0, 0.635d-08, 0.4270d0, 0.21d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: C+++, E
+@prods: C++++,E, E
+@limits: 3.481356d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 64.5d0, 1d0, 0.150d-08, 0.4160d0, 0.13d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: C++++, E
+@prods: C+++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 392.1d0, 1d0, 0.299d-09, 0.6660d0, 0.02d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: C+++++, E
+@prods: C++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 490.0d0, 1d0, 0.123d-09, 0.6200d0, 0.16d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: N, E
+@prods: N+,E, E
+@limits: 1.160452d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 14.5d0, 0d0, 0.482d-07, 0.0652d0, 0.42d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: N+, E
+@prods: N++,E, E
+@limits: 2.320904d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 29.6d0, 0d0, 0.298d-07, 0.3100d0, 0.30d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: N++, E
+@prods: N+++,E, E
+@limits: 2.320904d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 47.5d0, 1d0, 0.810d-08, 0.3500d0, 0.24d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: N+++, E
+@prods: N++++,E, E
+@limits: 4.641808d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 77.5d0, 1d0, 0.371d-08, 0.5490d0, 0.18d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: N++++, E
+@prods: N+++++,E, E
+@limits: 4.641808d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 97.9d0, 0d0, 0.151d-08, 0.0167d0, 0.74d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: N+++++, E
+@prods: N++++++,E, E
+@limits: 3.481356d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 552.1d0, 0d0, 0.371d-09, 0.5460d0, 0.29d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: N++++++, E
+@prods: N+++++++,E, E
+@limits: 3.481356d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 667.0d0, 1d0, 0.777d-10, 0.6240d0, 0.16d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: O, E
+@prods: O+,E, E
+@limits: 1.160452d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 13.6d0, 0d0, 0.359d-07, 0.0730d0, 0.34d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: O+, E
+@prods: O++,E, E
+@limits: 2.320904d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 35.1d0, 1d0, 0.139d-07, 0.2120d0, 0.22d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: O++, E
+@prods: O+++,E, E
+@limits: 3.481356d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 54.9d0, 1d0, 0.931d-08, 0.2700d0, 0.27d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: O+++, E
+@prods: O++++,E, E
+@limits: 4.641808d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 77.4d0, 0d0, 0.102d-07, 0.6140d0, 0.27d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: O++++, E
+@prods: O+++++,E, E
+@limits: 5.802260d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 113.9d0, 1d0, 0.219d-08, 0.6300d0, 0.17d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: O+++++, E
+@prods: O++++++,E, E
+@limits: 8.123163d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 138.1d0, 0d0, 0.195d-08, 0.3600d0, 0.54d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: O++++++, E
+@prods: O+++++++,E, E
+@limits: 3.481356d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 739.3d0, 0d0, 0.212d-09, 0.3960d0, 0.35d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: O+++++++, E
+@prods: O++++++++,E, E
+@limits: 4.641808d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 871.4d0, 1d0, 0.521d-10, 0.6290d0, 0.16d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: F, E
+@prods: F+,E, E
+@limits: 1.160452d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 17.4d0, 1d0, 0.700d-07, 0.1780d0, 0.29d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: F+, E
+@prods: F++,E, E
+@limits: 2.320904d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 35.0d0, 0d0, 0.541d-07, 0.5710d0, 0.27d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: F++, E
+@prods: F+++,E, E
+@limits: 3.481356d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 62.7d0, 1d0, 0.937d-08, 0.3190d0, 0.20d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: F+++, E
+@prods: F++++,E, E
+@limits: 4.641808d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 87.1d0, 1d0, 0.492d-08, 0.3230d0, 0.24d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: F++++, E
+@prods: F+++++,E, E
+@limits: 5.802260d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 114.2d0, 0d0, 0.706d-08, 0.6840d0, 0.27d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: F+++++, E
+@prods: F++++++,E, E
+@limits: 8.123163d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 157.2d0, 1d0, 0.128d-08, 0.6480d0, 0.16d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: F++++++, E
+@prods: F+++++++,E, E
+@limits: 1.160452d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 185.2d0, 1d0, 0.561d-09, 0.7380d0, 0.16d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: F+++++++, E
+@prods: F++++++++,E, E
+@limits: 4.641808d+05, 1.160452d+09
+@rate: colion_v96(Tgas, 953.9d0, 0d0, 0.166d-09, 0.5420d0, 0.29d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: F++++++++, E
+@prods: F+++++++++,E, E
+@limits: 5.802259d+05, 1.160452d+09
+@rate: colion_v96(Tgas, 1103.1d0, 1d0, 0.374d-10, 0.6590d0, 0.15d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ne, E
+@prods: Ne+,E, E
+@limits: 1.160452d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 21.6d0, 1d0, 0.150d-07, 0.0329d0, 0.43d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ne+, E
+@prods: Ne++,E, E
+@limits: 3.481356d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 41.0d0, 0d0, 0.198d-07, 0.2950d0, 0.20d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ne++, E
+@prods: Ne+++,E, E
+@limits: 3.481356d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 63.5d0, 1d0, 0.703d-08, 0.0677d0, 0.39d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ne+++, E
+@prods: Ne++++,E, E
+@limits: 5.802260d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 97.1d0, 1d0, 0.424d-08, 0.0482d0, 0.58d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ne++++, E
+@prods: Ne+++++,E, E
+@limits: 8.123163d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 126.2d0, 1d0, 0.279d-08, 0.3050d0, 0.25d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ne+++++, E
+@prods: Ne++++++,E, E
+@limits: 8.123163d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 157.9d0, 0d0, 0.345d-08, 0.5810d0, 0.28d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ne++++++, E
+@prods: Ne+++++++,E, E
+@limits: 1.160452d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 207.3d0, 1d0, 0.956d-09, 0.7490d0, 0.14d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ne+++++++, E
+@prods: Ne++++++++,E, E
+@limits: 1.160452d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 239.1d0, 1d0, 0.473d-09, 0.9920d0, 0.04d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ne++++++++, E
+@prods: Ne+++++++++,E, E
+@limits: 5.802259d+05, 1.160452d+09
+@rate: colion_v96(Tgas, 1196.0d0, 1d0, 0.392d-10, 0.2620d0, 0.20d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ne+++++++++, E
+@prods: Ne++++++++++,E, E
+@limits: 8.123163d+05, 1.160452d+09
+@rate: colion_v96(Tgas, 1360.6d0, 1d0, 0.277d-10, 0.6610d0, 0.13d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Na, E
+@prods: Na+,E, E
+@limits: 1.160452d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 5.1d0, 1d0, 0.101d-06, 0.2750d0, 0.23d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Na+, E
+@prods: Na++,E, E
+@limits: 2.320904d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 47.3d0, 1d0, 0.735d-08, 0.0560d0, 0.35d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Na++, E
+@prods: Na+++,E, E
+@limits: 3.481356d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 71.6d0, 1d0, 0.810d-08, 0.1480d0, 0.32d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Na+++, E
+@prods: Na++++,E, E
+@limits: 4.641808d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 98.9d0, 0d0, 0.114d-07, 0.5530d0, 0.28d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Na++++, E
+@prods: Na+++++,E, E
+@limits: 8.123163d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 138.4d0, 1d0, 0.263d-08, 0.2300d0, 0.29d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Na+++++, E
+@prods: Na++++++,E, E
+@limits: 8.123163d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 172.2d0, 1d0, 0.185d-08, 0.3630d0, 0.22d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Na++++++, E
+@prods: Na+++++++,E, E
+@limits: 1.160452d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 208.5d0, 0d0, 0.282d-08, 0.6740d0, 0.27d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Na+++++++, E
+@prods: Na++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 264.2d0, 1d0, 0.672d-09, 0.7520d0, 0.14d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Na++++++++, E
+@prods: Na+++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 299.9d0, 1d0, 0.280d-09, 0.7810d0, 0.15d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Na+++++++++, E
+@prods: Na++++++++++,E, E
+@limits: 8.123163d+05, 1.160452d+09
+@rate: colion_v96(Tgas, 1465.1d0, 1d0, 0.463d-10, 0.5580d0, 0.16d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Na++++++++++, E
+@prods: Na+++++++++++,E, E
+@limits: 8.123163d+05, 1.160452d+09
+@rate: colion_v96(Tgas, 1648.7d0, 1d0, 0.216d-10, 0.7430d0, 0.13d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Mg, E
+@prods: Mg+,E, E
+@limits: 1.160452d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 7.6d0, 0d0, 0.621d-06, 0.5920d0, 0.39d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Mg+, E
+@prods: Mg++,E, E
+@limits: 1.160452d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 15.2d0, 0d0, 0.192d-07, 0.0027d0, 0.85d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Mg++, E
+@prods: Mg+++,E, E
+@limits: 4.641808d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 80.1d0, 1d0, 0.556d-08, 0.1070d0, 0.30d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Mg+++, E
+@prods: Mg++++,E, E
+@limits: 5.802260d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 109.3d0, 1d0, 0.435d-08, 0.1590d0, 0.31d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Mg++++, E
+@prods: Mg+++++,E, E
+@limits: 8.123163d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 141.3d0, 0d0, 0.710d-08, 0.6580d0, 0.25d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Mg+++++, E
+@prods: Mg++++++,E, E
+@limits: 1.160452d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 186.5d0, 1d0, 0.170d-08, 0.2420d0, 0.28d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Mg++++++, E
+@prods: Mg+++++++,E, E
+@limits: 1.160452d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 224.9d0, 1d0, 0.122d-08, 0.3430d0, 0.23d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Mg+++++++, E
+@prods: Mg++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 266.0d0, 0d0, 0.220d-08, 0.8970d0, 0.22d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Mg++++++++, E
+@prods: Mg+++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 328.2d0, 1d0, 0.486d-09, 0.7510d0, 0.14d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Mg+++++++++, E
+@prods: Mg++++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 367.5d0, 1d0, 0.235d-09, 1.0300d0, 0.10d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Mg++++++++++, E
+@prods: Mg+++++++++++,E, E
+@limits: 1.160452d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 1761.8d0, 1d0, 0.206d-10, 0.1960d0, 0.25d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Mg+++++++++++, E
+@prods: Mg++++++++++++,E, E
+@limits: 1.160452d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 1962.7d0, 1d0, 0.175d-10, 0.8350d0, 0.11d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Al, E
+@prods: Al+,E, E
+@limits: 1.160452d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 6.0d0, 1d0, 0.228d-06, 0.3870d0, 0.25d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Al+, E
+@prods: Al++,E, E
+@limits: 1.160452d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 18.8d0, 0d0, 0.118d-06, 2.2100d0, 0.25d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Al++, E
+@prods: Al+++,E, E
+@limits: 2.320904d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 28.5d0, 1d0, 0.440d-08, 0.1060d0, 0.24d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Al+++, E
+@prods: Al++++,E, E
+@limits: 5.802260d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 120.0d0, 0d0, 0.175d-07, 0.8720d0, 0.22d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Al++++, E
+@prods: Al+++++,E, E
+@limits: 8.123163d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 153.8d0, 1d0, 0.261d-08, 0.1590d0, 0.31d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Al+++++, E
+@prods: Al++++++,E, E
+@limits: 1.160452d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 198.5d0, 1d0, 0.185d-08, 0.1520d0, 0.36d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Al++++++, E
+@prods: Al+++++++,E, E
+@limits: 1.160452d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 241.4d0, 1d0, 0.114d-08, 0.2280d0, 0.29d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Al+++++++, E
+@prods: Al++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 284.6d0, 1d0, 0.800d-09, 0.4170d0, 0.16d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Al++++++++, E
+@prods: Al+++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 390.2d0, 1d0, 0.583d-09, 0.4970d0, 0.23d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Al+++++++++, E
+@prods: Al++++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 399.4d0, 0d0, 0.493d-09, 0.7060d0, 0.16d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Al++++++++++, E
+@prods: Al+++++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 442.0d0, 1d0, 0.977d-10, 0.2780d0, 0.17d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Al+++++++++++, E
+@prods: Al++++++++++++,E, E
+@limits: 1.160452d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 2086.6d0, 0d0, 0.394d-10, 0.2860d0, 0.36d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Al++++++++++++, E
+@prods: Al+++++++++++++,E, E
+@limits: 1.160452d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 2304.1d0, 1d0, 0.138d-10, 0.8350d0, 0.11d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Si, E
+@prods: Si+,E, E
+@limits: 1.160452d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 8.2d0, 1d0, 0.188d-06, 0.3760d0, 0.25d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Si+, E
+@prods: Si++,E, E
+@limits: 1.160452d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 16.4d0, 1d0, 0.643d-07, 0.6320d0, 0.20d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Si++, E
+@prods: Si+++,E, E
+@limits: 2.320904d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 33.5d0, 1d0, 0.201d-07, 0.4730d0, 0.22d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Si+++, E
+@prods: Si++++,E, E
+@limits: 3.481356d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 54.0d0, 1d0, 0.494d-08, 0.1720d0, 0.23d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Si++++, E
+@prods: Si+++++,E, E
+@limits: 8.123163d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 166.8d0, 1d0, 0.176d-08, 0.1020d0, 0.31d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Si+++++, E
+@prods: Si++++++,E, E
+@limits: 1.160452d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 205.3d0, 1d0, 0.174d-08, 0.1800d0, 0.29d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Si++++++, E
+@prods: Si+++++++,E, E
+@limits: 1.160452d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 246.5d0, 1d0, 0.123d-08, 0.5180d0, 0.07d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Si+++++++, E
+@prods: Si++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 303.5d0, 1d0, 0.827d-09, 0.2390d0, 0.28d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Si++++++++, E
+@prods: Si+++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 351.1d0, 1d0, 0.601d-09, 0.3050d0, 0.25d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Si+++++++++, E
+@prods: Si++++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 401.4d0, 1d0, 0.465d-09, 0.6660d0, 0.04d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Si++++++++++, E
+@prods: Si+++++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 476.4d0, 1d0, 0.263d-09, 0.6660d0, 0.16d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Si+++++++++++, E
+@prods: Si++++++++++++,E, E
+@limits: 3.481356d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 523.5d0, 1d0, 0.118d-09, 0.7340d0, 0.16d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Si++++++++++++, E
+@prods: Si+++++++++++++,E, E
+@limits: 1.160452d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 2437.7d0, 0d0, 0.336d-10, 0.3360d0, 0.37d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Si+++++++++++++, E
+@prods: Si++++++++++++++,E, E
+@limits: 2.320904d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 2673.2d0, 1d0, 0.119d-10, 0.9890d0, 0.08d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: P, E
+@prods: P+,E, E
+@limits: 1.160452d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 10.5d0, 1d0, 0.199d-06, 0.5350d0, 0.24d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: P+, E
+@prods: P++,E, E
+@limits: 1.160452d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 19.8d0, 1d0, 0.588d-07, 0.5370d0, 0.21d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: P++, E
+@prods: P+++,E, E
+@limits: 2.320904d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 30.2d0, 1d0, 0.296d-07, 0.8650d0, 0.16d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: P+++, E
+@prods: P++++,E, E
+@limits: 3.481356d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 51.4d0, 1d0, 0.101d-07, 0.5460d0, 0.20d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: P++++, E
+@prods: P+++++,E, E
+@limits: 8.123163d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 65.0d0, 1d0, 0.236d-08, 0.1920d0, 0.17d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: P+++++, E
+@prods: P++++++,E, E
+@limits: 1.160452d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 220.4d0, 0d0, 0.666d-08, 1.0000d0, 0.18d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: P++++++, E
+@prods: P+++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 263.2d0, 1d0, 0.124d-08, 0.2150d0, 0.26d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: P+++++++, E
+@prods: P++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 309.4d0, 0d0, 0.227d-08, 0.7340d0, 0.23d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: P++++++++, E
+@prods: P+++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 371.7d0, 1d0, 0.614d-09, 0.2560d0, 0.27d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: P+++++++++, E
+@prods: P++++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 424.5d0, 1d0, 0.469d-09, 0.3420d0, 0.23d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: P++++++++++, E
+@prods: P+++++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 479.6d0, 0d0, 0.614d-09, 0.3340d0, 0.39d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: P+++++++++++, E
+@prods: P++++++++++++,E, E
+@limits: 3.481356d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 560.4d0, 0d0, 0.322d-09, 0.8500d0, 0.12d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: P++++++++++++, E
+@prods: P+++++++++++++,E, E
+@limits: 3.481356d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 611.9d0, 1d0, 0.932d-10, 0.7340d0, 0.16d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: P+++++++++++++, E
+@prods: P++++++++++++++,E, E
+@limits: 2.320904d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 2816.9d0, 0d0, 0.379d-10, 0.8050d0, 0.22d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: P++++++++++++++, E
+@prods: P+++++++++++++++,E, E
+@limits: 2.320904d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 3069.9d0, 1d0, 0.973d-11, 0.9910d0, 0.08d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: S, E
+@prods: S+,E, E
+@limits: 1.160452d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 10.4d0, 1d0, 0.549d-07, 0.1000d0, 0.25d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: S+, E
+@prods: S++,E, E
+@limits: 1.160452d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 23.3d0, 1d0, 0.681d-07, 0.6930d0, 0.21d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: S++, E
+@prods: S+++,E, E
+@limits: 2.320904d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 34.8d0, 1d0, 0.214d-07, 0.3530d0, 0.24d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: S+++, E
+@prods: S++++,E, E
+@limits: 2.320904d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 47.3d0, 1d0, 0.166d-07, 1.0300d0, 0.14d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: S++++, E
+@prods: S+++++,E, E
+@limits: 3.481356d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 72.6d0, 1d0, 0.612d-08, 0.5800d0, 0.19d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: S+++++, E
+@prods: S++++++,E, E
+@limits: 1.160452d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 88.1d0, 1d0, 0.133d-08, 0.0688d0, 0.35d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: S++++++, E
+@prods: S+++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 280.9d0, 0d0, 0.493d-08, 1.1300d0, 0.16d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: S+++++++, E
+@prods: S++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 328.2d0, 1d0, 0.873d-09, 0.1930d0, 0.28d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: S++++++++, E
+@prods: S+++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 379.1d0, 0d0, 0.135d-08, 0.4310d0, 0.32d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: S+++++++++, E
+@prods: S++++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 447.1d0, 1d0, 0.459d-09, 0.2420d0, 0.28d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: S++++++++++, E
+@prods: S+++++++++++,E, E
+@limits: 3.481356d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 504.8d0, 1d0, 0.349d-09, 0.3050d0, 0.25d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: S+++++++++++, E
+@prods: S++++++++++++,E, E
+@limits: 3.481356d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 564.7d0, 0d0, 0.523d-09, 0.4280d0, 0.35d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: S++++++++++++, E
+@prods: S+++++++++++++,E, E
+@limits: 3.481356d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 651.6d0, 0d0, 0.259d-09, 0.8540d0, 0.12d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: S+++++++++++++, E
+@prods: S++++++++++++++,E, E
+@limits: 3.481356d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 707.2d0, 1d0, 0.750d-10, 0.7340d0, 0.16d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: S++++++++++++++, E
+@prods: S+++++++++++++++,E, E
+@limits: 2.320904d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 3223.9d0, 0d0, 0.267d-10, 0.5720d0, 0.28d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: S+++++++++++++++, E
+@prods: S++++++++++++++++,E, E
+@limits: 2.320904d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 3494.2d0, 1d0, 0.632d-11, 0.5850d0, 0.17d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Cl, E
+@prods: Cl+,E, E
+@limits: 1.160452d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 13.0d0, 1d0, 0.169d-06, 0.4300d0, 0.24d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Cl+, E
+@prods: Cl++,E, E
+@limits: 1.160452d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 23.8d0, 1d0, 0.696d-07, 0.6700d0, 0.20d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Cl++, E
+@prods: Cl+++,E, E
+@limits: 2.320904d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 39.6d0, 1d0, 0.340d-07, 0.8650d0, 0.18d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Cl+++, E
+@prods: Cl++++,E, E
+@limits: 3.481356d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 53.5d0, 1d0, 0.110d-07, 0.3280d0, 0.25d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Cl++++, E
+@prods: Cl+++++,E, E
+@limits: 3.481356d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 67.8d0, 1d0, 0.111d-07, 1.3700d0, 0.10d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Cl+++++, E
+@prods: Cl++++++,E, E
+@limits: 4.641808d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 97.0d0, 1d0, 0.317d-08, 0.3300d0, 0.24d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Cl++++++, E
+@prods: Cl+++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 114.2d0, 1d0, 0.101d-08, 0.1960d0, 0.16d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Cl+++++++, E
+@prods: Cl++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 348.3d0, 0d0, 0.211d-08, 0.3130d0, 0.37d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Cl++++++++, E
+@prods: Cl+++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 400.1d0, 1d0, 0.632d-09, 0.1730d0, 0.30d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Cl+++++++++, E
+@prods: Cl++++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 455.6d0, 0d0, 0.948d-09, 0.3440d0, 0.36d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Cl++++++++++, E
+@prods: Cl+++++++++++,E, E
+@limits: 3.481356d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 529.3d0, 1d0, 0.369d-09, 0.2730d0, 0.26d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Cl+++++++++++, E
+@prods: Cl++++++++++++,E, E
+@limits: 3.481356d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 592.0d0, 1d0, 0.285d-09, 0.3430d0, 0.23d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Cl++++++++++++, E
+@prods: Cl+++++++++++++,E, E
+@limits: 3.481356d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 656.7d0, 0d0, 0.481d-09, 0.6580d0, 0.27d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Cl+++++++++++++, E
+@prods: Cl++++++++++++++,E, E
+@limits: 3.481356d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 749.8d0, 1d0, 0.131d-09, 0.6230d0, 0.16d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Cl++++++++++++++, E
+@prods: Cl+++++++++++++++,E, E
+@limits: 4.641808d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 809.4d0, 1d0, 0.613d-10, 0.7360d0, 0.16d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Cl+++++++++++++++, E
+@prods: Cl++++++++++++++++,E, E
+@limits: 2.320904d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 3658.4d0, 0d0, 0.190d-10, 0.3790d0, 0.36d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Cl++++++++++++++++, E
+@prods: Cl+++++++++++++++++,E, E
+@limits: 2.320904d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 3946.3d0, 1d0, 0.514d-11, 0.5530d0, 0.18d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ar, E
+@prods: Ar+,E, E
+@limits: 1.160452d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 15.8d0, 1d0, 0.599d-07, 0.1360d0, 0.26d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ar+, E
+@prods: Ar++,E, E
+@limits: 2.320904d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 27.6d0, 1d0, 0.607d-07, 0.5440d0, 0.21d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ar++, E
+@prods: Ar+++,E, E
+@limits: 2.320904d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 40.9d0, 1d0, 0.343d-07, 0.8340d0, 0.17d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ar+++, E
+@prods: Ar++++,E, E
+@limits: 3.481356d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 52.3d0, 0d0, 0.300d-07, 1.0300d0, 0.25d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ar++++, E
+@prods: Ar+++++,E, E
+@limits: 3.481356d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 75.0d0, 1d0, 0.873d-08, 0.3660d0, 0.31d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ar+++++, E
+@prods: Ar++++++,E, E
+@limits: 4.641808d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 91.0d0, 1d0, 0.578d-08, 0.3140d0, 0.34d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ar++++++, E
+@prods: Ar+++++++,E, E
+@limits: 5.802260d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 124.3d0, 1d0, 0.298d-08, 0.7030d0, 0.16d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ar+++++++, E
+@prods: Ar++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 143.5d0, 1d0, 0.725d-09, 0.2070d0, 0.15d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ar++++++++, E
+@prods: Ar+++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 422.4d0, 1d0, 0.140d-08, 0.6960d0, 0.13d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ar+++++++++, E
+@prods: Ar++++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 478.7d0, 1d0, 0.478d-09, 0.1640d0, 0.31d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ar++++++++++, E
+@prods: Ar+++++++++++,E, E
+@limits: 3.481356d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 539.0d0, 0d0, 0.802d-09, 0.4390d0, 0.32d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ar+++++++++++, E
+@prods: Ar++++++++++++,E, E
+@limits: 3.481356d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 618.3d0, 1d0, 0.288d-09, 0.2590d0, 0.27d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ar++++++++++++, E
+@prods: Ar+++++++++++++,E, E
+@limits: 3.481356d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 686.1d0, 1d0, 0.232d-09, 0.3620d0, 0.22d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ar+++++++++++++, E
+@prods: Ar++++++++++++++,E, E
+@limits: 4.641808d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 755.7d0, 0d0, 0.333d-09, 0.4120d0, 0.36d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ar++++++++++++++, E
+@prods: Ar+++++++++++++++,E, E
+@limits: 4.641808d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 854.8d0, 1d0, 0.127d-09, 0.9100d0, 0.13d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ar+++++++++++++++, E
+@prods: Ar++++++++++++++++,E, E
+@limits: 4.641808d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 918.0d0, 1d0, 0.521d-10, 0.7810d0, 0.15d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ar++++++++++++++++, E
+@prods: Ar+++++++++++++++++,E, E
+@limits: 2.320904d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 4120.7d0, 0d0, 0.166d-10, 0.4350d0, 0.33d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ar+++++++++++++++++, E
+@prods: Ar++++++++++++++++++,E, E
+@limits: 2.320904d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 4426.2d0, 1d0, 0.432d-11, 0.5540d0, 0.18d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: K, E
+@prods: K+,E, E
+@limits: 1.160452d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 4.3d0, 1d0, 0.202d-06, 0.2720d0, 0.31d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: K+, E
+@prods: K++,E, E
+@limits: 2.320904d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 31.6d0, 1d0, 0.401d-07, 0.3710d0, 0.22d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: K++, E
+@prods: K+++,E, E
+@limits: 2.320904d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 45.8d0, 1d0, 0.150d-07, 0.4330d0, 0.21d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: K+++, E
+@prods: K++++,E, E
+@limits: 3.481356d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 60.9d0, 1d0, 0.194d-07, 0.8890d0, 0.16d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: K++++, E
+@prods: K+++++,E, E
+@limits: 4.641808d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 82.7d0, 1d0, 0.695d-08, 0.4940d0, 0.18d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: K+++++, E
+@prods: K++++++,E, E
+@limits: 4.641808d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 99.4d0, 1d0, 0.411d-08, 0.5400d0, 0.17d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: K++++++, E
+@prods: K+++++++,E, E
+@limits: 5.802260d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 117.6d0, 1d0, 0.223d-08, 0.5190d0, 0.16d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: K+++++++, E
+@prods: K++++++++,E, E
+@limits: 8.123163d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 154.7d0, 1d0, 0.215d-08, 0.8280d0, 0.14d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: K++++++++, E
+@prods: K+++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 175.8d0, 0d0, 0.161d-08, 0.6420d0, 0.13d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: K+++++++++, E
+@prods: K++++++++++,E, E
+@limits: 3.481356d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 504.0d0, 1d0, 0.107d-08, 0.6950d0, 0.13d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: K++++++++++, E
+@prods: K+++++++++++,E, E
+@limits: 3.481356d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 564.7d0, 1d0, 0.378d-09, 0.1730d0, 0.30d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: K+++++++++++, E
+@prods: K++++++++++++,E, E
+@limits: 3.481356d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 629.4d0, 0d0, 0.624d-09, 0.4180d0, 0.33d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: K++++++++++++, E
+@prods: K+++++++++++++,E, E
+@limits: 3.481356d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 714.6d0, 1d0, 0.229d-09, 0.2450d0, 0.28d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: K+++++++++++++, E
+@prods: K++++++++++++++,E, E
+@limits: 4.641808d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 786.6d0, 1d0, 0.186d-09, 0.3440d0, 0.23d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: K++++++++++++++, E
+@prods: K+++++++++++++++,E, E
+@limits: 4.641808d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 861.1d0, 0d0, 0.269d-09, 0.3960d0, 0.37d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: K+++++++++++++++, E
+@prods: K++++++++++++++++,E, E
+@limits: 4.641808d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 968.0d0, 1d0, 0.106d-09, 0.9120d0, 0.13d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: K++++++++++++++++, E
+@prods: K+++++++++++++++++,E, E
+@limits: 5.802259d+05, 1.160452d+09
+@rate: colion_v96(Tgas, 1053.4d0, 1d0, 0.424d-10, 0.7370d0, 0.16d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: K+++++++++++++++++, E
+@prods: K++++++++++++++++++,E, E
+@limits: 2.320904d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 4610.9d0, 0d0, 0.138d-10, 0.4160d0, 0.34d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: K++++++++++++++++++, E
+@prods: K+++++++++++++++++++,E, E
+@limits: 2.320904d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 4934.1d0, 1d0, 0.367d-11, 0.5550d0, 0.18d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ca, E
+@prods: Ca+,E, E
+@limits: 1.160452d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 6.1d0, 0d0, 0.440d-06, 0.8480d0, 0.33d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ca+, E
+@prods: Ca++,E, E
+@limits: 1.160452d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 11.9d0, 0d0, 0.522d-07, 0.1510d0, 0.34d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ca++, E
+@prods: Ca+++,E, E
+@limits: 3.481356d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 50.9d0, 1d0, 0.206d-07, 0.4180d0, 0.20d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ca+++, E
+@prods: Ca++++,E, E
+@limits: 3.481356d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 67.3d0, 1d0, 0.172d-07, 0.6380d0, 0.19d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ca++++, E
+@prods: Ca+++++,E, E
+@limits: 4.641808d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 84.5d0, 1d0, 0.126d-07, 1.0100d0, 0.14d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ca+++++, E
+@prods: Ca++++++,E, E
+@limits: 5.802260d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 108.8d0, 1d0, 0.472d-08, 0.5260d0, 0.17d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ca++++++, E
+@prods: Ca+++++++,E, E
+@limits: 8.123163d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 127.2d0, 1d0, 0.289d-08, 0.5480d0, 0.17d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ca+++++++, E
+@prods: Ca++++++++,E, E
+@limits: 8.123163d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 147.2d0, 1d0, 0.164d-08, 0.5520d0, 0.15d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ca++++++++, E
+@prods: Ca+++++++++,E, E
+@limits: 1.160452d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 188.3d0, 1d0, 0.157d-08, 0.7990d0, 0.14d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ca+++++++++, E
+@prods: Ca++++++++++,E, E
+@limits: 3.481356d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 211.3d0, 1d0, 0.432d-09, 0.2320d0, 0.14d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ca++++++++++, E
+@prods: Ca+++++++++++,E, E
+@limits: 3.481356d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 591.9d0, 0d0, 0.947d-09, 0.3110d0, 0.38d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ca+++++++++++, E
+@prods: Ca++++++++++++,E, E
+@limits: 3.481356d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 657.2d0, 1d0, 0.298d-09, 0.1630d0, 0.31d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ca++++++++++++, E
+@prods: Ca+++++++++++++,E, E
+@limits: 3.481356d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 726.6d0, 0d0, 0.478d-09, 0.3590d0, 0.36d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ca+++++++++++++, E
+@prods: Ca++++++++++++++,E, E
+@limits: 4.641808d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 817.6d0, 1d0, 0.186d-09, 0.2440d0, 0.28d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ca++++++++++++++, E
+@prods: Ca+++++++++++++++,E, E
+@limits: 4.641808d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 894.5d0, 1d0, 0.156d-09, 0.3640d0, 0.22d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ca+++++++++++++++, E
+@prods: Ca++++++++++++++++,E, E
+@limits: 4.641808d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 974.0d0, 0d0, 0.216d-09, 0.3570d0, 0.39d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ca++++++++++++++++, E
+@prods: Ca+++++++++++++++++,E, E
+@limits: 5.802259d+05, 1.160452d+09
+@rate: colion_v96(Tgas, 1087.0d0, 1d0, 0.770d-10, 0.6550d0, 0.15d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ca+++++++++++++++++, E
+@prods: Ca++++++++++++++++++,E, E
+@limits: 5.802259d+05, 1.160452d+09
+@rate: colion_v96(Tgas, 1157.0d0, 1d0, 0.358d-10, 0.7360d0, 0.16d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ca++++++++++++++++++, E
+@prods: Ca+++++++++++++++++++,E, E
+@limits: 3.481356d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 5128.9d0, 0d0, 0.128d-10, 0.5200d0, 0.30d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ca+++++++++++++++++++, E
+@prods: Ca++++++++++++++++++++,E, E
+@limits: 3.481356d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 5469.9d0, 1d0, 0.308d-11, 0.5280d0, 0.19d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Sc, E
+@prods: Sc+,E, E
+@limits: 1.160452d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 6.6d0, 1d0, 0.316d-06, 0.2040d0, 0.28d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Sc+, E
+@prods: Sc++,E, E
+@limits: 1.160452d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 12.8d0, 1d0, 0.861d-07, 0.1810d0, 0.25d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Sc++, E
+@prods: Sc+++,E, E
+@limits: 1.160452d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 24.8d0, 1d0, 0.508d-07, 0.3570d0, 0.24d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Sc+++, E
+@prods: Sc++++,E, E
+@limits: 3.481356d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 73.5d0, 1d0, 0.100d-07, 0.4530d0, 0.15d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Sc++++, E
+@prods: Sc+++++,E, E
+@limits: 4.641808d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 91.9d0, 1d0, 0.676d-08, 0.4600d0, 0.15d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Sc+++++, E
+@prods: Sc++++++,E, E
+@limits: 5.802260d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 110.7d0, 1d0, 0.527d-08, 0.5610d0, 0.17d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Sc++++++, E
+@prods: Sc+++++++,E, E
+@limits: 8.123163d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 138.0d0, 1d0, 0.340d-08, 0.5600d0, 0.16d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Sc+++++++, E
+@prods: Sc++++++++,E, E
+@limits: 8.123163d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 158.1d0, 1d0, 0.218d-08, 0.6120d0, 0.15d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Sc++++++++, E
+@prods: Sc+++++++++,E, E
+@limits: 1.160452d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 180.0d0, 1d0, 0.126d-08, 0.6100d0, 0.14d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Sc+++++++++, E
+@prods: Sc++++++++++,E, E
+@limits: 1.160452d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 225.1d0, 1d0, 0.124d-08, 0.8520d0, 0.13d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Sc++++++++++, E
+@prods: Sc+++++++++++,E, E
+@limits: 3.481356d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 249.8d0, 1d0, 0.362d-09, 0.3490d0, 0.05d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Sc+++++++++++, E
+@prods: Sc++++++++++++,E, E
+@limits: 3.481356d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 687.4d0, 1d0, 0.552d-09, 0.3750d0, 0.28d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Sc++++++++++++, E
+@prods: Sc+++++++++++++,E, E
+@limits: 4.641808d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 756.7d0, 1d0, 0.564d-09, 0.8730d0, 0.15d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Sc+++++++++++++, E
+@prods: Sc++++++++++++++,E, E
+@limits: 4.641808d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 830.8d0, 1d0, 0.450d-09, 1.0500d0, 0.13d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Sc++++++++++++++, E
+@prods: Sc+++++++++++++++,E, E
+@limits: 4.641808d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 927.5d0, 1d0, 0.273d-09, 0.8660d0, 0.15d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Sc+++++++++++++++, E
+@prods: Sc++++++++++++++++,E, E
+@limits: 5.802259d+05, 1.160452d+09
+@rate: colion_v96(Tgas, 1009.0d0, 1d0, 0.156d-09, 0.7150d0, 0.17d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Sc++++++++++++++++, E
+@prods: Sc+++++++++++++++++,E, E
+@limits: 5.802259d+05, 1.160452d+09
+@rate: colion_v96(Tgas, 1094.0d0, 0d0, 0.181d-09, 1.1400d0, 0.36d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Sc+++++++++++++++++, E
+@prods: Sc++++++++++++++++++,E, E
+@limits: 5.802259d+05, 1.160452d+09
+@rate: colion_v96(Tgas, 1213.0d0, 1d0, 0.429d-10, 0.7840d0, 0.15d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Sc++++++++++++++++++, E
+@prods: Sc+++++++++++++++++++,E, E
+@limits: 8.123163d+05, 1.160452d+09
+@rate: colion_v96(Tgas, 1288.0d0, 0d0, 0.221d-10, 0.0270d0, 0.82d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Sc+++++++++++++++++++, E
+@prods: Sc++++++++++++++++++++,E, E
+@limits: 3.481356d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 5674.9d0, 1d0, 0.451d-11, 0.9180d0, 0.04d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Sc++++++++++++++++++++, E
+@prods: Sc+++++++++++++++++++++,E, E
+@limits: 3.481356d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 6033.8d0, 0d0, 0.203d-11, 0.0170d0, 0.70d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ti, E
+@prods: Ti+,E, E
+@limits: 1.160452d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 6.8d0, 1d0, 0.160d-06, 0.3600d0, 0.28d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ti+, E
+@prods: Ti++,E, E
+@limits: 1.160452d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 13.6d0, 0d0, 0.214d-06, 0.8800d0, 0.28d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ti++, E
+@prods: Ti+++,E, E
+@limits: 2.320904d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 27.5d0, 1d0, 0.285d-07, 0.2270d0, 0.21d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ti+++, E
+@prods: Ti++++,E, E
+@limits: 2.320904d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 43.3d0, 1d0, 0.348d-07, 0.3900d0, 0.23d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ti++++, E
+@prods: Ti+++++,E, E
+@limits: 4.641808d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 99.3d0, 1d0, 0.100d-07, 0.5790d0, 0.18d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ti+++++, E
+@prods: Ti++++++,E, E
+@limits: 5.802260d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 119.5d0, 1d0, 0.701d-08, 0.6380d0, 0.17d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ti++++++, E
+@prods: Ti+++++++,E, E
+@limits: 8.123163d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 140.8d0, 1d0, 0.495d-08, 0.7170d0, 0.16d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ti+++++++, E
+@prods: Ti++++++++,E, E
+@limits: 8.123163d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 170.4d0, 1d0, 0.299d-08, 0.6930d0, 0.17d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ti++++++++, E
+@prods: Ti+++++++++,E, E
+@limits: 1.160452d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 192.1d0, 1d0, 0.210d-08, 0.7220d0, 0.16d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ti+++++++++, E
+@prods: Ti++++++++++,E, E
+@limits: 1.160452d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 215.9d0, 1d0, 0.162d-08, 0.7650d0, 0.14d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ti++++++++++, E
+@prods: Ti+++++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 265.0d0, 1d0, 0.111d-08, 0.8850d0, 0.12d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ti+++++++++++, E
+@prods: Ti++++++++++++,E, E
+@limits: 3.481356d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 291.5d0, 0d0, 0.909d-09, 0.9720d0, 0.06d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ti++++++++++++, E
+@prods: Ti+++++++++++++,E, E
+@limits: 4.641808d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 787.8d0, 1d0, 0.441d-09, 0.3590d0, 0.29d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ti+++++++++++++, E
+@prods: Ti++++++++++++++,E, E
+@limits: 4.641808d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 863.1d0, 1d0, 0.439d-09, 0.7810d0, 0.17d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ti++++++++++++++, E
+@prods: Ti+++++++++++++++,E, E
+@limits: 4.641808d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 941.9d0, 1d0, 0.373d-09, 1.0500d0, 0.13d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ti+++++++++++++++, E
+@prods: Ti++++++++++++++++,E, E
+@limits: 5.802259d+05, 1.160452d+09
+@rate: colion_v96(Tgas, 1044.0d0, 1d0, 0.228d-09, 0.8580d0, 0.15d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ti++++++++++++++++, E
+@prods: Ti+++++++++++++++++,E, E
+@limits: 5.802259d+05, 1.160452d+09
+@rate: colion_v96(Tgas, 1131.0d0, 1d0, 0.134d-09, 0.7570d0, 0.16d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ti+++++++++++++++++, E
+@prods: Ti++++++++++++++++++,E, E
+@limits: 5.802259d+05, 1.160452d+09
+@rate: colion_v96(Tgas, 1221.0d0, 0d0, 0.155d-09, 1.1500d0, 0.36d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ti++++++++++++++++++, E
+@prods: Ti+++++++++++++++++++,E, E
+@limits: 8.123163d+05, 1.160452d+09
+@rate: colion_v96(Tgas, 1346.0d0, 1d0, 0.380d-10, 0.8350d0, 0.14d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ti+++++++++++++++++++, E
+@prods: Ti++++++++++++++++++++,E, E
+@limits: 8.123163d+05, 1.160452d+09
+@rate: colion_v96(Tgas, 1426.0d0, 0d0, 0.189d-10, 0.0280d0, 0.82d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ti++++++++++++++++++++, E
+@prods: Ti+++++++++++++++++++++,E, E
+@limits: 3.481356d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 6249.1d0, 1d0, 0.401d-11, 0.9680d0, 0.03d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ti+++++++++++++++++++++, E
+@prods: Ti++++++++++++++++++++++,E, E
+@limits: 3.481356d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 6625.0d0, 1d0, 0.162d-11, 0.6570d0, 0.14d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: V, E
+@prods: V+,E, E
+@limits: 1.160452d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 6.7d0, 0d0, 0.882d-06, 0.3590d0, 0.32d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: V+, E
+@prods: V++,E, E
+@limits: 1.160452d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 14.7d0, 0d0, 0.311d-06, 0.4320d0, 0.29d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: V++, E
+@prods: V+++,E, E
+@limits: 2.320904d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 29.3d0, 1d0, 0.350d-07, 0.2470d0, 0.25d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: V+++, E
+@prods: V++++,E, E
+@limits: 2.320904d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 46.7d0, 0d0, 0.532d-07, 1.1100d0, 0.16d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: V++++, E
+@prods: V+++++,E, E
+@limits: 3.481356d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 65.3d0, 1d0, 0.898d-08, 0.1400d0, 0.37d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: V+++++, E
+@prods: V++++++,E, E
+@limits: 8.123163d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 128.1d0, 1d0, 0.587d-08, 0.5170d0, 0.17d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: V++++++, E
+@prods: V+++++++,E, E
+@limits: 8.123163d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 150.6d0, 1d0, 0.511d-08, 0.6790d0, 0.16d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: V+++++++, E
+@prods: V++++++++,E, E
+@limits: 8.123163d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 173.4d0, 1d0, 0.371d-08, 0.7610d0, 0.15d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: V++++++++, E
+@prods: V+++++++++,E, E
+@limits: 1.160452d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 205.8d0, 1d0, 0.224d-08, 0.7110d0, 0.17d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: V+++++++++, E
+@prods: V++++++++++,E, E
+@limits: 1.160452d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 230.5d0, 1d0, 0.165d-08, 0.7640d0, 0.15d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: V++++++++++, E
+@prods: V+++++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 256.0d0, 1d0, 0.126d-08, 0.7620d0, 0.14d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: V+++++++++++, E
+@prods: V++++++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 308.0d0, 1d0, 0.886d-09, 0.8860d0, 0.12d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: V++++++++++++, E
+@prods: V+++++++++++++,E, E
+@limits: 4.641808d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 336.3d0, 0d0, 0.389d-09, 0.1420d0, 0.39d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: V+++++++++++++, E
+@prods: V++++++++++++++,E, E
+@limits: 4.641808d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 896.0d0, 1d0, 0.380d-09, 0.4090d0, 0.27d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: V++++++++++++++, E
+@prods: V+++++++++++++++,E, E
+@limits: 4.641808d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 976.0d0, 0d0, 0.484d-09, 0.1730d0, 0.57d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: V+++++++++++++++, E
+@prods: V++++++++++++++++,E, E
+@limits: 2.320904d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 1060.0d0, 1d0, 0.249d-09, 0.6500d0, 0.14d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: V++++++++++++++++, E
+@prods: V+++++++++++++++++,E, E
+@limits: 2.320904d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 1168.0d0, 0d0, 0.591d-09, 1.6100d0, 0.18d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: V+++++++++++++++++, E
+@prods: V++++++++++++++++++,E, E
+@limits: 2.320904d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 1260.0d0, 0d0, 0.502d-09, 2.1200d0, 0.15d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: V++++++++++++++++++, E
+@prods: V+++++++++++++++++++,E, E
+@limits: 2.320904d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 1355.0d0, 1d0, 0.538d-10, 0.1370d0, 0.40d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: V+++++++++++++++++++, E
+@prods: V++++++++++++++++++++,E, E
+@limits: 2.320904d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 1486.0d0, 1d0, 0.556d-10, 0.7080d0, 0.10d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: V++++++++++++++++++++, E
+@prods: V+++++++++++++++++++++,E, E
+@limits: 2.320904d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 1571.0d0, 0d0, 0.284d-10, 0.0240d0, 0.79d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: V+++++++++++++++++++++, E
+@prods: V++++++++++++++++++++++,E, E
+@limits: 1.160452d+07, 1.160452d+09
+@rate: colion_v96(Tgas, 6851.3d0, 0d0, 0.254d-10, 2.9200d0, 0.09d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: V++++++++++++++++++++++, E
+@prods: V+++++++++++++++++++++++,E, E
+@limits: 1.160452d+07, 1.160452d+09
+@rate: colion_v96(Tgas, 7246.1d0, 0d0, 0.132d-10, 3.5100d0, 0.07d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Cr, E
+@prods: Cr+,E, E
+@limits: 1.160452d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 6.8d0, 1d0, 0.103d-06, 0.2170d0, 0.27d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Cr+, E
+@prods: Cr++,E, E
+@limits: 1.160452d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 16.5d0, 0d0, 0.245d-06, 0.3810d0, 0.32d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Cr++, E
+@prods: Cr+++,E, E
+@limits: 2.320904d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 31.0d0, 0d0, 0.109d-06, 0.5180d0, 0.27d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Cr+++, E
+@prods: Cr++++,E, E
+@limits: 2.320904d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 49.1d0, 1d0, 0.152d-07, 0.1820d0, 0.30d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Cr++++, E
+@prods: Cr+++++,E, E
+@limits: 3.481356d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 69.5d0, 0d0, 0.325d-07, 1.3600d0, 0.13d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Cr+++++, E
+@prods: Cr++++++,E, E
+@limits: 4.641808d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 90.6d0, 1d0, 0.550d-08, 0.1430d0, 0.37d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Cr++++++, E
+@prods: Cr+++++++,E, E
+@limits: 8.123163d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 160.2d0, 1d0, 0.513d-08, 0.6570d0, 0.16d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Cr+++++++, E
+@prods: Cr++++++++,E, E
+@limits: 1.160452d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 184.7d0, 1d0, 0.385d-08, 0.7220d0, 0.15d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Cr++++++++, E
+@prods: Cr+++++++++,E, E
+@limits: 1.160452d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 209.3d0, 1d0, 0.281d-08, 0.7590d0, 0.15d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Cr+++++++++, E
+@prods: Cr++++++++++,E, E
+@limits: 1.160452d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 244.4d0, 1d0, 0.176d-08, 0.7320d0, 0.16d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Cr++++++++++, E
+@prods: Cr+++++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 271.0d0, 1d0, 0.130d-08, 0.7640d0, 0.15d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Cr+++++++++++, E
+@prods: Cr++++++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 298.0d0, 1d0, 0.102d-08, 0.8100d0, 0.13d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Cr++++++++++++, E
+@prods: Cr+++++++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 354.8d0, 1d0, 0.719d-09, 0.8870d0, 0.12d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Cr+++++++++++++, E
+@prods: Cr++++++++++++++,E, E
+@limits: 5.802259d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 384.2d0, 1d0, 0.161d-09, 0.1500d0, 0.22d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Cr++++++++++++++, E
+@prods: Cr+++++++++++++++,E, E
+@limits: 5.802259d+05, 1.160452d+09
+@rate: colion_v96(Tgas, 1011.0d0, 1d0, 0.464d-09, 0.9710d0, 0.12d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Cr+++++++++++++++, E
+@prods: Cr++++++++++++++++,E, E
+@limits: 5.802259d+05, 1.160452d+09
+@rate: colion_v96(Tgas, 1097.0d0, 1d0, 0.331d-09, 0.9240d0, 0.14d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Cr++++++++++++++++, E
+@prods: Cr+++++++++++++++++,E, E
+@limits: 5.802259d+05, 1.160452d+09
+@rate: colion_v96(Tgas, 1185.0d0, 1d0, 0.249d-09, 0.9310d0, 0.15d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Cr+++++++++++++++++, E
+@prods: Cr++++++++++++++++++,E, E
+@limits: 8.123163d+05, 1.160452d+09
+@rate: colion_v96(Tgas, 1299.0d0, 1d0, 0.168d-09, 0.9100d0, 0.14d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Cr++++++++++++++++++, E
+@prods: Cr+++++++++++++++++++,E, E
+@limits: 8.123163d+05, 1.160452d+09
+@rate: colion_v96(Tgas, 1396.0d0, 1d0, 0.101d-09, 0.8050d0, 0.15d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Cr+++++++++++++++++++, E
+@prods: Cr++++++++++++++++++++,E, E
+@limits: 8.123163d+05, 1.160452d+09
+@rate: colion_v96(Tgas, 1496.0d0, 0d0, 0.117d-09, 1.2100d0, 0.35d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Cr++++++++++++++++++++, E
+@prods: Cr+++++++++++++++++++++,E, E
+@limits: 8.123163d+05, 1.160452d+09
+@rate: colion_v96(Tgas, 1634.0d0, 1d0, 0.291d-10, 0.8840d0, 0.13d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Cr+++++++++++++++++++++, E
+@prods: Cr++++++++++++++++++++++,E, E
+@limits: 8.123163d+05, 1.160452d+09
+@rate: colion_v96(Tgas, 1721.0d0, 0d0, 0.145d-10, 0.0350d0, 0.80d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Cr++++++++++++++++++++++, E
+@prods: Cr+++++++++++++++++++++++,E, E
+@limits: 3.481356d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 7482.0d0, 1d0, 0.307d-11, 0.9670d0, 0.03d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Cr+++++++++++++++++++++++, E
+@prods: Cr++++++++++++++++++++++++,E, E
+@limits: 1.160452d+07, 1.160452d+09
+@rate: colion_v96(Tgas, 7894.8d0, 1d0, 0.146d-11, 0.1830d0, 0.39d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Mn, E
+@prods: Mn+,E, E
+@limits: 1.160452d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 7.4d0, 1d0, 0.856d-07, 0.1320d0, 0.26d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Mn+, E
+@prods: Mn++,E, E
+@limits: 2.320904d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 15.6d0, 0d0, 0.118d-06, 0.3590d0, 0.19d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Mn++, E
+@prods: Mn+++,E, E
+@limits: 2.320904d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 33.7d0, 0d0, 0.854d-07, 0.3970d0, 0.32d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Mn+++, E
+@prods: Mn++++,E, E
+@limits: 3.481356d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 51.2d0, 1d0, 0.180d-07, 0.2720d0, 0.18d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Mn++++, E
+@prods: Mn+++++,E, E
+@limits: 3.481356d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 72.4d0, 1d0, 0.822d-08, 0.1610d0, 0.32d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Mn+++++, E
+@prods: Mn++++++,E, E
+@limits: 4.641808d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 95.0d0, 0d0, 0.215d-07, 1.5400d0, 0.11d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Mn++++++, E
+@prods: Mn+++++++,E, E
+@limits: 5.802260d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 119.3d0, 1d0, 0.365d-08, 0.1470d0, 0.37d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Mn+++++++, E
+@prods: Mn++++++++,E, E
+@limits: 1.160452d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 194.5d0, 1d0, 0.391d-08, 0.6990d0, 0.15d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Mn++++++++, E
+@prods: Mn+++++++++,E, E
+@limits: 1.160452d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 221.8d0, 1d0, 0.292d-08, 0.7190d0, 0.15d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Mn+++++++++, E
+@prods: Mn++++++++++,E, E
+@limits: 1.160452d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 248.3d0, 1d0, 0.223d-08, 0.8060d0, 0.14d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Mn++++++++++, E
+@prods: Mn+++++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 286.0d0, 1d0, 0.139d-08, 0.7350d0, 0.16d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Mn+++++++++++, E
+@prods: Mn++++++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 314.4d0, 1d0, 0.104d-08, 0.7610d0, 0.15d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Mn++++++++++++, E
+@prods: Mn+++++++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 343.6d0, 1d0, 0.828d-09, 0.8090d0, 0.13d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Mn+++++++++++++, E
+@prods: Mn++++++++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 403.0d0, 1d0, 0.560d-09, 0.7870d0, 0.14d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Mn++++++++++++++, E
+@prods: Mn+++++++++++++++,E, E
+@limits: 5.802259d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 435.2d0, 1d0, 0.152d-09, 0.2990d0, 0.08d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Mn+++++++++++++++, E
+@prods: Mn++++++++++++++++,E, E
+@limits: 5.802259d+05, 1.160452d+09
+@rate: colion_v96(Tgas, 1133.0d0, 1d0, 0.403d-09, 1.0400d0, 0.11d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Mn++++++++++++++++, E
+@prods: Mn+++++++++++++++++,E, E
+@limits: 5.802259d+05, 1.160452d+09
+@rate: colion_v96(Tgas, 1244.0d0, 1d0, 0.274d-09, 0.9230d0, 0.14d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Mn+++++++++++++++++, E
+@prods: Mn++++++++++++++++++,E, E
+@limits: 8.123163d+05, 1.160452d+09
+@rate: colion_v96(Tgas, 1317.0d0, 1d0, 0.218d-09, 0.9900d0, 0.14d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Mn++++++++++++++++++, E
+@prods: Mn+++++++++++++++++++,E, E
+@limits: 8.123163d+05, 1.160452d+09
+@rate: colion_v96(Tgas, 1437.0d0, 1d0, 0.149d-09, 0.9680d0, 0.13d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Mn+++++++++++++++++++, E
+@prods: Mn++++++++++++++++++++,E, E
+@limits: 8.123163d+05, 1.160452d+09
+@rate: colion_v96(Tgas, 1539.0d0, 1d0, 0.870d-10, 0.8020d0, 0.15d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Mn++++++++++++++++++++, E
+@prods: Mn+++++++++++++++++++++,E, E
+@limits: 8.123163d+05, 1.160452d+09
+@rate: colion_v96(Tgas, 1644.0d0, 0d0, 0.102d-09, 1.2200d0, 0.35d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Mn+++++++++++++++++++++, E
+@prods: Mn++++++++++++++++++++++,E, E
+@limits: 1.160452d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 1788.0d0, 1d0, 0.254d-10, 0.8830d0, 0.13d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Mn++++++++++++++++++++++, E
+@prods: Mn+++++++++++++++++++++++,E, E
+@limits: 1.160452d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 1880.0d0, 0d0, 0.128d-10, 0.0330d0, 0.81d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Mn+++++++++++++++++++++++, E
+@prods: Mn++++++++++++++++++++++++,E, E
+@limits: 4.641808d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 8141.0d0, 1d0, 0.277d-11, 1.0100d0, 0.02d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Mn++++++++++++++++++++++++, E
+@prods: Mn+++++++++++++++++++++++++,E, E
+@limits: 1.160452d+07, 1.160452d+09
+@rate: colion_v96(Tgas, 8571.9d0, 1d0, 0.132d-11, 0.2190d0, 0.37d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Fe, E
+@prods: Fe+,E, E
+@limits: 1.160452d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 7.9d0, 0d0, 0.252d-06, 0.7010d0, 0.25d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Fe+, E
+@prods: Fe++,E, E
+@limits: 1.160452d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 16.2d0, 1d0, 0.221d-07, 0.0330d0, 0.45d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Fe++, E
+@prods: Fe+++,E, E
+@limits: 2.320904d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 30.6d0, 0d0, 0.410d-07, 0.3660d0, 0.17d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Fe+++, E
+@prods: Fe++++,E, E
+@limits: 3.481356d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 54.8d0, 0d0, 0.353d-07, 0.2430d0, 0.39d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Fe++++, E
+@prods: Fe+++++,E, E
+@limits: 3.481356d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 75.0d0, 1d0, 0.104d-07, 0.2850d0, 0.17d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Fe+++++, E
+@prods: Fe++++++,E, E
+@limits: 4.641808d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 99.0d0, 1d0, 0.123d-07, 0.4110d0, 0.21d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Fe++++++, E
+@prods: Fe+++++++,E, E
+@limits: 5.802260d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 125.0d0, 1d0, 0.947d-08, 0.4580d0, 0.21d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Fe+++++++, E
+@prods: Fe++++++++,E, E
+@limits: 8.123163d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 151.1d0, 1d0, 0.471d-08, 0.2800d0, 0.28d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Fe++++++++, E
+@prods: Fe+++++++++,E, E
+@limits: 1.160452d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 233.6d0, 1d0, 0.302d-08, 0.6970d0, 0.15d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Fe+++++++++, E
+@prods: Fe++++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 262.1d0, 1d0, 0.234d-08, 0.7640d0, 0.14d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Fe++++++++++, E
+@prods: Fe+++++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 290.0d0, 1d0, 0.176d-08, 0.8050d0, 0.14d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Fe+++++++++++, E
+@prods: Fe++++++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 331.0d0, 1d0, 0.114d-08, 0.7730d0, 0.15d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Fe++++++++++++, E
+@prods: Fe+++++++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 361.0d0, 1d0, 0.866d-09, 0.8050d0, 0.14d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Fe+++++++++++++, E
+@prods: Fe++++++++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 392.0d0, 1d0, 0.661d-09, 0.7620d0, 0.14d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Fe++++++++++++++, E
+@prods: Fe+++++++++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 457.0d0, 1d0, 0.441d-09, 0.6980d0, 0.16d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Fe+++++++++++++++, E
+@prods: Fe++++++++++++++++,E, E
+@limits: 8.123163d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 489.3d0, 1d0, 0.118d-09, 0.2110d0, 0.15d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Fe++++++++++++++++, E
+@prods: Fe+++++++++++++++++,E, E
+@limits: 8.123163d+05, 1.160452d+09
+@rate: colion_v96(Tgas, 1262.0d0, 1d0, 0.361d-09, 1.1600d0, 0.09d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Fe+++++++++++++++++, E
+@prods: Fe++++++++++++++++++,E, E
+@limits: 8.123163d+05, 1.160452d+09
+@rate: colion_v96(Tgas, 1360.0d0, 1d0, 0.245d-09, 0.9780d0, 0.13d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Fe++++++++++++++++++, E
+@prods: Fe+++++++++++++++++++,E, E
+@limits: 8.123163d+05, 1.160452d+09
+@rate: colion_v96(Tgas, 1470.0d0, 1d0, 0.187d-09, 0.9880d0, 0.14d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Fe+++++++++++++++++++, E
+@prods: Fe++++++++++++++++++++,E, E
+@limits: 8.123163d+05, 1.160452d+09
+@rate: colion_v96(Tgas, 1582.0d0, 1d0, 0.133d-09, 1.0300d0, 0.12d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Fe++++++++++++++++++++, E
+@prods: Fe+++++++++++++++++++++,E, E
+@limits: 8.123163d+05, 1.160452d+09
+@rate: colion_v96(Tgas, 1690.0d0, 1d0, 0.784d-10, 0.8480d0, 0.14d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Fe+++++++++++++++++++++, E
+@prods: Fe++++++++++++++++++++++,E, E
+@limits: 1.160452d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 1800.0d0, 0d0, 0.890d-10, 1.2000d0, 0.35d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Fe++++++++++++++++++++++, E
+@prods: Fe+++++++++++++++++++++++,E, E
+@limits: 1.160452d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 1960.0d0, 1d0, 0.229d-10, 0.9360d0, 0.12d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Fe+++++++++++++++++++++++, E
+@prods: Fe++++++++++++++++++++++++,E, E
+@limits: 1.160452d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 2046.0d0, 0d0, 0.112d-10, 0.0340d0, 0.81d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Fe++++++++++++++++++++++++, E
+@prods: Fe+++++++++++++++++++++++++,E, E
+@limits: 4.641808d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 8828.0d0, 1d0, 0.246d-11, 1.0200d0, 0.02d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Fe+++++++++++++++++++++++++, E
+@prods: Fe++++++++++++++++++++++++++,E, E
+@limits: 4.641808d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 9277.7d0, 1d0, 0.979d-12, 0.6640d0, 0.14d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Co, E
+@prods: Co+,E, E
+@limits: 1.160452d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 7.9d0, 1d0, 0.889d-07, 0.1270d0, 0.24d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Co+, E
+@prods: Co++,E, E
+@limits: 1.160452d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 17.1d0, 1d0, 0.565d-07, 0.1940d0, 0.23d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Co++, E
+@prods: Co+++,E, E
+@limits: 2.320904d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 33.5d0, 1d0, 0.306d-07, 0.2010d0, 0.22d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Co+++, E
+@prods: Co++++,E, E
+@limits: 4.641808d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 51.3d0, 0d0, 0.227d-07, 0.5740d0, 0.10d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Co++++, E
+@prods: Co+++++,E, E
+@limits: 4.641808d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 79.5d0, 0d0, 0.193d-07, 0.1950d0, 0.42d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Co+++++, E
+@prods: Co++++++,E, E
+@limits: 5.802260d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 102.0d0, 0d0, 0.127d-07, 0.1260d0, 0.47d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Co++++++, E
+@prods: Co+++++++,E, E
+@limits: 8.123163d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 129.0d0, 1d0, 0.358d-08, 0.1940d0, 0.29d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Co+++++++, E
+@prods: Co++++++++,E, E
+@limits: 8.123163d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 158.0d0, 0d0, 0.117d-07, 1.9800d0, 0.07d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Co++++++++, E
+@prods: Co+++++++++,E, E
+@limits: 1.160452d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 186.1d0, 1d0, 0.178d-08, 0.1120d0, 0.42d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Co+++++++++, E
+@prods: Co++++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 275.0d0, 1d0, 0.241d-08, 0.7390d0, 0.14d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Co++++++++++, E
+@prods: Co+++++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 305.0d0, 1d0, 0.186d-08, 0.7620d0, 0.14d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Co+++++++++++, E
+@prods: Co++++++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 336.0d0, 1d0, 0.141d-08, 0.8040d0, 0.14d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Co++++++++++++, E
+@prods: Co+++++++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 379.0d0, 1d0, 0.954d-09, 0.8130d0, 0.14d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Co+++++++++++++, E
+@prods: Co++++++++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 411.0d0, 1d0, 0.712d-09, 0.8030d0, 0.14d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Co++++++++++++++, E
+@prods: Co+++++++++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 444.0d0, 1d0, 0.534d-09, 0.7180d0, 0.15d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Co+++++++++++++++, E
+@prods: Co++++++++++++++++,E, E
+@limits: 3.481356d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 512.0d0, 1d0, 0.362d-09, 0.6580d0, 0.17d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Co++++++++++++++++, E
+@prods: Co+++++++++++++++++,E, E
+@limits: 8.123163d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 546.6d0, 1d0, 0.105d-09, 0.2520d0, 0.12d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Co+++++++++++++++++, E
+@prods: Co++++++++++++++++++,E, E
+@limits: 8.123163d+05, 1.160452d+09
+@rate: colion_v96(Tgas, 1397.0d0, 1d0, 0.310d-09, 1.1700d0, 0.09d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Co++++++++++++++++++, E
+@prods: Co+++++++++++++++++++,E, E
+@limits: 1.160452d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 1486.0d0, 1d0, 0.156d-09, 0.5720d0, 0.15d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Co+++++++++++++++++++, E
+@prods: Co++++++++++++++++++++,E, E
+@limits: 1.160452d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 1603.0d0, 1d0, 0.132d-09, 0.6820d0, 0.13d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Co++++++++++++++++++++, E
+@prods: Co+++++++++++++++++++++,E, E
+@limits: 3.481356d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 1735.0d0, 1d0, 0.908d-10, 0.5110d0, 0.17d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Co+++++++++++++++++++++, E
+@prods: Co++++++++++++++++++++++,E, E
+@limits: 2.320904d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 1846.0d0, 0d0, 0.345d-09, 2.8400d0, 0.11d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Co++++++++++++++++++++++, E
+@prods: Co+++++++++++++++++++++++,E, E
+@limits: 3.481356d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 1962.0d0, 1d0, 0.501d-10, 0.7140d0, 0.11d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Co+++++++++++++++++++++++, E
+@prods: Co++++++++++++++++++++++++,E, E
+@limits: 3.481356d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 2119.0d0, 1d0, 0.192d-10, 0.1170d0, 0.42d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Co++++++++++++++++++++++++, E
+@prods: Co+++++++++++++++++++++++++,E, E
+@limits: 3.481356d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 2219.0d0, 1d0, 0.195d-10, 1.2000d0, 0.00d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Co+++++++++++++++++++++++++, E
+@prods: Co++++++++++++++++++++++++++,E, E
+@limits: 1.160452d+07, 1.160452d+09
+@rate: colion_v96(Tgas, 9544.0d0, 0d0, 0.168d-10, 3.5200d0, 0.05d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Co++++++++++++++++++++++++++, E
+@prods: Co+++++++++++++++++++++++++++,E, E
+@limits: 2.320904d+07, 1.160452d+10
+@rate: colion_v96(Tgas, 10012.1d0, 1d0, 0.145d-11, 0.6350d0, 0.15d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ni, E
+@prods: Ni+,E, E
+@limits: 1.160452d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 7.6d0, 0d0, 0.165d-06, 0.4520d0, 0.28d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ni+, E
+@prods: Ni++,E, E
+@limits: 1.160452d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 18.2d0, 0d0, 0.842d-07, 0.6190d0, 0.16d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ni++, E
+@prods: Ni+++,E, E
+@limits: 2.320904d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 35.3d0, 1d0, 0.189d-07, 0.2200d0, 0.21d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ni+++, E
+@prods: Ni++++,E, E
+@limits: 3.481356d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 54.9d0, 1d0, 0.148d-07, 0.2160d0, 0.21d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ni++++, E
+@prods: Ni+++++,E, E
+@limits: 4.641808d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 76.0d0, 0d0, 0.113d-07, 0.5180d0, 0.09d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ni+++++, E
+@prods: Ni++++++,E, E
+@limits: 5.802260d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 108.0d0, 0d0, 0.116d-07, 0.1850d0, 0.44d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ni++++++, E
+@prods: Ni+++++++,E, E
+@limits: 8.123163d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 133.0d0, 0d0, 0.868d-08, 0.1380d0, 0.46d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ni+++++++, E
+@prods: Ni++++++++,E, E
+@limits: 8.123163d+04, 2.320904d+08
+@rate: colion_v96(Tgas, 162.0d0, 1d0, 0.245d-08, 0.1630d0, 0.32d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ni++++++++, E
+@prods: Ni+++++++++,E, E
+@limits: 1.160452d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 193.0d0, 0d0, 0.924d-08, 2.2500d0, 0.05d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ni+++++++++, E
+@prods: Ni++++++++++,E, E
+@limits: 1.160452d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 225.0d0, 0d0, 0.241d-08, 0.0270d0, 0.79d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ni++++++++++, E
+@prods: Ni+++++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 321.0d0, 1d0, 0.192d-08, 0.7380d0, 0.14d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ni+++++++++++, E
+@prods: Ni++++++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 352.0d0, 1d0, 0.150d-08, 0.7610d0, 0.14d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ni++++++++++++, E
+@prods: Ni+++++++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 384.0d0, 1d0, 0.116d-08, 0.8030d0, 0.14d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ni+++++++++++++, E
+@prods: Ni++++++++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 430.0d0, 1d0, 0.808d-09, 0.8560d0, 0.13d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ni++++++++++++++, E
+@prods: Ni+++++++++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 464.0d0, 1d0, 0.609d-09, 0.8500d0, 0.13d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ni+++++++++++++++, E
+@prods: Ni++++++++++++++++,E, E
+@limits: 2.320904d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 499.0d0, 1d0, 0.448d-09, 0.7180d0, 0.15d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ni++++++++++++++++, E
+@prods: Ni+++++++++++++++++,E, E
+@limits: 3.481356d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 571.3d0, 1d0, 0.300d-09, 0.6220d0, 0.18d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ni+++++++++++++++++, E
+@prods: Ni++++++++++++++++++,E, E
+@limits: 8.123163d+05, 2.320904d+08
+@rate: colion_v96(Tgas, 607.0d0, 1d0, 0.790d-10, 0.1600d0, 0.19d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ni++++++++++++++++++, E
+@prods: Ni+++++++++++++++++++,E, E
+@limits: 8.123163d+05, 1.160452d+09
+@rate: colion_v96(Tgas, 1541.0d0, 1d0, 0.278d-09, 1.2500d0, 0.08d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ni+++++++++++++++++++, E
+@prods: Ni++++++++++++++++++++,E, E
+@limits: 8.123163d+05, 1.160452d+09
+@rate: colion_v96(Tgas, 1648.0d0, 1d0, 0.192d-09, 1.0400d0, 0.12d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ni++++++++++++++++++++, E
+@prods: Ni+++++++++++++++++++++,E, E
+@limits: 1.160452d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 1756.0d0, 1d0, 0.151d-09, 1.1100d0, 0.12d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ni+++++++++++++++++++++, E
+@prods: Ni++++++++++++++++++++++,E, E
+@limits: 1.160452d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 1894.0d0, 1d0, 0.105d-09, 1.0900d0, 0.11d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ni++++++++++++++++++++++, E
+@prods: Ni+++++++++++++++++++++++,E, E
+@limits: 1.160452d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 2011.0d0, 1d0, 0.604d-10, 0.8490d0, 0.14d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ni+++++++++++++++++++++++, E
+@prods: Ni++++++++++++++++++++++++,E, E
+@limits: 1.160452d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 2131.0d0, 0d0, 0.691d-10, 1.2100d0, 0.35d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ni++++++++++++++++++++++++, E
+@prods: Ni+++++++++++++++++++++++++,E, E
+@limits: 1.160452d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 2295.0d0, 1d0, 0.184d-10, 0.9910d0, 0.11d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ni+++++++++++++++++++++++++, E
+@prods: Ni++++++++++++++++++++++++++,E, E
+@limits: 1.160452d+06, 1.160452d+09
+@rate: colion_v96(Tgas, 2399.0d0, 0d0, 0.903d-11, 0.0420d0, 0.79d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ni++++++++++++++++++++++++++, E
+@prods: Ni+++++++++++++++++++++++++++,E, E
+@limits: 2.320904d+07, 1.160452d+10
+@rate: colion_v96(Tgas, 10290.0d0, 1d0, 0.261d-11, 0.5680d0, 0.16d0)
+
+#collisional ionization rate, Voronov 1997 (ADNDT 65, 1) via Verner's cfit.f
+@type: colion
+@reacts: Ni+++++++++++++++++++++++++++, E
+@prods: Ni++++++++++++++++++++++++++++,E, E
+@limits: 2.320904d+07, 1.160452d+10
+@rate: colion_v96(Tgas, 10775.3d0, 1d0, 0.139d-11, 0.7290d0, 0.13d0)
+

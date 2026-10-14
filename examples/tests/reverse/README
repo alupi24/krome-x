@@ -1,0 +1,25 @@
+!***************************************************************
+!This test is based on the Zel'dovich nitric oxide mechanism
+! involving two reactions and its reverse as discussed 
+! in Al-Khateeb et al. 2009. The aim of the test is to 
+! evaluate the inverse reaction rate coefficients applying 
+! the thermodynamic method discussed in Grassi et al. 2013
+! and employed in KROME.
+! Initial conditions are n = 1e-3 mols, Volume = 1e3 cm3 and
+! T = 4000 Kelvin.
+!***************************************************************
+
+KROME-X notes:
+- output files (legacy name): abundances.dat (fort.66).
+- legacy -reverse (a generation flag reversing every reaction) is not a
+  KROME-X option: the reverse reactions are declared in the network with
+  <->. NO_reverse.knet is networks/NO.knet with both reactions written
+  as <-> (what kromex/convert_legacy.py networks/react_NO --reverse
+  writes). The reverse rate is k_fwd / K_c, K_c from the NASA
+  polynomials of data/thermo30.dat, as in legacy.
+- the species columns of abundances.dat are in KROME-X (alphabetical) order:
+  N N2 NO O O2 (legacy: order of appearance N2 O NO N O2); plot.py picks
+  them by name.
+- as in legacy, the time written is t + the next (1.5x larger) dt.
+- KROME-X and legacy agree to the 3 digits written (the largest difference is
+  one unit in the last digit, N at early times).

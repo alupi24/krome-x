@@ -1,0 +1,9 @@
+krome_format 1
+# converted from legacy network 'react_NO' by convert_legacy.py
+
+# legacy shortcut symbols, now ordinary vars:
+var invT     = 1.0/Tgas
+
+#reactions for Zel'dovich nitric oxyde (NO) mechanism (Baulch et al. 1994)
+N2 + O -> NO + N  []  3e-10*exp(-38300.*invT)
+O2 + N -> NO + O  []  1.5e-14*Tgas*exp(-3270.*invT)

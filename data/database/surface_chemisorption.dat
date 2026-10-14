@@ -1,0 +1,40 @@
+@var:[ndust] rateChem_PC = dust_get_rateChem_PC(krome_dust_T(:))
+@var:[ndust] rateChem_CP = dust_get_rateChem_CP(krome_dust_T(:))
+@var:[ndust] rateChem_CC = dust_get_rateChem_CC(krome_dust_T(:))
+@var:[ndust] dust_inv_phi = dust_get_inv_phi(krome_dust_asize2(:),xdust(:))
+
+#rate chemisorption (H -> H_c) from Cazaux+2004 (err:Cazaux+2010), Iqbal+2010, Hocuk+2014
+@type: surfChemisorption
+@reacts: H_dust
+@prods: H_c_dust
+@limits:
+@rate: rateChem_PC(auto_jdust-nmols)
+
+#rate chemisorption (H_c -> H) from Cazaux+2004 (err:Cazaux+2010), Iqbal+2010, Hocuk+2014
+@type: surfChemisorption
+@reacts: H_c_dust
+@prods: H_dust
+@limits:
+@rate: rateChem_CP(auto_jdust-nmols)
+
+#rate chemisorption (H_c + H -> H2) from Cazaux+2004 (err:Cazaux+2010), Iqbal+2010, Hocuk+2014
+@type: surfChemisorption
+@reacts: H_c_dust,H_dust
+@prods: H2_dust
+@limits:
+@rate: rateChem_CP(auto_jdust-nmols)*dust_inv_phi(auto_jdust-nmols)
+
+#rate chemisorption (H_c + H -> H2) from Cazaux+2004 (err:Cazaux+2010), Iqbal+2010, Hocuk+2014
+@type: surfChemisorption
+@reacts: H_c_dust,H_dust
+@prods: H2_dust
+@limits:
+@rate: rateChem_PC(auto_jdust-nmols)*dust_inv_phi(auto_jdust-nmols)
+
+#rate chemisorption (H_c + H_c -> H2) from Cazaux+2004 (err:Cazaux+2010), Iqbal+2010, Hocuk+2014
+@type: surfChemisorption
+@reacts: H_c_dust,H_c_dust
+@prods: H2_dust
+@limits:
+@rate: rateChem_CC(auto_jdust-nmols)*dust_inv_phi(auto_jdust-nmols)
+

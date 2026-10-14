@@ -1,0 +1,50 @@
+      1     3d6(5D).4s                   a    6  D    4.5          0.000          0.000
+      2     3d6(5D).4s                   a    6  D    3.5        384.790        385.178
+      3     3d6(5D).4s                   a    6  D    2.5        667.683        667.203
+      4     3d6(5D).4s                   a    6  D    1.5        862.613        862.535
+      5     3d6(5D).4s                   a    6  D    0.5        977.053        976.662
+      6     3d7                          a    4  F    4.5       1872.567       1872.119
+      7     3d7                          a    4  F    3.5       2430.097       2429.584
+      8     3d7                          a    4  F    2.5       2837.950       2837.807
+      9     3d7                          a    4  F    1.5       3117.461       3117.637
+     10     3d6(5D).4s                   a    4  D    3.5       7955.299       7954.858
+     11     3d6(5D).4s                   a    4  D    2.5       8391.938       8391.613
+     12     3d6(5D).4s                   a    4  D    1.5       8680.454       8680.221
+     13     3d6(5D).4s                   a    4  D    0.5       8846.768       8847.022
+     14     3d7                          a    4  P    2.5      13474.411      13474.645
+     15     3d7                          a    4  P    1.5      13673.185      13673.269
+     16     3d7                          a    4  P    0.5      13904.824      13904.815
+ -1
+%filename: fe_2.elvlc
+%observed energy levels: J. Sugar, C. Corliss, 1985, J. Phys. Chem. Ref. Data., 14, Supplement No.2.    
+%theoretical energy levels: Zhang, H.L., Pradhan, A.K., 1995, A&AS, 293, 953.
+%comment: also identified by Zhang and Pradhan:
+145    21 3d6.(3F2).4p y  4  3 F  3.5  8      62065.520     0.56558424
+195    24 3d6.(3D).4p  w  4  1 P  2.5  6      71964.711     0.65579259
+196    24 3d6.(3D).4p  w  4  1 P  1.5  4      72043.023     0.65650624
+197    24 3d6.(3D).4p  w  4  1 P  0.5  2      72429.711     0.66003001                      
+204    24 3d6.(3D).4p  w  4  2 D  0.5  2      72212.977     0.65805495
+318    36 3d6.(3F1).4p 4  4  4 G  2.5  6      89727.344     0.81765807
+319    36 3d6.(3F1).4p 4  4  4 G  3.5  8      89890.375     0.81914371
+320    36 3d6.(3F1).4p 4  4  4 G  4.5 10      90042.781     0.82053256
+321    36 3d6.(3F1).4p 4  4  4 G  5.5 12      90211.703     0.82207191
+336    32 3d6.(3P1).4p 4  4  0 S  1.5  4      90629.898     0.82588279
+337    32 3d6.(3P1).4p 4  4  1 P  0.5  2      90839.484     0.82779264
+338    32 3d6.(3P1).4p 4  4  1 P  1.5  4      90898.875     0.82833385
+339    32 3d6.(3P1).4p 4  4  1 P  2.5  6      92274.117     0.84086603
+364    36 3d6.(3F1).4p    4  2 D  0.5  4      92453.461     0.84250033
+365    36 3d6.(3F1).4p    4  2 D  1.5  6      92647.508     0.84426862
+366    36 3d6.(3F1).4p    4  2 D  2.5  6      92899.203     0.84656227
+367    36 3d6.(3F1).4p    4  2 D  3.5  8      93129.898     0.84866452
+%comment:   added notation for:
+167    20 3d6.(3H).4p  z  2  5 H  5.5 12      65363.594     0.59563863
+%
+%produced as part of the Arcetri/Cambridge/NRL 'CHIANTI' atomic data base collaboration
+%
+%  K.P.Dere 1994
+%
+% Peter Young, 18-Nov-2015
+%   The format of the file has been updated, with the "label" column now populated with
+%   the appropriate letter tags. The configuration string has also been standardized.
+%   No change has been made to the energy values.
+ -1

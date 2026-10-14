@@ -1,0 +1,40 @@
+!****************************************************************
+!A semi-infinite slab in a box of size rmin-rmax (300 log-spaced
+! grid points, n = 1e3 cm-3, Tgas = 50 K fixed, cosmic rays
+! 5e-17 s-1) irradiated by 10 times the Draine flux in [5,13.6] eV.
+!The light is attenuated by the opacity of the photochemical cross
+! sections of the network and by dust (opacityDraineR35.dat,
+! dust-to-gas 1e-2). The chemistry is evolved to 1e6 yr.
+!Output: profiles_final.dat final profiles (time, Av, Tgas, species),
+! profiles.dat every time step, abundances_center.dat the time evolution of
+! cell ngrid/2, opacity.dat the attenuated intensity (Av, energy, J).
+!****************************************************************
+
+KROME-X port (examples/tests/rtchem) of legacy tests/rtchem (a DEV test,
+which had no README or plot.py). Differences:
+- the driver is C++ (test.cpp, krome.hpp);
+- the photon bins are runtime setup: legacy -photoBins=10 +
+  krome_set_photoBin_draineLin(5, 13.6) + krome_photoBin_scale(10)
+  become spectra::bins_lin + spectra::draine (x 10) + PhotoModule::init;
+  krome_photoBin_store / restore / scale_array become the per-cell field
+  SolverOpts::Phi = stored Phi x attenuation / 4;
+- krome_load_opacity_table("opacityDraineR35.dat", unitEnergy="micron")
+  is read by the driver and averaged on the bins with
+  spectra::dust_kappa_bins; krome_get_opacity_size_d2g(x, Tgas, dr, d2g)
+  is get_absorption(x, Tgas, p, o, d2g kappa) x dr;
+- krome_set_user_crate(5e-17) is the network parameter crate (Params);
+- as in legacy, the composition that attenuates the light across cell i
+  is the state of the previous solve (cell i-1), not cell i's own: the
+  legacy driver passed x before copying cell i into it (at the very
+  first cell of the run x is zero here; legacy used it uninitialized);
+- KROME-X averages the cross sections and the fields over each bin (legacy
+  sampled the bin midpoint), and the SWRI H2 lines are finite-width
+  boxes;
+- the solver tolerances are the KROME-X defaults (rtol 1e-8; legacy 1e-4);
+- output columns follow the KROME-X alphabetical species order, as the
+  headers say (plot.py picks them by name).
+Comparison with legacy (final profiles, profiles_final.dat): the H/H2,
+C+/CO and C+/C fronts are at the same Av within 2% (H2/(H+H2) = 0.5 at Av
+0.575 legacy, 0.574 KROME-X); away from the fronts the species agree
+within ~1%.
+- output files (legacy name): profiles_final.dat (fort.55), profiles.dat (fort.66), abundances_center.dat (fort.77).

@@ -1,0 +1,20 @@
+# legacy tests/dust: -n networks/react_primordial -dust=10,C,Si
+# -dustOptions=GROWTH,EVAP -dustSeed="1d-12"
+# - the binned population (-dust=10,C,Si) is runtime setup (DustBins in
+#   the driver); the network needs the key elements C and Si
+# - -dustOptions=GROWTH,EVAP -> dust.evolve = GROWTH,EVAP
+# - legacy set Td = Tgas (krome_set_Tdust): with dust.evolve_Td and thermal
+#   evolution off, Td stays at the value given (binned dust otherwise
+#   always takes the radiative balance)
+# - -dustSeed had no effect in legacy: dropped
+# (the network path is relative to the KROME-X folder)
+
+[project]
+network = "examples/tests/dust/primordial_dust.knet"
+
+[thermal]
+cooling = ["DUSTBINS"]
+
+[dust]
+evolve_Td = true
+evolve = ["GROWTH", "EVAP"]

@@ -1,0 +1,19 @@
+# legacy tests/chianti: equilibrium cooling curve of carbon from the
+# CHIANTI line data (C+ ... C5+), J21 = 0, 1, 1e2
+# legacy -coolFile=tools/coolChianti.dat (legacy's CHIANTI conversion,
+# shipped as data/cooling/coolChianti.dat); its C+ replaces the embedded
+# coolZ.dat one; each coolant is its own cooling term (CII ... CVI)
+# legacy -coolLevels=99999: keep every level (no cut)
+# dropped: -photoBins=10 (runtime setup in test.cpp: 10 log bins
+# 10-100 eV), -useThermoToggle (SolverOpts::evolve_T, off by default),
+# -noRecCheck (no recombination check in KROME-X)
+# (the network path is relative to the KROME-X folder)
+
+[project]
+network = "networks/chianti.knet"
+
+[thermal]
+cooling = ["CIII", "CIV", "CV", "CVI", "Z"]
+metals = ["C+"]
+coolant_files = ["data/cooling/coolChianti.dat"]
+levels = 99999

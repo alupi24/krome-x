@@ -1,0 +1,112 @@
+krome_format 1
+# legacy tests/dust: react_primordial plus the bare key elements C and
+# Si of the grains (legacy -dust added them automatically)
+species C, Si
+# converted from legacy network 'react_primordial' by convert_legacy.py
+
+# legacy shortcut symbols, now ordinary vars:
+var Te       = Tgas_eV
+var lnTe     = log(Tgas_eV)
+var invTe    = 1.0/Tgas_eV
+var invT     = 1.0/Tgas
+var sqrTgas  = sqrt(Tgas)
+var T32      = Tgas/300.0
+
+#primordial rates from several authors mostly based on Abel et al. 1997 (see also Grassi et al. 2014)
+
+#Janev 1987
+H + e- -> H+ + e- + e-      []             exp(-32.71396786e0+13.5365560e0*lnTe-5.73932875e0*(lnTe**2)+1.56315498e0*(lnTe**3)-0.28770560e0*(lnTe**4)+3.48255977e-2*(lnTe**5)-2.63197617e-3*(lnTe**6)+1.11954395e-4*(lnTe**7)-2.03914985e-6*(lnTe**8))
+
+#Abel et al. 1997, fit by data from Ferland et al. 1992
+H+ + e- -> H                [0, 5.5e3]     3.92e-13*invTe**0.6353e0
+H+ + e- -> H                [5.5e3, inf]   exp(-28.61303380689232e0-0.7241125657826851e0*lnTe-0.02026044731984691e0*lnTe**2-0.002380861877349834e0*lnTe**3-0.0003212605213188796e0*lnTe**4-0.00001421502914054107e0*lnTe**5+4.989108920299513e-6*lnTe**6+5.755614137575758e-7*lnTe**7-1.856767039775261e-8*lnTe**8-3.071135243196595e-9*lnTe**9)
+
+#Janev 1987
+He + e- -> He+ + e- + e-    []             exp(-44.09864886e0+23.91596563e0*lnTe-10.7532302e0*(lnTe**2)+3.05803875e0*(lnTe**3)-0.56851189e0*(lnTe**4)+6.79539123e-2*(lnTe**5)-5.00905610e-3*(lnTe**6)+2.06723616e-4*(lnTe**7)-3.64916141e-6*(lnTe**8))
+
+#Radiative+dielectronic from Cen 1992, Aldrovandi & Pequignot 1973
+He+ + e- -> He              [0, 9.28e3]    3.92e-13*invTe**0.6353e0
+He+ + e- -> He              [9.28e3, inf]  1.54e-9*(1.e0+0.3e0/exp(8.099328789667e0*invTe))/(exp(40.49664394833662e0*invTe)*Te**1.5e0)+3.92e-13/Te**0.6353e0
+
+#Aladdin database 1989 (see Abel et al. 1997)
+He+ + e- -> He++ + e- + e-  []             exp(-68.71040990212001e0+43.93347632635e0*lnTe-18.48066993568e0*lnTe**2+4.701626486759002e0*lnTe**3-0.7692466334492e0*lnTe**4+0.08113042097303e0*lnTe**5-0.005324020628287001e0*lnTe**6+0.0001975705312221e0*lnTe**7-3.165581065665e-6*lnTe**8)
+
+#Cen 1992
+He++ + e- -> He+            []             3.36e-10/sqrTgas/(Tgas/1.e3)**0.2e0/(1+(Tgas/1.e6)**0.7e0)
+
+#ENZO
+H + e- -> H-                []             6.77e-15*Te**0.8779e0
+
+#Abel et al. 1997, fit by data from Janev 1987
+H- + H -> H2 + e-           [0, 1160]      1.43e-9
+H- + H -> H2 + e-           [1160, inf]    exp(-20.06913897587003e0+0.2289800603272916e0*lnTe+0.03599837721023835e0*lnTe**2-0.004555120027032095e0*lnTe**3-0.0003105115447124016e0*lnTe**4+0.0001073294010367247e0*lnTe**5-8.36671960467864e-6*lnTe**6+2.238306228891639e-7*lnTe**7)
+
+#Shapiro&Kang 1987
+H + H+ -> H2+               [0, 6.7e3]     1.85e-23*Tgas**1.8e0
+H + H+ -> H2+               [6.7e3, inf]   5.81e-16*(Tgas/5.62e4)**(-0.6657e0*log10(Tgas/5.62e4))
+
+#Karpas 1979
+H2+ + H -> H2 + H+          []             6.0e-10
+
+#Abel et al. 1997
+H2 + H+ -> H2+ + H          [3.48e3, inf]  exp(-24.24914687731536e0+3.400824447095291e0*lnTe-3.898003964650152e0*lnTe**2+2.045587822403071e0*lnTe**3-0.5416182856220388e0*lnTe**4+0.0841077503763412e0*lnTe**5-0.007879026154483455e0*lnTe**6+0.0004138398421504563e0*lnTe**7-9.36345888928611e-6*lnTe**8)
+
+#Donahue&Shull 1991
+H2 + e- -> H + H + e-       []             5.6e-11*exp(-102124.e0*invT)*Tgas**0.5e0
+
+#Dove&Mandy 1986
+H2 + H -> H + H + H         []             1.0670825e-10*Te**2.012e0*exp(-4.463e0*invTe)/(1.e0+0.2472e0*Te)**3.512e0
+
+#Janev 1987
+H- + e- -> H + e- + e-      []             exp(-18.01849334273e0+2.360852208681e0*lnTe-0.2827443061704e0*lnTe**2+0.01623316639567e0*lnTe**3-0.03365012031362999e0*lnTe**4+0.01178329782711e0*lnTe**5-0.001656194699504e0*lnTe**6+0.0001068275202678e0*lnTe**7-2.631285809207e-6*lnTe**8)
+
+#Abel et al. 1997, based on Janev 1987
+H- + H -> H + H + e-        [0, 1.16e3]    2.56e-9*Te**1.78186e0
+H- + H -> H + H + e-        [1.16e3, inf]  exp(-20.37260896533324e0+1.139449335841631e0*lnTe-0.1421013521554148e0*lnTe**2+0.00846445538663e0*lnTe**3-0.0014327641212992e0*lnTe**4+0.0002012250284791e0*lnTe**5+0.0000866396324309e0*lnTe**6-0.00002585009680264e0*lnTe**7+2.4555011970392e-6*lnTe**8-8.06838246118e-8*lnTe**9)
+
+#Dalgarno & Lepp, 1987
+H- + H+ -> H + H            []             6.5e-9/sqrt(Te)
+
+#Poulart 1978
+H- + H+ -> H2+ + e-         []             1.e-8*Tgas**(-0.4e0)
+
+#Abel et al. 1997, fit by data from Schneider 1994
+H2+ + e- -> H + H           [0, 6.17e2]    1.e-8
+H2+ + e- -> H + H           [6.17e2, inf]  1.32e-6*Tgas**(-0.76e0)
+
+#Dalgarno & Lepp 1987
+H2+ + H- -> H + H2          []             5.e-7*sqrt(1.e2*invT)
+
+#Glover&Abel 2008
+H + H + H -> H2 + H         [0, 3e2]       1.3e-32*(T32)**(-0.38e0)
+H + H + H -> H2 + H         [3e2, inf]     1.3e-32*(T32)**(-1.00e0)
+
+#Glover&Abel 2008
+H2 + H + H -> H2 + H2       [0, 3e2]       1.3e-32*(T32)**(-0.38e0) / 8.e0
+H2 + H + H -> H2 + H2       [3e2, inf]     1.3e-32*(T32)**(-1.00e0) / 8.e0
+
+#DEUTERIUM CHEMISTRY
+#Galli & Palla 2002 from Wolf Savin 2001
+H+ + D -> H + D+            [5e1, inf]     2.00e-10*Tgas**(0.402e0)*exp(-37.1e0*invT)-3.31e-17*Tgas**(1.48e0)
+
+#Galli & Palla 2002 from Wolf Savin 2001
+H + D+ -> H+ + D            [5e1, inf]     2.06e-10*Tgas**(0.396)*exp(-33.e0*invT)+2.03e-9*Tgas**(-0.332)
+
+##Galli&Palla 2002 from Gerlich 1982
+H2 + D+ -> HD + H+          []             1.e-9*(0.417+0.846*log10(Tgas)-0.137*(log10(Tgas))**2)
+
+##Galli & Palla 2002, from Garlich 1982 with modification by Gay et al. 2011
+HD + H+ -> H2 + D+          []             1.0e-9 *exp(-4.57e2*invT)
+
+##Glover et al. 2009, from data by Mielke et al. 2003
+H2 + D -> HD + H            [0, 2.e3]      10**(-56.4737+5.88886*log10(Tgas)+7.19692*(log10(Tgas))**2+2.25069*(log10(Tgas))**3-2.16903*(log10(Tgas))**4+0.317887*(log10(Tgas))**5)
+H2 + D -> HD + H            [2e3, inf]     3.17e-10*exp(-5207.*invT)
+
+##Galli & Palla 2002, from Shavitt 1959 (lower limit from Shavitt)
+HD + H -> H2 + D            [2e2, inf]     5.25e-11*exp(-4430.*invT+1.739e5*(invT)**2)
+
+##ENZO
+D + H- -> HD + e-           []             1.5e-9*(T32)**(-0.1e0)
+
+#ADDITIONAL DEUTERIUM RATES FROM GP98, SLD98
+D+ + e- -> D                []             3.6e-12*(Tgas/300)**(-0.75e0)

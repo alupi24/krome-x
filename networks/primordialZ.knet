@@ -1,0 +1,180 @@
+krome_format 1
+# converted from legacy network 'react_primordialZ' by convert_legacy.py
+
+# legacy shortcut symbols, now ordinary vars:
+var Te       = Tgas_eV
+var lnTe     = log(Tgas_eV)
+var invTe    = 1.0/Tgas_eV
+var invT     = 1.0/Tgas
+var T32      = Tgas/300.0
+
+# functions provided by runtime physics modules:
+extern dissH2_Martin96
+
+#UPDATED primordial rates, 2014
+var T = Tgas
+
+#This modifier turns off the reactions involving metals when
+# the density (its internal name is sum(n(1:nmols)) is greater than 1e14 1/cm3.
+#This is necessary to cope with the solver instability at higher density.
+#Note that metals do not participate to the thermal history of the collapse
+# at higher density and hence they can be neglected in that range.
+# [legacy reactionModifier converted into where() in the rates below:]
+#   if(sum(n(1:nmols))>1d14) k(31:71) = 0d0
+
+#Janev 1987
+H + e- -> H+ + e- + e-      []             exp(-32.71396786e0+13.5365560e0*lnTe-5.73932875e0*(lnTe**2)+1.56315498e0*(lnTe**3)-0.28770560e0*(lnTe**4)+3.48255977e-2*(lnTe**5)-2.63197617e-3*(lnTe**6)+1.11954395e-4*(lnTe**7)-2.03914985e-6*(lnTe**8))
+
+#Abel et al. 1997, fit by data from Ferland et al. 1992
+H+ + e- -> H                [0, 5.5e3]     3.92e-13*invTe**0.6353e0
+H+ + e- -> H                [5.5e3, inf]   exp(-28.61303380689232e0-0.7241125657826851e0*lnTe-0.02026044731984691e0*lnTe**2-0.002380861877349834e0*lnTe**3-0.0003212605213188796e0*lnTe**4-0.00001421502914054107e0*lnTe**5+4.989108920299513e-6*lnTe**6+5.755614137575758e-7*lnTe**7-1.856767039775261e-8*lnTe**8-3.071135243196595e-9*lnTe**9)
+
+#Janev 1987
+He + e- -> He+ + e- + e-    []             exp(-44.09864886e0+23.91596563e0*lnTe-10.7532302e0*(lnTe**2)+3.05803875e0*(lnTe**3)-0.56851189e0*(lnTe**4)+6.79539123e-2*(lnTe**5)-5.00905610e-3*(lnTe**6)+2.06723616e-4*(lnTe**7)-3.64916141e-6*(lnTe**8))
+
+#Radiative+dielectronic from Cen 1992, Aldrovandi & Pequignot 1973
+He+ + e- -> He              [0, 9.28e3]    3.92e-13*invTe**0.6353e0
+He+ + e- -> He              [9.28e3, inf]  1.54e-9*(1.e0+0.3e0/exp(8.099328789667e0*invTe))/(exp(40.49664394833662e0*invTe)*Te**1.5e0)+3.92e-13/Te**0.6353e0
+
+#Aladdin database 1989 (see Abel et al. 1997)
+He+ + e- -> He++ + e- + e-  []             exp(-68.71040990212001e0+43.93347632635e0*lnTe-18.48066993568e0*lnTe**2+4.701626486759002e0*lnTe**3-0.7692466334492e0*lnTe**4+0.08113042097303e0*lnTe**5-0.005324020628287001e0*lnTe**6+0.0001975705312221e0*lnTe**7-3.165581065665e-6*lnTe**8)
+
+# Verner & Ferland 1996 !NEW!
+He++ + e- -> He+            []             1.891e-10/(sqrt(Tgas/9.37)*(1.+sqrt(Tgas/9.37))**0.2476*(1.+sqrt(Tgas/2.774e6))**1.7524)
+
+# De Jong (1972) !NEW!
+H + e- -> H-                []             1.4e-18*Tgas**0.928*exp(-Tgas/16200.)
+
+# fit by Kreckel et al. 2010 !NEW!
+var a1 = 1.3500e-09
+var a2 = 9.8493e-02
+var a3 = 3.2852e-01
+var a4 = 5.5610e-01
+var a5 = 2.7710e-07
+var a6 = 2.1826e+00
+var a7 = 6.1910e-03
+var a8 = 1.0461e+00
+var a9 = 8.9712e-11
+var a10 = 3.0424e+00
+var a11 = 3.2576e-14
+var a12 = 3.7741e+00
+H- + H -> H2 + e-           []             a1*(Tgas**a2+a3*Tgas**a4+a5*Tgas**a6)/(1.+a7*Tgas**a8+a9*Tgas**a10+a11*Tgas**a12)
+
+# fit to Ramaker & Peek 1976, corrected by Coppola !NEW!
+H + H+ -> H2+               [0, 30.0e0]    2.10e-20*(Tgas/30.)**(-0.15)
+H + H+ -> H2+               [30.0e0, inf]  10**(-18.20-3.194*log10(Tgas)+1.786*(log10(Tgas))**2-0.2072*(log10(Tgas))**3)
+
+#Karpas 1979
+H2+ + H -> H2 + H+          []             6.0e-10
+
+# fit by Savin et al. 2004, see also Glover et al. 2010  !NEW!
+var asav = 2.1237150e4
+var bsav1 = -3.3232183e-7
+var bsav2 = 3.3735382e-7
+var bsav3 = -1.4491368e-7
+var bsav4 = 3.4172805e-8
+var bsav5 = -4.7813728e-9
+var bsav6 = 3.9731542e-10
+var bsav7 = -1.8171411e-11
+var bsav8 = 3.5311932e-13
+var sumsav = bsav1+bsav2*log(Tgas)+bsav3*(log(Tgas))**2+bsav4*(log(Tgas))**3+bsav5*(log(Tgas))**4+bsav6*(log(Tgas))**5+bsav7*(log(Tgas))**6+bsav8*(log(Tgas))**7
+H2 + H+ -> H2+ + H          [1.e2, 3.e4]   sumsav*exp(-asav*invT)
+
+# Capitelli et al. 2007 ! NEW REACTION!
+H2 + e- -> H + H-           []             3.55e1*Tgas**(-2.28)*exp(-46707./Tgas)
+
+# fit by Mitchell & Deveau 1983 of data by Corrigan 1965 !NEW!
+H2 + e- -> H + H + e-       []             4.38e-10*exp(-102000./Tgas)*Tgas**(0.35)
+
+#Martin et al 1996
+# [legacy @noTabNext dropped: handled outside the network file in KROME-X]
+H2 + H -> H + H + H         []             dissH2_Martin96()
+
+#Janev 1987
+H- + e- -> H + e- + e-      []             exp(-18.01849334273e0+2.360852208681e0*lnTe-0.2827443061704e0*lnTe**2+0.01623316639567e0*lnTe**3-0.03365012031362999e0*lnTe**4+0.01178329782711e0*lnTe**5-0.001656194699504e0*lnTe**6+0.0001068275202678e0*lnTe**7-2.631285809207e-6*lnTe**8)
+
+#Abel et al. 1997, based on Janev 1987
+H- + H -> H + H + e-        [0, 1.16e3]    2.56e-9*Te**1.78186e0
+H- + H -> H + H + e-        [1.16e3, inf]  exp(-20.37260896533324e0+1.139449335841631e0*lnTe-0.1421013521554148e0*lnTe**2+0.00846445538663e0*lnTe**3-0.0014327641212992e0*lnTe**4+0.0002012250284791e0*lnTe**5+0.0000866396324309e0*lnTe**6-0.00002585009680264e0*lnTe**7+2.4555011970392e-6*lnTe**8-8.06838246118e-8*lnTe**9)
+
+# Stenrup et al. 2009 !NEW!
+H- + H+ -> H + H            []             (2.96e-6/sqrt(Tgas)-1.73e-9+2.50e-10*sqrt(Tgas)-7.77e-13*Tgas)
+
+#Poulart 1978
+H- + H+ -> H2+ + e-         []             1.e-8*Tgas**(-0.4e0)
+
+# fit by Coppola et al. (2011) !NEW!
+H2+ + e- -> H + H           []             1.e6*(4.2278e-14-2.3088e-17*Tgas+7.3428e-21*Tgas**2-7.5474e-25*Tgas**3+3.3468e-29*Tgas**4-5.528e-34*Tgas**5)
+
+#Dalgarno & Lepp 1987
+H2+ + H- -> H + H2          []             5.e-7*sqrt(1.e2*invT)
+
+#Forrey 2013 !NEW!
+H + H + H -> H2 + H         []             6.e-32*Tgas**(-0.25e0)+2.e-31*Tgas**(-0.5e0)
+
+#Glover&Abel 2008
+H2 + H + H -> H2 + H2       []             (6.e-32*Tgas**(-0.25e0)+2.e-31*Tgas**(-0.5e0))/8.e0
+#
+#Omukai 2001
+var invT = 1e0/Tgas
+# [legacy 'var Hnuclei' dropped: builtin in KROME-X]
+var kl21 = 1.18e-10*exp(-6.95e4*invT)
+var kh21 = 8.125e-8*T**(-0.5e0)*exp(-5.2e4*invT)*(1.e0-exp(-6e3*invT))
+var ncr21 = 1e1**(4.845e0-1.3e0*log10(T*1e-4)+1.62e0*(log10(T*1e-4))**2)
+var a21 = 1.e0/(1.e0+(Hnuclei/ncr21))
+# [legacy @noTabNext dropped: handled outside the network file in KROME-X]
+H2 + H2 -> H + H + H2       []             kh21**(1.-a21)*kl21**a21
+
+#NEW REACTION FROM YOSHIDA 2006, FOR HELIUM CHARGE TRANSFER
+He+ + H -> He + H+          []             1.20e-15*(Tgas/3e2)**0.25e0
+
+He + H+ -> He+ + H          [0, 1e4]       1.26e-9*Tgas**(-0.75e0)*exp(-1.275e5*invT)
+He + H+ -> He+ + H          [1e4, inf]     4.e-37*Tgas**(4.74e0)
+
+#Metals reactins from the reduced network of Omukai 2005
+O+ + H -> H+ + O            []             where(ntot>1e14, 0.0, 6.80e-10)
+H+ + O -> O+ + H            []             where(ntot>1e14, 0.0, 7.00e-10*exp(-232.*invT))
+O+ + H2 -> OH+ + H          []             where(ntot>1e14, 0.0, 1.70e-9)
+OH+ + H2 -> H2O+ + H        []             where(ntot>1e14, 0.0, 1.01e-9)
+H2O+ + H2 -> H3O+ + H       []             where(ntot>1e14, 0.0, 8.30e-10)
+H2O+ + e- -> O + H2         []             where(ntot>1e14, 0.0, 2.00e-7*(T32)**(-0.50))
+H2O+ + e- -> OH + H         []             where(ntot>1e14, 0.0, 1.60e-7*(T32)**(-0.50))
+H3O+ + e- -> H2O + H        []             where(ntot>1e14, 0.0, 3.50e-7*(T32)**(-0.50))
+O + H -> OH                 []             where(ntot>1e14, 0.0, 9.90e-19*(T32)**(-0.38))
+O + H2 -> OH + H            []             where(ntot>1e14, 0.0, 3.43e-13*(T32)**2.67*exp(-3160*invT))
+H2 + OH -> H2O + H          []             where(ntot>1e14, 0.0, 1.55e-12*(T32)**1.60*exp(-1660*invT))
+OH + OH -> H2O + O          []             where(ntot>1e14, 0.0, 1.65e-12*(T32)**1.14*exp(-50*invT))
+H+ + OH -> OH+ + H          []             where(ntot>1e14, 0.0, 2.10e-9)
+H+ + H2O -> H2O+ + H        []             where(ntot>1e14, 0.0, 6.90e-9)
+H + OH -> H2 + O            []             where(ntot>1e14, 0.0, 7.00e-14*(T32)**2.80*exp(-1950*invT))
+H + H2O -> OH + H2          []             where(ntot>1e14, 0.0, 6.83e-12*(T32)**1.60*exp(-9720*invT))
+O + O -> O2                 []             where(ntot>1e14, 0.0, 4.90e-20*(T32)**1.58)
+O + OH -> O2 + H            []             where(ntot>1e14, 0.0, 4.34e-11*(T32)**(-0.50)*exp(-30*invT))
+H + O2 -> OH + O            []             where(ntot>1e14, 0.0, 3.30e-10*exp(-8460*invT))
+H+ + O2 -> O2+ + H          []             where(ntot>1e14, 0.0, 2.00e-9)
+O2+ + e- -> O + O           []             where(ntot>1e14, 0.0, 1.95e-7*(T32)**(-0.70))
+O + CH -> CO + H            []             where(ntot>1e14, 0.0, 6.60e-11)
+C + OH -> CO + H            []             where(ntot>1e14, 0.0, 1.10e-10*(T32)**0.50)
+C + O2 -> CO + O            []             where(ntot>1e14, 0.0, 3.30e-11)
+C+ + O2 -> O+ + CO          []             where(ntot>1e14, 0.0, 6.20e-10)
+OH + CO -> CO2 + H          []             where(ntot>1e14, 0.0, 1.00e-13)
+C+ + e- -> C                []             where(ntot>1e14, 0.0, 4.40e-12*(T32)**(-0.61))
+C+ + OH -> CO+ + H          []             where(ntot>1e14, 0.0, 7.70e-10)
+CO+ + H -> H+ + CO          []             where(ntot>1e14, 0.0, 7.50e-10)
+C + H -> CH                 []             where(ntot>1e14, 0.0, 1.00e-17)
+C + H2 -> CH + H            []             where(ntot>1e14, 0.0, 6.64e-10*exp(-11700*invT))
+H + CH -> C + H2            []             where(ntot>1e14, 0.0, 4.98e-11)
+H2 + CH -> CH2 + H          []             where(ntot>1e14, 0.0, 2.38e-10*exp(-1760*invT))
+H + CH2 -> CH + H2          []             where(ntot>1e14, 0.0, 2.70e-10)
+H2 + CH2 -> CH3 + H         []             where(ntot>1e14, 0.0, 5.18e-11*(T32)**0.17*exp(-6400*invT))
+H + CH3 -> CH2 + H2         []             where(ntot>1e14, 0.0, 1.00e-10*exp(-7600*invT))
+H2 + CH3 -> CH4 + H         []             where(ntot>1e14, 0.0, 6.86e-14*(T32)**2.74*exp(-4740*invT))
+H + CH4 -> H2 + CH3         []             where(ntot>1e14, 0.0, 5.82e-13*(T32)**3.00*exp(-4045*invT))
+H2 + C -> CH2               []             where(ntot>1e14, 0.0, 1.00e-17)
+H3O+ + e- -> OH + H + H     []             where(ntot>1e14, 0.0, 6.50e-7*(T32)**(-0.50))
+OH+ + e- -> O + H           []             where(ntot>1e14, 0.0, 6.3e-9*(T32)**(-0.48))
+
+O+ + e- -> O                []             auto
+CO+ + e- -> CO              []             auto
+CO+ + e- -> C + O           []             auto
+

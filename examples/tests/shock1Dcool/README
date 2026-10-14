@@ -1,0 +1,37 @@
+!****************SEDOV-LIKE SHOCK 1D LAGRANGIAN TEST***************
+! REFER TO: Bodenheimer P., Laughlin G., Rozyczka M., Yorke H.    
+!           2006, Numerical Methods in Astrophysics:         
+!           An Introduction. Series in Astronomy and Astrophysics, 
+!                             Taylor&Francis 
+! shock + chemistry and cooling (primordial)
+!*******************************************************************
+
+KROME-X port (legacy tests/shock1Dcool)
+- the driver is tests/shock1D (same hydro scheme, initial conditions and
+  outputs, see its README), cooling
+  -cooling=H2,HD,Z,DH and the thermal evolution on (SolverOpts::evolve_T):
+  KROME returns the cooled Tgas, which sets the internal energy.
+- C++ driver (test.cpp, the krome.hpp API; shells 0-based): all the 100
+  shells in ONE solve_cells_x call per hydro step (mass fractions,
+  legacy -useX); SolverOpts::renormalize_x rescales each shell's
+  fractions to their input sum, as the legacy krome() did.
+- shock1D.dat: the legacy final profiles of tests/shock1D (no cooling),
+  plotted against this run's hydro_final.dat by plot.py.
+- cooling: Z (metal lines) is empty for this metal-free network, in legacy
+  too. DH: legacy's cooling_dH also counted He++ + e- -> He+ (an
+  exothermic recombination) as a cooling term of 24.6 eV per event; KROME-X
+  has no thermochemical data for He++ and skips the two He++ reactions
+  (codegen warns). The final profiles are not affected (see below).
+- solver tolerances are the KROME-X defaults (rtol 1e-8, atol 1e-20; legacy
+  1e-4, 1e-20).
+- KROME-X vs legacy (final profiles): radius, density, velocity, pressure and
+  Tgas agree within 0.6 % (the legacy output has 3 digits); H, H2, HD, e-,
+  He, He+ within 3 %; the unshocked ambient H+ is 1.5 % lower in KROME-X, the
+  legacy rtol = 1e-4 integration error (see tests/shock1D/README).
+- 2.0.0: the DH enthalpies are taken at the gas temperature, from the
+  NASA block of that temperature (legacy and v2.0.0-benchmark: every
+  species at 300 K from the upper-range block), and the CODATA 2018
+  constants. Against v2.0.0-benchmark, Tgas moves by < 5.5e-4, the
+  abundances by < 5.3e-3 (D+); the legacy comparison above is that of
+  v2.0.0-benchmark.
+- output files (legacy name): initial.dat (fort.22), hydro.dat (fort.23), chemistry.dat (fort.33), hydro_final.dat (fort.24), chemistry_final.dat (fort.34).

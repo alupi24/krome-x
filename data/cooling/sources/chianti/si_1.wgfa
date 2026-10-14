@@ -1,0 +1,18 @@
+    1    2     1296764.57      5.253e-09      4.928e-06   3s2 3p2 3P0 - 3s2 3p2 3P1
+    1    3      448115.00      3.093e-14      1.443e-10   3s2 3p2 3P0 - 3s2 3p2 3P2
+    2    3      684734.53      1.234e-08      2.451e-05   3s2 3p2 3P1 - 3s2 3p2 3P2
+ -1
+
+Theoretical data from: Tachiev G. I., Froese Fischer C., 2002, A&A, 385, 716,
+ supplemented by data from ATSP2K and Autostructure calculations produced for 
+ Dufresne, R.P., Del Zanna, G., Storey, P.J., 2021, MNRAS, 505, 3968
+
+ Autostructure included level energy corrections based on NIST for all levels
+ except 36. Correcting the last level affected A-values adversely.
+ 
+ Used gf and A values for 36 -> 1,2,3,4,5 from AS because they better match Sandlin et al (1986) observed intensity ratios.
+
+Formatted for the CHIANTI database by R.P. Dufresne on Tue Dec 22 17:33:39 2020
+
+%File processed with wgfa_tidy by pryoung on 15-Oct-2024
+ -1

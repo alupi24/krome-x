@@ -1,0 +1,20 @@
+# Electron-impact ionization cross-section ratios sigma_ei(A)/sigma_ei(H),
+# averaged over 0.1-1 keV electron energies (fits of Lennon et al. 1988),
+# as compiled in Meijerink & Spaans 2005 (A&A 436, 397, eq. D.13).
+# Used to scale the secondary-ionization rate of metal species from the
+# per-H-atom rate, following Quadri et al. 2025 (arXiv:2505.05556, App. B,
+# eq. B.14). The preprocessor reads this table for
+# --secondary-ionization targets that are not fit species (H, H2, He);
+# an explicit X=ratio in the option overrides the table.
+C   3.92
+N   3.22
+O   2.97
+Si  6.67
+S   6.11
+Cl  6.51
+Fe  4.18
+C+  1.06
+N+  1.24
+O+  1.32
+S+  1.97
+Fe+ 2.38

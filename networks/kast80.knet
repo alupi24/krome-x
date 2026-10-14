@@ -1,0 +1,87 @@
+krome_format 1
+# converted from legacy network 'react_kast80' by convert_legacy.py
+
+# legacy shortcut symbols, now ordinary vars:
+var invT     = 1.0/Tgas
+
+#reactions from Kasting&Donahue1980 (planetary atmosphere)
+var T = Tgas
+H2O + O_1D -> OH + OH              []  2.1e-10
+H2 + O_1D -> OH + H                []  1.e-10
+H2 + O -> OH + H                   []  3.e-14*T*exp(-4480*invT)
+H2 + OH -> H2O + H                 []  1.8e-11*exp(-2330*invT)
+H + O3 -> OH + O2                  []  2.6e-11
+H + O2 -> HO2 + M                  []  2.1e-32*exp( 290*invT)
+H + HO2 -> H2 + O2                 []  4.2e-11*exp(-350*invT)
+H + HO2 -> H2O + O                 []  8.3e-11*exp(- 500*invT)
+H + HO2 -> OH + OH                 []  4.2e-10*exp(-950*invT)
+OH + O -> H + O2                   []  4.2e-11
+OH + HO2 -> H2O + O2               []  3.e-11
+OH + O3 -> HO2 + O2                []  1.5e-12*exp(-1000*invT)
+HO2 + O -> OH + O2                 []  3.5e-11
+HO2 + O3 -> OH + O2 + O2           []  1.4e-14*exp(-580*invT)
+HO2 + HO2 -> H2O2 + O2             []  3.e-11*exp(-500*invT)
+H2O2 + OH -> HO2 + H2O             []  1.e-11*exp(-750*invT)
+O + O -> O2 + M                    []  2.76e-34*exp(710*invT)
+O + O2 -> O3 + M                   []  1.058e-34*exp(510*invT)
+O + O3 -> O2 + O2                  []  1.9e-11*exp(-2300*invT)
+H + H -> H2 + M                    []  8.3e-33
+H + OH -> H2O + M                  []  6.1e-26/T**2
+OH + OH -> H2O + O                 []  1.4e-12
+CO + O -> CO2 + M                  []  2.e-37
+# CO + OH -> CO2 + H                 []  6.e-13*(0.25 + 1.82e-20*M)/(1.e0 + 1.82e-20*M)
+N + O2 -> NO + O                   []  1.e-14*T*exp(-3150*invT)
+N + O3 -> NO + O2                  []  5.7e-13
+N + OH -> NO + H                   []  5.3e-11
+N + NO -> N2 + O                   []  2.7e-11
+NO + O3 -> NO2 + O2                []  9.e-13*exp(-1200*invT)
+NO + O -> NO2 + M                  []  4.e-33*exp(940*invT)
+NO + HO2 -> NO2 + OH               []  8.e-12
+NO2 + O -> NO + O2                 []  9.1e-12
+NO2 + OH -> HNO3 + M               []  8.e-12
+HNO3 + OH -> H2O + NO3             []  1.3e-13
+O_1D + N2 -> O_3P + N2             []  3.e-11
+O_1D + O2 -> O_3P + O2             []  4.1e-11
+N2O + O_1D -> NO + NO              []  1.1e-10
+N2O + O_1D -> N2 + O2              []  1.1e-10
+CH4 + OH -> CH3 + H2O              []  2.35e-12*exp(-1710*invT)
+CH4 + O_1D -> CH3 + OH             []  1.3e-10
+CH2_1 + H2 -> CH3 + H              []  7.e-12
+CH2_1 + CH4 -> CH3 + CH3           []  1.9e-12
+CH2_1 + O2 -> H2CO + O             []  3.e-11
+CH2_1 + N2 -> CH2_3 + N2           []  5.e-13
+CH2_3 + H2 -> CH3 + H              []  5.e-14
+CH2_3 + CH4 -> CH3 + CH3           []  5.e-14
+CH2_3 + O2 -> H2CO + O             []  1.5e-12
+# CH3 + H -> CH4                     []  3.3e-10/(1.e0 + 1.e0/2.e-19*M)
+H3CO + O -> H2CO + OH              []  1.3e-10
+CH3 + OH -> H2CO + H2              []  1.e-11
+CH3 + O2 -> CH3O2 + M              []  3.e-32
+CH3O2 + HO2 -> CH3OOH + O2         []  3.e-11*exp(-500*invT)
+H2CO + OH -> H2O + HCO             []  3.e-11*exp(-250*invT)
+HCO + O2 -> HO2 + CO               []  5.e-12
+CH3O2 + HO2 -> CH3OOH + O2         []  3.e-11*exp(-500*invT)
+CH3O2 + CH3O2 -> H3CO + H3CO + O2  []  2.6e-13
+CH3OOH + OH -> CH3O2 + H2O         []  1.e-11*exp(-750*invT)
+CH3O2 + NO -> H3CO + NO2           []  3.e-12*exp(-500*invT)
+H3CO + O2 -> H2CO + HO2            []  1.6e-13*exp(-3300*invT)
+H3CO + O -> H2CO + OH              []  1.e-14
+H3CO + OH -> H2CO + H2O            []  1.5e-10*exp(-250*invT)
+CH3O2 + OH -> CO + H2O + H2O       []  1.5e-10*exp(-500*invT)
+O2 -> O_3P + O_3P                  []  3.5e-7
+O2 -> O_3P + O_1D                  []  6.5e-7
+H2O -> H + OH                      []  4.3e-6
+CO2 -> CO + O_3P                   []  1.8e-9
+CO2 -> CO + O_1D                   []  3.7e-8
+O3 -> O2 + O_3P                    []  3.e-4
+O3 -> O2 + O_1D                    []  5.8e-3
+H2O2 -> OH + OH                    []  5.6e-5
+NO -> N + O                        []  4.6e-6
+NO2 -> NO + O                      []  5.e-3
+HNO3 -> NO2 + OH                   []  6.5e-5
+N2O -> N2 + O                      []  5.5e-7
+CH4 -> CH2_1 + H2                  []  2.e-6
+CH3OOH -> H3CO + OH                []  5.6e-5
+H2CO -> H2 + CO                    []  8.3e-5
+H2CO -> HCO + H                    []  5.7e-5
+HCO -> H + CO                      []  1.4e-4

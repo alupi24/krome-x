@@ -1,0 +1,1306 @@
+###########
+###########
+@photorates:yes
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: H
+@prods: H+, E
+@limits: 1.360d+01, 5.000d+04
+@rate: sigma_v96(energy_ev, 4.298d-01, 5.475d+04, 3.288d+01, 2.963d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96 (same as H)
+@type: photoion
+@reacts: D
+@prods: D+, E
+@limits: 1.360d+01, 5.000d+04
+@rate: sigma_v96(energy_ev, 4.298d-01, 5.475d+04, 3.288d+01, 2.963d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: He
+@prods: He+, E
+@limits: 2.459d+01, 5.000d+04
+@rate: sigma_v96(energy_ev, 1.361d+01, 9.492d+02, 1.469d+00, 3.188d+00, 2.039d+00, 4.434d-01, 2.136d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: He+
+@prods: He++, E
+@limits: 5.442d+01, 5.000d+04
+@rate: sigma_v96(energy_ev, 1.720d+00, 1.369d+04, 3.288d+01, 2.963d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Li
+@prods: Li+, E
+@limits: 5.392d+00, 6.439d+01
+@rate: sigma_v96(energy_ev, 3.107d+00, 6.245d+01, 1.501d+01, 4.895d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Li+
+@prods: Li++, E
+@limits: 7.564d+01, 5.000d+04
+@rate: sigma_v96(energy_ev, 2.006d+01, 3.201d+02, 7.391d+00, 2.916d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Li++
+@prods: Li+++, E
+@limits: 1.225d+02, 5.000d+04
+@rate: sigma_v96(energy_ev, 3.871d+00, 6.083d+03, 3.288d+01, 2.963d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Be
+@prods: Be+, E
+@limits: 9.323d+00, 1.193d+02
+@rate: sigma_v96(energy_ev, 9.539d+00, 2.932d+05, 4.301d-01, 1.052d+01, 3.655d-01, 8.278d-04, 1.269d-02)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Be+
+@prods: Be++, E
+@limits: 1.821d+01, 1.299d+02
+@rate: sigma_v96(energy_ev, 1.181d+00, 2.678d+02, 5.645d+00, 1.170d+01, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Be++
+@prods: Be+++, E
+@limits: 1.539d+02, 5.000d+04
+@rate: sigma_v96(energy_ev, 1.760d+01, 5.458d+02, 1.719d+01, 3.157d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Be+++
+@prods: Be++++, E
+@limits: 2.177d+02, 5.000d+04
+@rate: sigma_v96(energy_ev, 6.879d+00, 3.422d+03, 3.288d+01, 2.963d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: B
+@prods: B+, E
+@limits: 8.298d+00, 1.940d+02
+@rate: sigma_v96(energy_ev, 5.213d-01, 5.466d+00, 8.618d+00, 1.728d+01, 1.887d+01, 1.319d+01, 4.556d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: B+
+@prods: B++, E
+@limits: 2.516d+01, 2.098d+02
+@rate: sigma_v96(energy_ev, 2.869d+00, 1.859d+04, 1.783d+00, 1.618d+01, 3.503d+00, 4.960d-03, 3.400d-02)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: B++
+@prods: B+++, E
+@limits: 3.793d+01, 2.274d+02
+@rate: sigma_v96(energy_ev, 1.041d+00, 5.393d+01, 1.767d+01, 9.540d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: B+++
+@prods: B++++, E
+@limits: 2.594d+02, 5.000d+04
+@rate: sigma_v96(energy_ev, 3.336d+01, 2.846d+02, 2.163d+01, 2.624d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: B++++
+@prods: B+++++, E
+@limits: 3.402d+02, 5.000d+04
+@rate: sigma_v96(energy_ev, 1.075d+01, 2.190d+03, 3.288d+01, 2.963d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: C
+@prods: C+, E
+@limits: 1.126d+01, 2.910d+02
+@rate: sigma_v96(energy_ev, 2.144d+00, 5.027d+02, 6.216d+01, 5.101d+00, 9.157d-02, 1.133d+00, 1.607d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: C+
+@prods: C++, E
+@limits: 2.438d+01, 3.076d+02
+@rate: sigma_v96(energy_ev, 4.058d-01, 8.709d+00, 1.261d+02, 8.578d+00, 2.093d+00, 4.929d+01, 3.234d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: C++
+@prods: C+++, E
+@limits: 4.789d+01, 3.289d+02
+@rate: sigma_v96(energy_ev, 4.614d+00, 1.539d+04, 1.737d+00, 1.593d+01, 5.922d+00, 4.378d-03, 2.528d-02)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: C+++
+@prods: C++++, E
+@limits: 6.449d+01, 3.522d+02
+@rate: sigma_v96(energy_ev, 3.506d+00, 1.068d+02, 1.436d+01, 7.457d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: C++++
+@prods: C+++++, E
+@limits: 3.921d+02, 5.000d+04
+@rate: sigma_v96(energy_ev, 4.624d+01, 2.344d+02, 2.183d+01, 2.581d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: C+++++
+@prods: C++++++, E
+@limits: 4.900d+02, 5.000d+04
+@rate: sigma_v96(energy_ev, 1.548d+01, 1.521d+03, 3.288d+01, 2.963d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: N
+@prods: N+, E
+@limits: 1.453d+01, 4.048d+02
+@rate: sigma_v96(energy_ev, 4.034d+00, 8.235d+02, 8.033d+01, 3.928d+00, 9.097d-02, 8.598d-01, 2.325d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: N+
+@prods: N++, E
+@limits: 2.960d+01, 4.236d+02
+@rate: sigma_v96(energy_ev, 6.128d-02, 1.944d+00, 8.163d+02, 8.773d+00, 1.043d+01, 4.280d+02, 2.030d+01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: N++
+@prods: N+++, E
+@limits: 4.745d+01, 4.473d+02
+@rate: sigma_v96(energy_ev, 2.420d-01, 9.375d-01, 2.788d+02, 9.156d+00, 1.850d+00, 1.877d+02, 3.999d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: N+++
+@prods: N++++, E
+@limits: 7.747d+01, 4.753d+02
+@rate: sigma_v96(energy_ev, 5.494d+00, 1.690d+04, 1.714d+00, 1.706d+01, 7.904d+00, 6.415d-03, 1.937d-02)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: N++++
+@prods: N+++++, E
+@limits: 9.789d+01, 5.043d+02
+@rate: sigma_v96(energy_ev, 4.471d+00, 8.376d+01, 3.297d+01, 6.003d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: N+++++
+@prods: N++++++, E
+@limits: 5.521d+02, 5.000d+04
+@rate: sigma_v96(energy_ev, 6.943d+01, 1.519d+02, 2.627d+01, 2.315d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: N++++++
+@prods: N+++++++, E
+@limits: 6.671d+02, 5.000d+04
+@rate: sigma_v96(energy_ev, 2.108d+01, 1.117d+03, 3.288d+01, 2.963d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: O
+@prods: O+, E
+@limits: 1.362d+01, 5.380d+02
+@rate: sigma_v96(energy_ev, 1.240d+00, 1.745d+03, 3.784d+00, 1.764d+01, 7.589d-02, 8.698d+00, 1.271d-01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: O+
+@prods: O++, E
+@limits: 3.512d+01, 5.581d+02
+@rate: sigma_v96(energy_ev, 1.386d+00, 5.967d+01, 3.175d+01, 8.943d+00, 1.934d-02, 2.131d+01, 1.503d-02)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: O++
+@prods: O+++, E
+@limits: 5.494d+01, 5.840d+02
+@rate: sigma_v96(energy_ev, 1.723d-01, 6.753d+02, 3.852d+02, 6.822d+00, 1.191d-01, 3.839d-03, 4.569d-01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: O+++
+@prods: O++++, E
+@limits: 7.741d+01, 6.144d+02
+@rate: sigma_v96(energy_ev, 2.044d-01, 8.659d-01, 4.931d+02, 8.785d+00, 3.143d+00, 3.328d+02, 4.285d+01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: O++++
+@prods: O+++++, E
+@limits: 1.139d+02, 6.491d+02
+@rate: sigma_v96(energy_ev, 2.854d+00, 1.642d+04, 1.792d+00, 2.647d+01, 2.836d+01, 3.036d-02, 5.554d-02)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: O+++++
+@prods: O++++++, E
+@limits: 1.381d+02, 6.837d+02
+@rate: sigma_v96(energy_ev, 7.824d+00, 6.864d+01, 3.210d+01, 5.495d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: O++++++
+@prods: O+++++++, E
+@limits: 7.393d+02, 5.000d+04
+@rate: sigma_v96(energy_ev, 8.709d+01, 1.329d+02, 2.535d+01, 2.336d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: O+++++++
+@prods: O++++++++, E
+@limits: 8.714d+02, 5.000d+04
+@rate: sigma_v96(energy_ev, 2.754d+01, 8.554d+02, 3.288d+01, 2.963d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: F
+@prods: F+, E
+@limits: 1.742d+01, 6.940d+02
+@rate: sigma_v96(energy_ev, 1.297d+01, 3.803d+03, 2.587d+00, 7.275d+00, 2.170d-03, 1.701d-04, 1.345d-02)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: F+
+@prods: F++, E
+@limits: 3.497d+01, 7.122d+02
+@rate: sigma_v96(energy_ev, 1.763d+00, 8.013d+01, 1.667d+01, 1.050d+01, 5.103d-01, 1.715d+01, 7.724d-01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: F++
+@prods: F+++, E
+@limits: 6.271d+01, 7.392d+02
+@rate: sigma_v96(energy_ev, 2.542d+00, 1.541d+02, 5.742d+01, 6.614d+00, 1.115d+00, 1.641d+01, 5.124d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: F+++
+@prods: F++++, E
+@limits: 8.714d+01, 7.709d+02
+@rate: sigma_v96(energy_ev, 7.744d-01, 3.165d+00, 1.099d+02, 9.203d+00, 6.812d+00, 9.531d+01, 9.781d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: F++++
+@prods: F+++++, E
+@limits: 1.142d+02, 8.091d+02
+@rate: sigma_v96(energy_ev, 7.286d-01, 4.690d-01, 1.400d+02, 9.718d+00, 2.570d-01, 1.506d+02, 2.574d-01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: F+++++
+@prods: F++++++, E
+@limits: 1.572d+02, 8.502d+02
+@rate: sigma_v96(energy_ev, 4.008d+00, 1.157d+04, 1.848d+00, 2.446d+01, 2.411d+01, 2.071d-02, 3.998d-02)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: F++++++
+@prods: F+++++++, E
+@limits: 1.852d+02, 8.905d+02
+@rate: sigma_v96(energy_ev, 2.563d+00, 6.930d+01, 7.547d+01, 6.448d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: F+++++++
+@prods: F++++++++, E
+@limits: 9.539d+02, 5.000d+04
+@rate: sigma_v96(energy_ev, 1.131d+02, 1.039d+02, 2.657d+01, 2.255d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: F++++++++
+@prods: F+++++++++, E
+@limits: 1.103d+03, 5.000d+04
+@rate: sigma_v96(energy_ev, 3.485d+01, 6.759d+02, 3.288d+01, 2.963d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ne
+@prods: Ne+, E
+@limits: 2.156d+01, 8.701d+02
+@rate: sigma_v96(energy_ev, 4.870d+00, 4.287d+03, 5.798d+00, 8.355d+00, 2.434d-01, 4.236d-02, 5.873d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ne+
+@prods: Ne++, E
+@limits: 4.096d+01, 8.831d+02
+@rate: sigma_v96(energy_ev, 1.247d+01, 1.583d+03, 3.935d+00, 7.810d+00, 6.558d-02, 1.520d+00, 1.084d-01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ne++
+@prods: Ne+++, E
+@limits: 6.346d+01, 9.131d+02
+@rate: sigma_v96(energy_ev, 7.753d-01, 5.708d+00, 6.725d+01, 1.005d+01, 4.633d-01, 7.654d+01, 2.023d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ne+++
+@prods: Ne++++, E
+@limits: 9.712d+01, 9.480d+02
+@rate: sigma_v96(energy_ev, 5.566d+00, 1.685d+03, 6.409d+02, 3.056d+00, 8.290d-03, 5.149d+00, 6.687d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ne++++
+@prods: Ne+++++, E
+@limits: 1.262d+02, 9.873d+02
+@rate: sigma_v96(energy_ev, 1.248d+00, 2.430d+00, 1.066d+02, 8.999d+00, 6.855d-01, 9.169d+01, 3.702d-01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ne+++++
+@prods: Ne++++++, E
+@limits: 1.579d+02, 1.031d+03
+@rate: sigma_v96(energy_ev, 1.499d+00, 9.854d-01, 1.350d+02, 8.836d+00, 1.656d+00, 1.042d+02, 1.435d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ne++++++
+@prods: Ne+++++++, E
+@limits: 2.073d+02, 1.078d+03
+@rate: sigma_v96(energy_ev, 4.888d+00, 1.198d+04, 1.788d+00, 2.550d+01, 2.811d+01, 2.536d-02, 4.417d-02)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ne+++++++
+@prods: Ne++++++++, E
+@limits: 2.391d+02, 1.125d+03
+@rate: sigma_v96(energy_ev, 1.003d+01, 5.631d+01, 3.628d+01, 5.585d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ne++++++++
+@prods: Ne+++++++++, E
+@limits: 1.196d+03, 5.000d+04
+@rate: sigma_v96(energy_ev, 1.586d+02, 6.695d+01, 3.352d+01, 2.002d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ne+++++++++
+@prods: Ne++++++++++, E
+@limits: 1.362d+03, 5.000d+04
+@rate: sigma_v96(energy_ev, 4.304d+01, 5.475d+02, 3.288d+01, 2.963d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Na
+@prods: Na+, E
+@limits: 5.139d+00, 3.814d+01
+@rate: sigma_v96(energy_ev, 6.139d+00, 1.601d+00, 6.148d+03, 3.839d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Na+
+@prods: Na++, E
+@limits: 4.729d+01, 1.074d+03
+@rate: sigma_v96(energy_ev, 8.203d+00, 1.040d+03, 8.259d+00, 7.362d+00, 2.328d+00, 3.375d+00, 4.010d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Na++
+@prods: Na+++, E
+@limits: 7.162d+01, 1.110d+03
+@rate: sigma_v96(energy_ev, 1.069d+01, 1.885d+03, 3.613d+00, 9.803d+00, 8.579d-02, 3.725d+00, 2.279d-01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Na+++
+@prods: Na++++, E
+@limits: 9.892d+01, 1.143d+03
+@rate: sigma_v96(energy_ev, 6.690d-01, 2.330d+00, 1.205d+02, 9.714d+00, 7.365d-01, 1.383d+02, 4.260d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Na++++
+@prods: Na+++++, E
+@limits: 1.384d+02, 1.185d+03
+@rate: sigma_v96(energy_ev, 5.408d+00, 2.346d+01, 2.913d+01, 8.260d+00, 9.275d-01, 2.204d+01, 7.577d-01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Na+++++
+@prods: Na++++++, E
+@limits: 1.722d+02, 1.230d+03
+@rate: sigma_v96(energy_ev, 4.846d+01, 7.101d+01, 3.945d+01, 2.832d+00, 1.285d-02, 9.603d-04, 6.378d-03)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Na++++++
+@prods: Na+++++++, E
+@limits: 2.085d+02, 1.281d+03
+@rate: sigma_v96(energy_ev, 2.096d+00, 1.609d+00, 2.473d+02, 7.681d+00, 1.895d+00, 9.940d+01, 3.278d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Na+++++++
+@prods: Na++++++++, E
+@limits: 2.642d+02, 1.335d+03
+@rate: sigma_v96(energy_ev, 1.535d+02, 7.215d+03, 3.886d-01, 8.476d+00, 9.121d-01, 1.667d-01, 1.766d-02)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Na++++++++
+@prods: Na+++++++++, E
+@limits: 2.999d+02, 1.386d+03
+@rate: sigma_v96(energy_ev, 1.391d+01, 4.729d+01, 3.889d+01, 5.265d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Na+++++++++
+@prods: Na++++++++++, E
+@limits: 1.465d+03, 5.000d+04
+@rate: sigma_v96(energy_ev, 2.268d+02, 3.995d+01, 5.315d+01, 1.678d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Na++++++++++
+@prods: Na+++++++++++, E
+@limits: 1.649d+03, 5.000d+04
+@rate: sigma_v96(energy_ev, 5.211d+01, 4.525d+02, 3.288d+01, 2.963d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Mg
+@prods: Mg+, E
+@limits: 7.646d+00, 5.490d+01
+@rate: sigma_v96(energy_ev, 1.197d+01, 1.372d+08, 2.228d-01, 1.574d+01, 2.805d-01, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Mg+
+@prods: Mg++, E
+@limits: 1.504d+01, 6.569d+01
+@rate: sigma_v96(energy_ev, 8.139d+00, 3.278d+00, 4.341d+07, 3.610d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Mg++
+@prods: Mg+++, E
+@limits: 8.014d+01, 1.317d+03
+@rate: sigma_v96(energy_ev, 1.086d+01, 5.377d+02, 9.779d+00, 7.117d+00, 2.604d+00, 4.860d+00, 3.722d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Mg+++
+@prods: Mg++++, E
+@limits: 1.093d+02, 1.356d+03
+@rate: sigma_v96(energy_ev, 2.912d+01, 1.394d+03, 2.895d+00, 6.487d+00, 4.326d-02, 9.402d-01, 1.135d-01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Mg++++
+@prods: Mg+++++, E
+@limits: 1.413d+02, 1.400d+03
+@rate: sigma_v96(energy_ev, 9.762d-01, 1.728d+00, 9.184d+01, 1.006d+01, 8.090d-01, 1.276d+02, 3.979d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Mg+++++
+@prods: Mg++++++, E
+@limits: 1.865d+02, 1.449d+03
+@rate: sigma_v96(energy_ev, 1.711d+00, 2.185d+00, 9.350d+01, 9.202d+00, 6.325d-01, 1.007d+02, 1.729d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Mg++++++
+@prods: Mg+++++++, E
+@limits: 2.249d+02, 1.501d+03
+@rate: sigma_v96(energy_ev, 3.570d+00, 3.104d+00, 6.060d+01, 8.857d+00, 1.422d+00, 5.452d+01, 2.078d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Mg+++++++
+@prods: Mg++++++++, E
+@limits: 2.660d+02, 1.558d+03
+@rate: sigma_v96(energy_ev, 4.884d-01, 6.344d-02, 5.085d+02, 9.385d+00, 6.666d-01, 5.348d+02, 3.997d-03)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Mg++++++++
+@prods: Mg+++++++++, E
+@limits: 3.282d+02, 1.618d+03
+@rate: sigma_v96(energy_ev, 3.482d+01, 9.008d+02, 1.823d+00, 1.444d+01, 2.751d+00, 5.444d+00, 7.918d-02)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Mg+++++++++
+@prods: Mg++++++++++, E
+@limits: 3.675d+02, 1.675d+03
+@rate: sigma_v96(energy_ev, 1.452d+01, 4.427d+01, 3.826d+01, 5.460d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Mg++++++++++
+@prods: Mg+++++++++++, E
+@limits: 1.762d+03, 5.000d+04
+@rate: sigma_v96(energy_ev, 2.042d+02, 6.140d+01, 2.778d+01, 2.161d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Mg+++++++++++
+@prods: Mg++++++++++++, E
+@limits: 1.963d+03, 5.000d+04
+@rate: sigma_v96(energy_ev, 6.203d+01, 3.802d+02, 3.288d+01, 2.963d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Al
+@prods: Al+, E
+@limits: 5.986d+00, 8.040d+01
+@rate: sigma_v96(energy_ev, 1.381d+01, 7.195d+00, 1.621d+03, 3.642d+00, 3.166d-01, 2.041d-01, 4.753d-01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Al+
+@prods: Al++, E
+@limits: 1.883d+01, 8.997d+01
+@rate: sigma_v96(energy_ev, 2.048d-01, 6.948d-02, 5.675d+02, 9.049d+00, 4.615d-01, 9.149d+01, 6.565d-01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Al++
+@prods: Al+++, E
+@limits: 2.845d+01, 1.026d+02
+@rate: sigma_v96(energy_ev, 1.027d+01, 4.915d+00, 1.990d+06, 3.477d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Al+++
+@prods: Al++++, E
+@limits: 1.200d+02, 1.588d+03
+@rate: sigma_v96(energy_ev, 3.130d+00, 1.513d+01, 1.674d+01, 1.180d+01, 5.342d+00, 3.994d+01, 4.803d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Al++++
+@prods: Al+++++, E
+@limits: 1.538d+02, 1.634d+03
+@rate: sigma_v96(energy_ev, 2.414d+01, 2.925d+02, 6.973d+00, 6.724d+00, 1.000d-01, 3.495d+00, 2.701d-01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Al+++++
+@prods: Al++++++, E
+@limits: 1.905d+02, 1.688d+03
+@rate: sigma_v96(energy_ev, 3.483d-01, 1.962d-02, 1.856d+01, 2.084d+01, 8.839d+00, 5.675d-02, 2.768d-01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Al++++++
+@prods: Al+++++++, E
+@limits: 2.414d+02, 1.739d+03
+@rate: sigma_v96(energy_ev, 2.636d+00, 1.889d+02, 1.338d+02, 6.204d+00, 1.836d+00, 3.552d+01, 8.223d-03)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Al+++++++
+@prods: Al++++++++, E
+@limits: 2.846d+02, 1.799d+03
+@rate: sigma_v96(energy_ev, 4.866d-01, 2.350d-01, 7.216d+02, 8.659d+00, 2.773d-01, 5.704d+02, 1.580d-01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Al++++++++
+@prods: Al+++++++++, E
+@limits: 3.301d+02, 1.862d+03
+@rate: sigma_v96(energy_ev, 1.842d+00, 4.982d-01, 2.568d+02, 8.406d+00, 6.945d-01, 1.719d+02, 6.595d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Al+++++++++
+@prods: Al++++++++++, E
+@limits: 3.994d+02, 1.929d+03
+@rate: sigma_v96(energy_ev, 8.044d+00, 1.774d+04, 1.653d+00, 2.655d+01, 2.953d+01, 2.538d-02, 1.203d-02)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Al++++++++++
+@prods: Al+++++++++++, E
+@limits: 4.421d+02, 1.992d+03
+@rate: sigma_v96(energy_ev, 2.355d+01, 3.388d+01, 3.432d+01, 5.085d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Al+++++++++++
+@prods: Al++++++++++++, E
+@limits: 2.086d+03, 5.000d+04
+@rate: sigma_v96(energy_ev, 2.738d+02, 4.036d+01, 3.567d+01, 1.915d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Al++++++++++++
+@prods: Al+++++++++++++, E
+@limits: 2.304d+03, 5.000d+04
+@rate: sigma_v96(energy_ev, 7.281d+01, 3.239d+02, 3.288d+01, 2.963d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Si
+@prods: Si+, E
+@limits: 8.152d+00, 1.060d+02
+@rate: sigma_v96(energy_ev, 2.317d+01, 2.506d+01, 2.057d+01, 3.546d+00, 2.837d-01, 1.672d-05, 4.207d-01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Si+
+@prods: Si++, E
+@limits: 1.635d+01, 1.186d+02
+@rate: sigma_v96(energy_ev, 2.556d+00, 4.140d+00, 1.337d+01, 1.191d+01, 1.570d+00, 6.634d+00, 1.272d-01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Si++
+@prods: Si+++, E
+@limits: 3.349d+01, 1.311d+02
+@rate: sigma_v96(energy_ev, 1.659d-01, 5.790d-04, 1.474d+02, 1.336d+01, 8.626d-01, 9.613d+01, 6.442d-01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Si+++
+@prods: Si++++, E
+@limits: 4.514d+01, 1.466d+02
+@rate: sigma_v96(energy_ev, 1.288d+01, 6.083d+00, 1.356d+06, 3.353d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Si++++
+@prods: Si+++++, E
+@limits: 1.668d+02, 1.887d+03
+@rate: sigma_v96(energy_ev, 7.761d-01, 8.863d-01, 1.541d+02, 9.980d+00, 1.303d+00, 2.009d+02, 4.537d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Si+++++
+@prods: Si++++++, E
+@limits: 2.051d+02, 1.946d+03
+@rate: sigma_v96(energy_ev, 6.305d+01, 7.293d+01, 1.558d+02, 2.400d+00, 2.989d-03, 1.115d+00, 8.051d-02)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Si++++++
+@prods: Si+++++++, E
+@limits: 2.465d+02, 2.001d+03
+@rate: sigma_v96(energy_ev, 3.277d-01, 6.680d-02, 4.132d+01, 1.606d+01, 3.280d+00, 1.149d-02, 6.396d-01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Si+++++++
+@prods: Si++++++++, E
+@limits: 3.032d+02, 2.058d+03
+@rate: sigma_v96(energy_ev, 7.655d-01, 3.477d-01, 3.733d+02, 8.986d+00, 1.476d-03, 3.850d+02, 8.999d-02)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Si++++++++
+@prods: Si+++++++++, E
+@limits: 3.511d+02, 2.125d+03
+@rate: sigma_v96(energy_ev, 3.343d-01, 1.465d-01, 1.404d+03, 8.503d+00, 1.646d+00, 1.036d+03, 2.936d-01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Si+++++++++
+@prods: Si++++++++++, E
+@limits: 4.014d+02, 2.194d+03
+@rate: sigma_v96(energy_ev, 8.787d-01, 1.950d-01, 7.461d+02, 8.302d+00, 4.489d-01, 4.528d+02, 1.015d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Si++++++++++
+@prods: Si+++++++++++, E
+@limits: 4.761d+02, 2.268d+03
+@rate: sigma_v96(energy_ev, 1.205d+01, 1.992d+04, 1.582d+00, 2.425d+01, 2.392d+01, 1.990d-02, 1.007d-02)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Si+++++++++++
+@prods: Si++++++++++++, E
+@limits: 5.235d+02, 2.336d+03
+@rate: sigma_v96(energy_ev, 3.560d+01, 2.539d+01, 3.307d+01, 4.728d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Si++++++++++++
+@prods: Si+++++++++++++, E
+@limits: 2.438d+03, 5.000d+04
+@rate: sigma_v96(energy_ev, 2.752d+02, 4.754d+01, 2.848d+01, 2.135d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Si+++++++++++++
+@prods: Si++++++++++++++, E
+@limits: 2.673d+03, 5.000d+04
+@rate: sigma_v96(energy_ev, 8.447d+01, 2.793d+02, 3.288d+01, 2.963d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: S
+@prods: S+, E
+@limits: 1.036d+01, 1.700d+02
+@rate: sigma_v96(energy_ev, 1.808d+01, 4.564d+04, 1.000d+00, 1.361d+01, 6.385d-01, 9.935d-01, 2.486d-01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: S+
+@prods: S++, E
+@limits: 2.333d+01, 1.846d+02
+@rate: sigma_v96(energy_ev, 8.787d+00, 3.136d+02, 3.442d+00, 1.281d+01, 7.354d-01, 2.782d+00, 1.788d-01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: S++
+@prods: S+++, E
+@limits: 3.483d+01, 1.995d+02
+@rate: sigma_v96(energy_ev, 2.027d+00, 6.666d+00, 5.454d+01, 8.611d+00, 4.109d+00, 1.568d+01, 9.421d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: S+++
+@prods: S++++, E
+@limits: 4.731d+01, 2.164d+02
+@rate: sigma_v96(energy_ev, 2.173d+00, 2.606d+00, 6.641d+01, 8.655d+00, 1.863d+00, 1.975d+01, 3.361d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: S++++
+@prods: S+++++, E
+@limits: 7.268d+01, 2.350d+02
+@rate: sigma_v96(energy_ev, 1.713d-01, 5.072d-04, 1.986d+02, 1.307d+01, 7.880d-01, 9.424d+01, 6.265d-01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: S+++++
+@prods: S++++++, E
+@limits: 8.805d+01, 2.557d+02
+@rate: sigma_v96(energy_ev, 1.413d+01, 9.139d+00, 1.656d+03, 3.626d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: S++++++
+@prods: S+++++++, E
+@limits: 2.809d+02, 2.569d+03
+@rate: sigma_v96(energy_ev, 3.757d-01, 5.703d-01, 1.460d+02, 1.135d+01, 1.503d+00, 2.222d+02, 4.606d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: S+++++++
+@prods: S++++++++, E
+@limits: 3.282d+02, 2.641d+03
+@rate: sigma_v96(energy_ev, 1.462d+01, 3.161d+01, 1.611d+01, 8.642d+00, 1.153d-03, 1.869d+01, 3.037d-01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: S++++++++
+@prods: S+++++++++, E
+@limits: 3.791d+02, 2.705d+03
+@rate: sigma_v96(energy_ev, 1.526d-01, 9.646d+03, 1.438d+03, 5.977d+00, 1.492d+00, 1.615d-03, 4.049d-01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: S+++++++++
+@prods: S++++++++++, E
+@limits: 4.471d+02, 2.782d+03
+@rate: sigma_v96(energy_ev, 1.040d+01, 5.364d+01, 3.641d+01, 7.090d+00, 2.310d+00, 1.775d+01, 1.663d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: S++++++++++
+@prods: S+++++++++++, E
+@limits: 5.048d+02, 2.859d+03
+@rate: sigma_v96(energy_ev, 6.485d+00, 1.275d+01, 6.583d+01, 7.692d+00, 1.678d+00, 3.426d+01, 1.370d-01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: S+++++++++++
+@prods: S++++++++++++, E
+@limits: 5.647d+02, 2.941d+03
+@rate: sigma_v96(energy_ev, 2.443d+00, 3.490d-01, 5.411d+02, 7.769d+00, 7.033d-01, 2.279d+02, 1.172d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: S++++++++++++
+@prods: S+++++++++++++, E
+@limits: 6.517d+02, 3.029d+03
+@rate: sigma_v96(energy_ev, 1.474d+01, 2.294d+04, 1.529d+00, 2.568d+01, 2.738d+01, 2.203d-02, 1.073d-02)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: S+++++++++++++
+@prods: S++++++++++++++, E
+@limits: 7.072d+02, 3.107d+03
+@rate: sigma_v96(energy_ev, 3.310d+01, 2.555d+01, 3.821d+01, 5.037d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: S++++++++++++++
+@prods: S+++++++++++++++, E
+@limits: 3.224d+03, 5.000d+04
+@rate: sigma_v96(energy_ev, 4.390d+02, 2.453d+01, 4.405d+01, 1.765d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: S+++++++++++++++
+@prods: S++++++++++++++++, E
+@limits: 3.494d+03, 5.000d+04
+@rate: sigma_v96(energy_ev, 1.104d+02, 2.139d+02, 3.288d+01, 2.963d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ar
+@prods: Ar+, E
+@limits: 1.576d+01, 2.492d+02
+@rate: sigma_v96(energy_ev, 1.709d+01, 2.106d+01, 2.645d+02, 4.796d+00, 4.185d-01, 1.688d+00, 8.943d-01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ar+
+@prods: Ar++, E
+@limits: 2.763d+01, 2.662d+02
+@rate: sigma_v96(energy_ev, 2.494d+01, 2.503d+01, 1.272d+02, 4.288d+00, 5.108d-01, 9.299d-01, 7.195d-01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ar++
+@prods: Ar+++, E
+@limits: 4.074d+01, 2.801d+02
+@rate: sigma_v96(energy_ev, 1.417d+01, 3.580d+01, 3.776d+01, 5.742d+00, 6.316d-01, 2.384d+00, 1.794d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ar+++
+@prods: Ar++++, E
+@limits: 5.981d+01, 2.987d+02
+@rate: sigma_v96(energy_ev, 6.953d+00, 2.035d+01, 1.400d+01, 9.595d+00, 8.842d-01, 7.501d+00, 1.806d-01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ar++++
+@prods: Ar+++++, E
+@limits: 7.502d+01, 3.200d+02
+@rate: sigma_v96(energy_ev, 1.031d+01, 9.946d+00, 7.444d+01, 6.261d+00, 4.885d-01, 6.406d+00, 3.659d-03)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ar+++++
+@prods: Ar++++++, E
+@limits: 9.101d+01, 3.426d+02
+@rate: sigma_v96(energy_ev, 5.440d-01, 1.080d+00, 9.419d+02, 7.582d+00, 1.107d+01, 1.700d+02, 1.587d+01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ar++++++
+@prods: Ar+++++++, E
+@limits: 1.243d+02, 3.667d+02
+@rate: sigma_v96(energy_ev, 2.966d-02, 3.693d+00, 9.951d+03, 7.313d+00, 1.363d-02, 4.383d-04, 2.513d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ar+++++++
+@prods: Ar++++++++, E
+@limits: 1.435d+02, 3.925d+02
+@rate: sigma_v96(energy_ev, 3.884d+00, 3.295d+01, 7.082d+02, 4.645d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ar++++++++
+@prods: Ar+++++++++, E
+@limits: 4.225d+02, 3.361d+03
+@rate: sigma_v96(energy_ev, 1.926d-01, 8.279d-01, 2.392d+02, 1.121d+01, 1.434d+00, 3.814d+01, 4.649d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ar+++++++++
+@prods: Ar++++++++++, E
+@limits: 4.787d+02, 3.446d+03
+@rate: sigma_v96(energy_ev, 1.040d+01, 8.204d+00, 1.495d+01, 1.115d+01, 9.203d-04, 3.804d+01, 6.390d-01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ar++++++++++
+@prods: Ar+++++++++++, E
+@limits: 5.390d+02, 3.523d+03
+@rate: sigma_v96(energy_ev, 1.257d-01, 1.760d+03, 1.579d+03, 6.714d+00, 1.975d+00, 3.286d-03, 3.226d-01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ar+++++++++++
+@prods: Ar++++++++++++, E
+@limits: 6.183d+02, 3.613d+03
+@rate: sigma_v96(energy_ev, 5.310d+00, 7.018d-01, 1.001d+02, 8.939d+00, 4.987d-01, 1.099d+02, 2.202d-01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ar++++++++++++
+@prods: Ar+++++++++++++, E
+@limits: 6.861d+02, 3.702d+03
+@rate: sigma_v96(energy_ev, 3.209d-01, 2.459d-02, 2.285d+03, 8.810d+00, 6.692d-01, 2.068d+03, 2.113d+01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ar+++++++++++++
+@prods: Ar++++++++++++++, E
+@limits: 7.558d+02, 3.798d+03
+@rate: sigma_v96(energy_ev, 1.557d+00, 4.997d-02, 5.031d+02, 8.966d+00, 2.938d-01, 4.552d+02, 6.459d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ar++++++++++++++
+@prods: Ar+++++++++++++++, E
+@limits: 8.548d+02, 3.898d+03
+@rate: sigma_v96(energy_ev, 1.888d+01, 2.571d+04, 1.475d+00, 2.634d+01, 2.909d+01, 2.445d-02, 1.054d-02)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ar+++++++++++++++
+@prods: Ar++++++++++++++++, E
+@limits: 9.180d+02, 3.988d+03
+@rate: sigma_v96(energy_ev, 4.154d+01, 2.135d+01, 4.118d+01, 4.945d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ar++++++++++++++++
+@prods: Ar+++++++++++++++++, E
+@limits: 4.121d+03, 5.000d+04
+@rate: sigma_v96(energy_ev, 4.468d+02, 3.108d+01, 3.039d+01, 2.092d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ar+++++++++++++++++
+@prods: Ar++++++++++++++++++, E
+@limits: 4.426d+03, 5.000d+04
+@rate: sigma_v96(energy_ev, 1.399d+02, 1.690d+02, 3.288d+01, 2.963d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ca
+@prods: Ca+, E
+@limits: 6.113d+00, 3.443d+01
+@rate: sigma_v96(energy_ev, 1.278d+01, 5.370d+05, 3.162d-01, 1.242d+01, 4.477d-01, 1.012d-03, 1.851d-02)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ca+
+@prods: Ca++, E
+@limits: 1.187d+01, 4.090d+01
+@rate: sigma_v96(energy_ev, 1.553d+01, 1.064d+07, 7.790d-01, 2.130d+01, 6.453d-01, 2.161d-03, 6.706d-02)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ca++
+@prods: Ca+++, E
+@limits: 5.091d+01, 3.731d+02
+@rate: sigma_v96(energy_ev, 2.436d+01, 3.815d+01, 2.931d+02, 3.944d+00, 3.126d-01, 1.802d+00, 1.233d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ca+++
+@prods: Ca++++, E
+@limits: 6.727d+01, 3.944d+02
+@rate: sigma_v96(energy_ev, 4.255d+00, 7.736d+00, 1.355d+01, 1.236d+01, 1.369d+00, 1.467d+01, 3.298d-02)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ca++++
+@prods: Ca+++++, E
+@limits: 8.451d+01, 4.175d+02
+@rate: sigma_v96(energy_ev, 6.882d-01, 1.523d-01, 1.502d+02, 1.061d+01, 8.227d+00, 1.210d+02, 3.876d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ca+++++
+@prods: Ca++++++, E
+@limits: 1.088d+02, 4.423d+02
+@rate: sigma_v96(energy_ev, 9.515d+00, 7.642d+01, 8.973d+01, 5.141d+00, 2.471d+00, 4.829d+00, 5.824d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ca++++++
+@prods: Ca+++++++, E
+@limits: 1.272d+02, 4.687d+02
+@rate: sigma_v96(energy_ev, 8.080d-01, 4.760d-01, 3.682d+02, 8.634d+00, 5.720d-01, 1.487d+02, 1.283d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ca+++++++
+@prods: Ca++++++++, E
+@limits: 1.472d+02, 4.967d+02
+@rate: sigma_v96(energy_ev, 1.366d+00, 6.641d-01, 3.188d+02, 8.138d+00, 2.806d-01, 1.039d+02, 3.329d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ca++++++++
+@prods: Ca+++++++++, E
+@limits: 1.883d+02, 5.270d+02
+@rate: sigma_v96(energy_ev, 5.520d-02, 2.076d+02, 1.790d+04, 5.893d+00, 1.843d-03, 2.826d-04, 1.657d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ca+++++++++
+@prods: Ca++++++++++, E
+@limits: 2.113d+02, 5.569d+02
+@rate: sigma_v96(energy_ev, 1.605d+01, 1.437d+01, 6.989d+02, 3.857d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ca++++++++++
+@prods: Ca+++++++++++, E
+@limits: 5.919d+02, 4.265d+03
+@rate: sigma_v96(energy_ev, 2.288d-01, 9.384d-01, 2.549d+02, 1.103d+01, 1.390d+00, 2.478d+01, 3.100d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ca+++++++++++
+@prods: Ca++++++++++++, E
+@limits: 6.572d+02, 4.362d+03
+@rate: sigma_v96(energy_ev, 2.345d+01, 1.227d+01, 1.312d+01, 9.771d+00, 6.842d-04, 2.417d+01, 5.469d-01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ca++++++++++++
+@prods: Ca+++++++++++++, E
+@limits: 7.267d+02, 4.453d+03
+@rate: sigma_v96(energy_ev, 1.008d+01, 1.849d+03, 1.792d+04, 2.868d+00, 2.410d+02, 6.138d-03, 6.931d+01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ca+++++++++++++
+@prods: Ca++++++++++++++, E
+@limits: 8.177d+02, 4.555d+03
+@rate: sigma_v96(energy_ev, 9.980d+00, 1.116d+00, 5.918d+01, 9.005d+00, 3.879d+00, 7.104d+01, 5.311d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ca++++++++++++++
+@prods: Ca+++++++++++++++, E
+@limits: 8.946d+02, 4.659d+03
+@rate: sigma_v96(energy_ev, 1.309d+02, 5.513d+01, 3.828d+02, 2.023d+00, 9.084d-02, 1.833d-02, 9.359d-01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ca+++++++++++++++
+@prods: Ca++++++++++++++++, E
+@limits: 9.745d+02, 4.767d+03
+@rate: sigma_v96(energy_ev, 4.293d+00, 1.293d+00, 1.691d+01, 1.438d+01, 3.461d-05, 9.363d-01, 4.589d-02)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ca++++++++++++++++
+@prods: Ca+++++++++++++++++, E
+@limits: 1.087d+03, 4.880d+03
+@rate: sigma_v96(energy_ev, 2.618d+01, 2.028d+04, 1.456d+00, 2.560d+01, 2.803d+01, 2.402d-02, 9.323d-03)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ca+++++++++++++++++
+@prods: Ca++++++++++++++++++, E
+@limits: 1.157d+03, 4.982d+03
+@rate: sigma_v96(energy_ev, 9.472d+01, 1.105d+01, 3.818d+01, 4.192d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ca++++++++++++++++++
+@prods: Ca+++++++++++++++++++, E
+@limits: 5.129d+03, 5.000d+04
+@rate: sigma_v96(energy_ev, 6.297d+02, 1.936d+01, 3.921d+01, 1.862d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Ca+++++++++++++++++++
+@prods: Ca++++++++++++++++++++, E
+@limits: 5.470d+03, 5.000d+04
+@rate: sigma_v96(energy_ev, 1.729d+02, 1.369d+02, 3.288d+01, 2.963d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Fe
+@prods: Fe+, E
+@limits: 7.902d+00, 6.600d+01
+@rate: sigma_v96(energy_ev, 5.461d-02, 3.062d-01, 2.671d+07, 7.923d+00, 2.069d+01, 1.382d+02, 2.481d-01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Fe+
+@prods: Fe++, E
+@limits: 1.619d+01, 7.617d+01
+@rate: sigma_v96(energy_ev, 1.761d-01, 4.365d+03, 6.298d+03, 5.204d+00, 1.141d+01, 9.272d+01, 1.075d+02)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Fe++
+@prods: Fe+++, E
+@limits: 3.065d+01, 8.705d+01
+@rate: sigma_v96(energy_ev, 1.698d-01, 6.107d+00, 1.555d+03, 8.055d+00, 8.698d+00, 1.760d+02, 1.847d+01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Fe+++
+@prods: Fe++++, E
+@limits: 5.480d+01, 1.067d+02
+@rate: sigma_v96(energy_ev, 2.544d+01, 3.653d+02, 8.913d+00, 6.538d+00, 5.602d-01, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Fe++++
+@prods: Fe+++++, E
+@limits: 7.501d+01, 1.288d+02
+@rate: sigma_v96(energy_ev, 7.256d-01, 1.523d-03, 3.736d+01, 1.767d+01, 5.064d+01, 8.871d+01, 5.280d-02)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Fe+++++
+@prods: Fe++++++, E
+@limits: 9.906d+01, 1.527d+02
+@rate: sigma_v96(energy_ev, 2.656d+00, 5.259d-01, 1.450d+01, 1.632d+01, 1.558d+01, 3.361d+01, 3.743d-03)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Fe++++++
+@prods: Fe+++++++, E
+@limits: 1.250d+02, 1.783d+02
+@rate: sigma_v96(energy_ev, 5.059d+00, 2.420d+04, 4.850d+04, 2.374d+00, 2.516d-03, 4.546d-01, 2.683d+01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Fe+++++++
+@prods: Fe++++++++, E
+@limits: 1.511d+02, 2.055d+02
+@rate: sigma_v96(energy_ev, 7.098d-02, 1.979d+01, 1.745d+04, 6.750d+00, 2.158d+02, 2.542d+03, 4.672d+02)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Fe++++++++
+@prods: Fe+++++++++, E
+@limits: 2.336d+02, 9.211d+02
+@rate: sigma_v96(energy_ev, 6.741d+00, 2.687d+01, 1.807d+02, 6.290d+00, 2.387d-04, 2.494d+01, 8.251d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Fe+++++++++
+@prods: Fe++++++++++, E
+@limits: 2.621d+02, 9.590d+02
+@rate: sigma_v96(energy_ev, 6.886d+01, 6.470d+01, 2.062d+01, 4.111d+00, 2.778d-04, 1.190d-05, 6.570d-03)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Fe++++++++++
+@prods: Fe+++++++++++, E
+@limits: 2.902d+02, 9.983d+02
+@rate: sigma_v96(energy_ev, 8.284d+00, 3.281d+00, 5.360d+01, 8.571d+00, 3.279d-01, 2.971d+01, 5.220d-01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Fe+++++++++++
+@prods: Fe++++++++++++, E
+@limits: 3.308d+02, 1.039d+03
+@rate: sigma_v96(energy_ev, 6.295d+00, 1.738d+00, 1.130d+02, 8.037d+00, 3.096d-01, 4.671d+01, 1.425d-01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Fe++++++++++++
+@prods: Fe+++++++++++++, E
+@limits: 3.610d+02, 1.081d+03
+@rate: sigma_v96(energy_ev, 1.317d-01, 2.791d-03, 2.487d+03, 9.791d+00, 6.938d-01, 2.170d+03, 6.852d-03)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Fe+++++++++++++
+@prods: Fe++++++++++++++, E
+@limits: 3.922d+02, 1.125d+03
+@rate: sigma_v96(energy_ev, 8.509d-01, 1.454d-01, 1.239d+03, 8.066d+00, 4.937d-01, 4.505d+02, 2.504d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Fe++++++++++++++
+@prods: Fe+++++++++++++++, E
+@limits: 4.570d+02, 1.181d+03
+@rate: sigma_v96(energy_ev, 5.555d-02, 2.108d+02, 2.045d+04, 6.033d+00, 1.885d-03, 2.706d-04, 1.628d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Fe+++++++++++++++
+@prods: Fe++++++++++++++++, E
+@limits: 4.893d+02, 1.216d+03
+@rate: sigma_v96(energy_ev, 2.873d+01, 1.207d+01, 5.150d+02, 3.846d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Fe++++++++++++++++
+@prods: Fe+++++++++++++++++, E
+@limits: 1.262d+03, 7.651d+03
+@rate: sigma_v96(energy_ev, 3.444d-01, 1.452d+00, 3.960d+02, 1.013d+01, 1.264d+00, 2.891d+01, 3.404d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Fe+++++++++++++++++
+@prods: Fe++++++++++++++++++, E
+@limits: 1.358d+03, 7.769d+03
+@rate: sigma_v96(energy_ev, 3.190d+01, 2.388d+00, 2.186d+01, 9.589d+00, 2.902d-02, 3.805d+01, 4.805d-01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Fe++++++++++++++++++
+@prods: Fe+++++++++++++++++++, E
+@limits: 1.456d+03, 7.918d+03
+@rate: sigma_v96(energy_ev, 7.519d-04, 6.066d-05, 1.606d+06, 8.813d+00, 4.398d+00, 1.915d+06, 3.140d+01)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Fe+++++++++++++++++++
+@prods: Fe++++++++++++++++++++, E
+@limits: 1.582d+03, 8.041d+03
+@rate: sigma_v96(energy_ev, 2.011d+01, 4.455d-01, 4.236d+01, 9.724d+00, 2.757d+00, 6.847d+01, 3.989d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Fe++++++++++++++++++++
+@prods: Fe+++++++++++++++++++++, E
+@limits: 1.689d+03, 8.184d+03
+@rate: sigma_v96(energy_ev, 9.243d+00, 1.098d+01, 7.637d+01, 7.962d+00, 1.748d+00, 4.446d+01, 3.512d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Fe+++++++++++++++++++++
+@prods: Fe++++++++++++++++++++++, E
+@limits: 1.799d+03, 8.350d+03
+@rate: sigma_v96(energy_ev, 9.713d+00, 7.204d-02, 1.853d+02, 8.843d+00, 9.551d-03, 1.702d+02, 4.263d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Fe++++++++++++++++++++++
+@prods: Fe+++++++++++++++++++++++, E
+@limits: 1.950d+03, 8.484d+03
+@rate: sigma_v96(energy_ev, 4.575d+01, 2.580d+04, 1.358d+00, 2.604d+01, 2.723d+01, 3.582d-02, 8.712d-03)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Fe+++++++++++++++++++++++
+@prods: Fe++++++++++++++++++++++++, E
+@limits: 2.046d+03, 8.638d+03
+@rate: sigma_v96(energy_ev, 7.326d+01, 1.276d+01, 4.914d+01, 4.941d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Fe++++++++++++++++++++++++
+@prods: Fe+++++++++++++++++++++++++, E
+@limits: 8.829d+03, 5.000d+04
+@rate: sigma_v96(energy_ev, 1.057d+03, 1.195d+01, 5.769d+01, 1.718d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+
+#photoionization rate from verner+96
+@type: photoion
+@reacts: Fe+++++++++++++++++++++++++
+@prods: Fe++++++++++++++++++++++++++, E
+@limits: 9.278d+03, 5.000d+04
+@rate: sigma_v96(energy_ev, 2.932d+02, 8.099d+01, 3.288d+01, 2.963d+00, 0.000d+00, 0.000d+00, 0.000d+00)
+

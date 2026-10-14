@@ -1,0 +1,15 @@
+# legacy tests/euler1D: Eulerian Sod shock 1D (HLL+RK2) with primordial
+# chemistry and H2 cooling (Grassi+2014, sect. 5.1, fig. 21)
+# legacy options: -n networks/react_primordial -useX -cooling=H2
+# KROME-X changes:
+#  - the network is the converted networks/primordial.knet (identical rates)
+#  - -useX is dropped: mass fractions are a runtime choice in KROME-X, the
+#    driver calls solve_cells_x
+#  - the thermal evolution is switched on in the driver (evolve_T = true)
+# (the network path is relative to the KROME-X folder)
+
+[project]
+network = "networks/primordial.knet"
+
+[thermal]
+cooling = ["H2"]

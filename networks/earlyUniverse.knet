@@ -1,0 +1,236 @@
+krome_format 1
+# converted from legacy network 'react_earlyUniverse' by convert_legacy.py
+
+param Trad     = 0.0    # runtime parameter (legacy @common:user_Trad); set default!
+
+# legacy shortcut symbols, now ordinary vars:
+var invTgas  = 1.0/Tgas
+
+# functions provided by runtime physics modules:
+extern recfast_H_rec
+extern recfast_H_ion
+extern recfast_He_rec
+extern recfast_He_ion
+
+#**************************************
+#GP98 rates
+#Format: idx,R,R,R,P,P,P,P,Tmin,Tmax,rate
+#note that this network requires -useFileIdx, since
+# there are reactions that depend on others rates.
+#**************************************
+#this common variable allows to set the Trad
+
+#this modifier block allows to change the ODE after their calculation.
+# it can be anywhere in this file, but KROME will put it after the ODE calculation.
+# feel free to add any fortran expression (including comments)
+# [legacy ODEmodifier converted into freeze directives:]
+#   !differential equations for non-He species are set to zero
+#   ! before redhisft 2.243d3.
+#   ! phys_zredshit is the internal name for redshift
+#   ! dn(:) is the ODE array, where the index are self-explanatory
+#   if(phys_zredshift>2.243d3) then
+#   dn(idx_E) = 0d0
+#   dn(idx_H) = 0d0
+#   dn(idx_H2) = 0d0
+#   dn(idx_Hj) = 0d0
+#   dn(idx_H2j) = 0d0
+#   dn(idx_Hk) = 0d0
+#   dn(idx_D) = 0d0
+#   dn(idx_Dj) = 0d0
+#   dn(idx_HD) = 0d0
+#   dn(idx_HDj) = 0d0
+#   dn(idx_H2Dj) = 0d0
+#   dn(idx_H3j) = 0d0
+#   end if
+freeze e-, H, H2, H+, H2+, H-, D, D+, HD, HD+, H2D+, H3+ where zredshift>2.243e3
+
+#--------------------------------------
+#Hydrogen
+#--------------------------------------
+#H1: H recombination and CMB photoionization as RECFAST 1.5.2 (Seager,
+# Sasselov & Scott 1999; Wong, Moss & Scott 2008), the effective three-
+# level atom with the Peebles escape factor (legacy: the Sasaki & Takahara
+# 1993 net rate elec_recomb_ST93)
+H+ + e- -> H            []              recfast_H_rec(n(H))
+H -> H+ + e-            []              recfast_H_ion(n(H))
+
+#H3
+H + e- -> H-            []              1.4e-18*Tgas**(0.928e0)*exp(-Tgas/16200.e0)
+
+#H4
+H- -> H + e-            []              1.1e-1*Trad**(2.13)*exp(-8823.e0/Trad)
+
+#H5
+H- + H -> H2 + e-       [0, 300.e0]     1.5e-9
+H- + H -> H2 + e-       [300.e0, inf]   4.e-9*Tgas**(-0.17)
+
+#H6
+H- + H+ -> H2+ + e-     [0, 8000.e0]    6.9e-9*Tgas**(-0.35)
+H- + H+ -> H2+ + e-     [8000.e0, inf]  9.6e-7*Tgas**(-0.9)
+
+#H7
+H- + H+ -> H + H        []              5.7e-6*Tgas**(-0.5e0)+6.3e-8-9.2e-11*Tgas**(0.5e0)+4.4e-13*Tgas
+
+#H8
+H + H+ -> H2+           []              10.e0**(-19.38-1.523*log10(Tgas)+1.118*(log10(Tgas))**2.e0-0.1269*(log10(Tgas))**3.e0)
+
+#H9
+H2+ -> H + H+           []              1.63e7*exp(-3.2400e4/Trad)
+
+#H10
+H2+ + H -> H2 + H+      []              6.4e-10
+
+#H11
+H2+ + e- -> H + H       []              2.0e-7*Tgas**(-0.5e0)
+
+#H12
+H2+ -> H+ + H+ + e-     []              9.0e1*Trad**(1.48e0)*exp(-3.35000e5/Trad)
+
+#H13
+H2+ + H2 -> H3+ + H     []              2.e-9
+
+#H15
+H2 + H+ -> H2+ + H      [0, 1.e4]       3.0e-10*exp(-2.1050e4*invTgas)
+H2 + H+ -> H2+ + H      [1.e4, inf]     1.5e-10*exp(-1.4000e4*invTgas)
+
+#H16
+H2 + e- -> H + H-       []              2.7e-8*Tgas**(-1.27e0)*exp(-4.3000e4*invTgas)
+
+#H17
+H2 + e- -> H + H + e-   []              4.4e-10*Tgas**(0.35e0)*exp(-1.02000e5*invTgas)
+
+#H18
+H2 -> H2+ + e-          []              2.9e2*Trad**(1.56e0)*exp(-1.78500e5/Trad)
+
+#H19
+H3+ + H -> H2+ + H2     []              7.7e-9*exp(-1.7560e4*invTgas)
+
+#H20
+H3+ + e- -> H2 + H      []              4.6e-6*Tgas**(-0.65e0)
+
+#H21
+H2 + H+ -> H3+          []              1.e-16
+
+#--------------------------------------
+#Helium
+#--------------------------------------
+#He1
+He++ + e- -> He+        []              1.891e-10*(sqrt(Tgas/9.37e0)*(1.e0+sqrt(Tgas/9.37e0))**(0.2476e0)*(1.e0+sqrt(Tgas/2.774e6))**(1.7524e0))**(-1.e0)
+
+#He2
+He+ -> He++ + e-        []              where(Trad>1e3, 5.0e1*Trad**(1.63e0)*exp(-5.9e5/Trad), 0.0)
+
+#He3, He4: HeI recombination and CMB photoionization as RECFAST 1.5.2
+# (singlets with the Sobolev escape and the H continuum opacity, and the
+# triplets; legacy: the GP98 fits)
+He+ + e- -> He          []              recfast_He_rec(n(He), n(H))
+He -> He+ + e-          []              recfast_He_ion(n(He), n(H))
+
+#He5
+He + H+ -> He+ + H      [1.e4, inf]     4.0e-37*Tgas**(4.74e0)
+
+#He6
+He+ + H -> He + H+      [6.e3, inf]     3.7e-25*Tgas**(2.06e0)*(1.e0+9.9e0*exp(-Tgas/2.570e3))
+
+#He8
+He + H+ -> HeH+         [0, 1.e3]       7.6e-18*Tgas**(-0.5e0) + 5.e-21
+He + H+ -> HeH+         [1.e3, inf]     3.45e-16*Tgas**(-1.06) + 5.e-21
+
+#He9 TBC
+He + H2+ -> HeH+ + H    []              3.0e-10*exp(-6.717e3*invTgas)
+
+#He10
+He+ + H -> HeH+         [0, 4.e3]       1.6e-14*Tgas**(-0.33e0)
+He+ + H -> HeH+         [4.e3, inf]     1.e-15
+
+#He11
+HeH+ + H -> He + H2+    []              9.1e-10
+
+#He12
+HeH+ + e- -> He + H     []              1.7e-7*Tgas**(-0.5e0)
+
+#He13
+HeH+ + H2 -> H3+ + He   []              1.3e-9
+
+#He14
+HeH+ -> He + H+         []              6.8e-1*Trad**(1.5e0)*exp(-2.2750e4/Trad)
+
+#He15
+HeH+ -> He+ + H         []              7.8e3*Trad**(1.2e0)*exp(-2.4e5/Trad)
+
+#--------------------------------------
+#Deuterium
+#--------------------------------------
+#D1: as H1 (RECFAST's three-level atom, with the escape of D's own
+# Lyman alpha; the charge exchange D3/D4 dominates anyway)
+D+ + e- -> D            []              recfast_H_rec(n(D))
+D -> D+ + e-            []              recfast_H_ion(n(D))
+
+#D3
+D + H+ -> D+ + H        []              3.7e-10*Tgas**(0.28e0)*exp(-43.e0*invTgas)
+
+#D4
+D+ + H -> D + H+        []              3.7e-10*Tgas**(0.28e0)
+
+#D5
+D + H -> HD             []              1.e-25
+
+#D6
+D + H2 -> H + HD        [250.e0, inf]   9.0e-11*exp(-3.876e3*invTgas)
+
+#D7
+HD+ + H -> H+ + HD      []              6.4e-10
+
+#D8
+D+ + H2 -> H+ + HD      []              2.1e-9
+
+#D9
+HD + H -> H2 + D        [2.e2, inf]     3.2e-11*exp(-3.624e3*invTgas)
+
+#D10
+HD + H+ -> H2 + D+      []              1.0e-9*exp(-4.64e2*invTgas)
+
+#D11 TBC
+HD + H3+ -> H2 + H2D+   []              (2.1e0-0.4e0*log10(Tgas))*1.e-9
+
+#D12
+D + H+ -> HD+           []              (10.e0**(-19.38-1.523*log10(Tgas)+1.118*(log10(Tgas))**2.e0-0.1269*(log10(Tgas))**3.e0))
+
+#D13
+D+ + H -> HD+           []              ((10.e0**(-19.38-1.523*log10(Tgas)+1.118*(log10(Tgas))**2.e0-0.1269*(log10(Tgas))**3.e0)))
+
+#D14
+HD+ -> H + D+           []              (1.63e7*exp(-3.2400e4/Trad))
+
+#D15
+HD+ -> H+ + D           []              (1.63e7*exp(-3.2400e4/Trad))
+
+#D16
+HD+ + e- -> H + D       []              7.2e-8*Tgas**(-0.5e0)
+
+#D17
+HD+ + H2 -> H2D+ + H    []              2.e-9
+
+#D18
+HD+ + H2 -> H3+ + D     []              2.e-9
+
+#D19
+D + H3+ -> H2D+ + H     []              1.e-9
+
+#D20
+H2D+ + e- -> H + H + D  []              1.0e-6*Tgas**(-0.5e0)*0.73
+
+#D21
+H2D+ + e- -> H2 + D     []              1.0e-6*Tgas**(-0.5e0)*0.07
+
+#D22
+H2D+ + e- -> HD + H     []              1.0e-6*Tgas**(-0.5e0)*0.20
+
+#D23
+H2D+ + H2 -> H3+ + HD   [0, 1.e2]       4.7e-9*exp(-2.15e2*invTgas)
+H2D+ + H2 -> H3+ + HD   [1.e2, inf]     5.5e-10
+
+#D24
+H2D+ + H -> H3+ + D     []              1.0e-9*exp(-5.98e2*invTgas)
+
+

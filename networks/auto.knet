@@ -1,0 +1,9 @@
+krome_format 1
+# converted from legacy network 'react_auto' by convert_legacy.py
+
+C -> C+ + e-            []  photo(xsec=auto)
+
+C+ + e- -> C            []  auto
+
+C + e- -> C+ + e- + e-  []  auto
+

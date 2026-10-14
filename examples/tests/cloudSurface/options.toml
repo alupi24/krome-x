@@ -1,0 +1,24 @@
+# legacy tests/cloudSurface: dark cloud gas-grain chemistry (Semenov+2010
+# benchmark, EA2 model of Wakelam & Herbst 2008), fixed T = 10 K
+# KROME-X changes:
+# - the network is networks/Semenov.knet (react_Semenov converted, with
+#   legacy's single grain size as `surface_grains single(...)`)
+# - legacy -useSemenov is the [surface] options below: Semenov binding
+#   energies, the legacy vibration frequency, no reaction-diffusion
+#   competition, no tunnelling; legacy's Semenov evaporation also had
+#   cosmic-ray desorption, driven by user_crflux (cr_desorption)
+# - -noSinkCheck, -noRecCheck, -iRHS are no-ops in KROME-X
+# (the network path is relative to the KROME-X folder)
+
+[project]
+network = "networks/Semenov.knet"
+
+[surface]
+binding_energies = "SEMENOV"
+nu = "LEGACY"
+competition = false
+tunnelling = false
+cr_desorption = "crflux"
+
+[solver]
+rtol = 1e-06

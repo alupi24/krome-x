@@ -1,0 +1,31 @@
+!******************************************************
+! This is a HLL+RK2 hydro solver for reproducing the
+! Sod shock test in Grassi+2014, sect.5.1, fig.21
+! Note: the solver here is more diffusive than the one
+! presented in the paper with FLASH/RAMSES
+!******************************************************
+
+KROME-X port (legacy tests/euler1D)
+- same HLL+RK2 scheme (1024 cells), time step (from the initial sound
+  speeds, as legacy), initial conditions and output: profiles_final.dat with
+  x/pc, rho, vx, Tgas and the H2, H-, e- mass densities [g/cm3], now with
+  a names header and 8 digits; the per-step t/tend print is kept.
+- C++ driver (test.cpp, the krome.hpp API; cells 0-based). After every
+  RK2 step the chemistry and H2 cooling of all the 1024 cells are solved
+  in ONE solve_cells_x call (mass fractions, legacy -useX), instead of
+  the legacy per-cell loop of krome() calls; with
+  SolverOpts::renormalize_x each cell's fractions are rescaled to their
+  input sum, as the legacy krome() did.
+- the legacy constants (pc2cm, kboltzmann, pmass, gamma, ...) were
+  single-precision literals: the port keeps them as float literals.
+- thermal evolution on (SolverOpts::evolve_T = true, legacy -cooling=H2).
+- solver tolerances are the KROME-X defaults (rtol 1e-8, atol 1e-20; legacy
+  1e-4, 1e-20).
+- sod_chem.dat: the reference profile of Grassi+2014 (plot.py).
+- OpenMP: building with -fopenmp (e.g. CXXFLAGS="-O2 -std=c++17
+  -Xpreprocessor -fopenmp" and -lomp on macOS) solves the cells of each
+  call in parallel, with the same results.
+- KROME-X vs legacy (final profiles): rho, Tgas, H2, H-, e- agree within 0.13 %
+  (median 0.0002-0.04 %); vx within 0.12 % of its maximum (the rest
+  velocity of the unperturbed gas is roundoff noise, a few cm/s, in both).
+- output files (legacy name): profiles_final.dat (fort.22).

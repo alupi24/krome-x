@@ -1,0 +1,28 @@
+      1     2s2 2p3                           4  S    1.5            0.0            0.0
+      2     2s2 2p3                           2  D    1.5        26830.6        30656.6
+      3     2s2 2p3                           2  D    2.5        26810.8        30662.8
+      4     2s2 2p3                           2  P    0.5        40469.9        41650.5
+      5     2s2 2p3                           2  P    1.5        40467.9        41650.6
+ -1
+
+Theoretical energies:
+
+Mao, J., Badnell, N. R., Del Zanna, G., 2020, A&A, 643, A95 
+"R-matrix electron-impact excitation data for the N-like iso-electronic sequence"
+DOI: 10.1051/0004-6361/202039195
+
+Note: only  bound levels have been retained.
+
+Energies for the ground configuration are from
+Blagrave, Martin, ApJ, 2004, 610, 813
+
+Rest of the energies are either from 
+Ingvar Wenaker 1990 Phys. Scr. 42 667
+
+or
+
+NIST Atomic Spectra Database,[Online].
+https://physics.nist.gov/PhysRefData/ASD/levels_form.html
+
+ 
+ -1

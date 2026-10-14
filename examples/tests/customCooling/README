@@ -1,0 +1,16 @@
+!***************************************************************
+!This test shows how to use custom cooling functions: the H2O
+! rotational cooling of eqns. (A13)-(A14) of Smith et al. 2003
+! (MNRAS 339, 1), written in the network file.
+!Check the network networks/customCool.knet for details.
+!***************************************************************
+
+KROME-X notes:
+- output files (legacy name): cooling.dat (fort.44).
+- the legacy @cooling block of react_customCool is the network's
+  `cooling custom_1 = ...` line (networks/customCool.knet); its term is
+  named CUSTOM in the cooling names (cooling_name).
+- legacy krome_get_cooling_array returned every legacy cooling slot
+  (21 columns, CUSTOM the 13th); KROME-X's get_thermal(..., cools) returns
+  only the configured terms, so cooling.dat has Tgas and CUSTOM.
+- the values are identical to legacy (30 temperatures, 10 K - 1e5 K).

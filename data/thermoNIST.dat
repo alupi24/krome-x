@@ -1,0 +1,56 @@
+# Gas phase thermochemistry data from the NIST database
+# http://webbook.nist.gov/chemistry/
+# Chase, M.W., Jr., NIST-JANAF Themochemical Tables, Fourth Edition,
+# J. Phys. Chem. Ref. Data, Monograph 9, 1998
+#
+# This file is cherry picked from NIST with molecules
+# that were missing in the Extended Third Millenium Ideal Gas
+# Thermochemical Database (http://garfield.chem.elte.hu/Burcat/THERM.DAT)
+# of which the thermo30.dat file is a selection.
+#
+# Data can be used to calculate:
+# Cp° = A + B*t + C*t2 + D*t3 + E/t2
+# H° − H°298.15= A*t + B*t2/2 + C*t3/3 + D*t4/4 − E/t + F − H
+# S° = A*ln(t) + B*t + C*t2/2 + D*t3/3 − E/(2*t2) + G
+#     Cp° = heat capacity (J/mol*K)
+#     H° = standard enthalpy (kJ/mol)
+#     S° = standard entropy (J/mol*K)
+#     t = temperature (K) / 1000.
+#     ° = at a pressure of 1 bar
+#
+# format: of the file
+# "#comment"
+# species:Tmin:Tmax:A,B,C,D,E,F,G,H
+
+# Data last reviewed in June, 1979
+Ti:3630.956:6000:9.274255:6.092113:0.577095:-0.110364:6.504405:483.0093:204.1566:473.6288
+
+# Data last reviewed in December, 1973
+TiO:4500:6000:36.25740:-2.704541:1.691450:-0.151753:9.805701:51.83580:281.4380:54.39200
+
+# Data last reviewed in December, 1973
+TiO2:4000:6000:63.82818:-4.418178:1.080707:-0.058816:-5.216235:-336.0739:323.0094:-305.4324
+
+# Data last reviewed in December, 1968
+TiCl:298:1000:26.02105:54.21209:-56.69529:20.19094:-0.034346:144.5681:266.6873:154.3900
+
+# Data last reviewed in December, 1968
+TiCl:1000:6000:40.27782:2.851768:-0.539435:0.037376:1.114237:143.4639:297.2665:154.3900
+
+# Data last reviewed in December, 1968
+TiCl2:298:1500:60.46257:4.880762:-5.049711:2.012844:-0.357849:-256.6369:348.2448:-237.2332
+
+# Data last reviewed in December, 1968
+TiCl2:1500:6000:48.51474:10.94961:-1.834831:0.112929:3.993365:-243.8573:343.4713:-237.2332
+
+# Data last reviewed in June, 1968
+TiCl3:298:6000:87.56359:-1.277513:0.269055:-0.021423:-1.314982:-569.7771:415.8143:-539.3176
+
+# Data last reviewed in December, 1967
+TiCl4:1000:6000:106.8573:1.049482:-0.284300:0.024257:-1.043516:-798.5666:477.9885:-763.1616
+
+# Data last reviewed in June, 1982
+Cl:298:600:13.38298:42.33999:-64.74656:32.99532:0.063319:116.1491:171.7038:121.3021
+
+# Data last reviewed in June, 1982
+Cl:600:6000:23.26597:-1.555939:0.346910:-0.025961:0.153212:114.6604:193.8882:121.3021

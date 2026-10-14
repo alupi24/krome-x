@@ -1,0 +1,67 @@
+!***************************************************
+!This is a test to plot cooling function using e.g.
+! the information from the Chianti database.
+! http://www.chiantidatabase.org
+! It computes a cooling curve similar to the one
+! shown in Gnat+Ferland 2012 ApJS 199 20 (Fig.2)
+! http://adsabs.harvard.edu/cgi-bin/bib_query?arXiv:1111.6980
+!The carbon ionization equilibrium (n(C) = n(e) = 1)
+! is computed at constant Tgas = 1e4-1e8 K for
+! J21 = 0, 1, 1e2 (a 1/E spectrum, 10 bins 10-100 eV),
+! then its line cooling from the C+ ... C5+ CHIANTI data.
+!***************************************************
+
+KROME-X port (examples/tests/chianti, driver test.cpp on the C++ API):
+- network networks/chianti.knet (legacy react_chianti);
+- legacy -coolFile=tools/coolChianti.dat is thermal.coolant_files with the same file
+  (shipped with KROME-X as data/cooling/coolChianti.dat);
+  -cooling=CII,CIII,CIV,CV,CVI selects its coolants, each its own get_thermal
+  term; its C+ replaces the embedded coolZ.dat C+ (a generation warning says
+  so); -coolLevels=99999 is thermal.levels = 99999 (no cut); cooling.dat holds the
+  total cooling, as legacy krome_get_cooling;
+- the photon bins are runtime setup: legacy -photoBins=10 +
+  krome_set_photoBin_J21log(10, 100) + krome_photoBin_scale(j21) become
+  Radiation::log_bins(10, 10, 100) + PhotoModule::init and
+  spectra::j21(..., j21, alpha = 1) as SolverOpts::Phi;
+- dropped: -useThermoToggle (Tgas constant: SolverOpts::evolve_T =
+  false, legacy krome_thermo_off), -noRecCheck (KROME-X has no recombination
+  check);
+- the legacy OpenMP loop over the temperatures is serial here;
+- abundances.dat (#j time Tgas <species>) and equilibrium.dat (#j Tgas
+  <species>) start with a names header; the species are in KROME-X
+  (alphabetical) order;
+- legacy RTOL/ATOL defaults were 1e-4/1e-20: KROME-X keeps its defaults
+  (rtol 1e-8);
+- plot: python3 plot.py (plot.png; gnuplot dropped).
+
+Comparison with legacy (cooling.dat, 30 temperatures x 3 J21):
+- J21 = 0: the ionization equilibrium is identical (4e-6); the cooling
+  agrees within -3.5 % / +1.7 % below 4.5e5 K and is 7-17 % higher
+  above 6e5 K (max at 1.6e6 K), where C4+ and C5+ dominate;
+- two KROME-X differences explain this, checked by patching the legacy
+  build: (1) legacy took the energy of a line as hc/lambda from the
+  file's wavelength, 0 when it is <= 0; KROME-X uses the level energies. Four
+  lines have lambda <= 0: two with lambda = 0, the two-photon decays of
+  the 2s levels of C5+ (1 -> 0, A = 3.8e5 s^-1) and C4+ (2 -> 0), and
+  two negative ones, C4+ 18 -> 6 and 18 -> 12; they give all of the
+  high-T excess (C4+ cooling +18 %, C5+ +24 % at 1e5-2.5e5 K, +7 % at
+  1e8 K); for the other lines hc/lambda and the level energies differ
+  by <= 0.1 % in the cooling. (2) legacy
+  interpolated the collisional rates linearly in T on a 100-point log-T
+  table (2 K - 1e8 K), which overestimates the steep exp(-dE/kT) rates
+  at low T: KROME-X is 4-19 % lower at 1e4 K (C+ ... C3+). With both changes
+  applied to legacy, each ion's cooling agrees to 1e-4 at fixed
+  abundances (so legacy's level cut, the highest level excited from the
+  ground, changes nothing here) and cooling.dat to 0.4 % (J21 = 0);
+- J21 = 1, 1e2: in addition, the photoionization rates differ (KROME-X
+  integrates each bin exactly, legacy took the bin midpoint, see the auto
+  test): the main C ion fractions differ by up to 25 % (C3+, J21 = 1) at
+  T < 1e5 K; the cooling is within 2.8 % of the patched legacy.
+- 2.0.0: the C ion recombinations are Badnell's radiative plus
+  dielectronic fits (the auto database; legacy and v2.0.0-benchmark: KIDA
+  for C+, Verner's radiative fits, without dielectronic recombination, for
+  C++ ... C6+). The ionization balance moves with it: the J21 = 0 cooling
+  is 0.37x the v2.0.0-benchmark value at 1e4 K, 0.72x at the 6.7e4 K peak
+  and up to 1.39x at 1.3e5 K (J21 = 1, 100: 0.55-1.39x, 0.69-1.43x); the
+  legacy comparison above is that of v2.0.0-benchmark.
+- output files (legacy name): cooling.dat (fort.55), abundances.dat (fort.66), equilibrium.dat (fort.77).

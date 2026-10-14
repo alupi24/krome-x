@@ -1,0 +1,8 @@
+krome_format 1
+# converted from legacy network 'react_coolCo' by convert_legacy.py
+
+#this is a dummy reaction network that is employed
+# for cooling from CO. Note that ghost species H2
+# is included since it is a collider
+species H2
+# [legacy dummy reaction dropped: KROME-X allows empty networks]

@@ -1,0 +1,11 @@
+# NIST Atomic Spectra Database (Kramida, Ralchenko, Reader & NIST ASD Team),
+# lines with transition probabilities, retrieved 2026-10-02 from
+# https://physics.nist.gov/cgi-bin/ASD/lines1.pl?spectra=Si+I&low_w=2000&upp_w=1e9&unit=0&max_low_enrg=300&max_upp_enrg=300&A_out=0&allowed_out=1&forbid_out=1&show_av=2
+# (vacuum/air wavelengths dropped). Columns: E_lower, E_upper [cm^-1],
+# A [s^-1], NIST accuracy grade, type (E1, M1, E2, M1+E2), lower and
+# upper level, NIST TP references.
+# E_low E_up A acc type | lower | upper | refs
+0.0000 223.1570 3.4900e-10 D+ E2 | 3s2.3p2 3P 0 | 3s2.3p2 3P 2 | c22
+77.1150 223.1570 1.2100e-10 D+ E2 | 3s2.3p2 3P 1 | 3s2.3p2 3P 2 | c22 , T4209
+77.1150 223.1570 4.2100e-05 B+ M1 | 3s2.3p2 3P 1 | 3s2.3p2 3P 2 | c22 , T4209
+0.0000 77.1150 8.2500e-06 B+ M1 | 3s2.3p2 3P 0 | 3s2.3p2 3P 1 | c22 , T4209

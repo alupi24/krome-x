@@ -1,0 +1,23 @@
+# legacy tests/earlyUniverse: primordial chemistry from z = 1e4 to z = 10
+# (Galli & Palla 1998)
+# KROME-X changes:
+# - -useFileIdx: not needed; the reactions of react_earlyUniverse that
+#   referenced other rates by file index (k(9), k(10), k(49)) are
+#   written out in networks/earlyUniverse.knet
+# - -computeElectrons (n(e-) from charge neutrality after each call) is
+#   done by the driver: n[IDX_E] = get_electrons_neutral(n) after each
+#   solve (the runtime option conserve = 1 is not equivalent here: it
+#   keeps the input charge, and does not move the frozen e-)
+# - the legacy krome_set_user_Trad, krome_set_zredshift and the legacy
+#   cosmology constants (hubble0, omega0) are per-cell parameters
+# - 2.0.0: the H2 cooling is H2 (Glover & Abel 2008); legacy's H2GP98
+#   (Galli & Palla 1998) was removed
+# - 2.0.0: H, D and He I recombination as RECFAST 1.5.2 (the network's
+#   recfast_* rates; legacy: Sasaki & Takahara 1993 and the GP98 fits)
+# (the network path is relative to the KROME-X folder)
+
+[project]
+network = "networks/earlyUniverse.knet"
+
+[thermal]
+cooling = ["H2", "COMPTON", "EXPANSION"]

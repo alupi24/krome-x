@@ -1,0 +1,17 @@
+!*************************************************
+! Test based on [R2008] Reinhardt, V. et al.
+! JPhysChemA 112, 1712 (2008)
+! Slow manifold trajectories example.
+!*************************************************
+
+KROME-X port (examples/tests/slowmanifold): same network (networks/SM.knet,
+converted from legacy react_SM), same 14 x 7 grid of H2O / H2 initial
+conditions, time loop and steady-state criterion. Differences:
+- the species are in the KROME-X alphabetical order (H H2 H2O O O2 OH; legacy
+  used the order of appearance, H2 H O2 O H2O OH): the output columns
+  follow the header, and plot.py picks them by name;
+- the solver tolerances are the KROME-X defaults (rtol 1e-8, atol 1e-20;
+  legacy DLSODES used RTOL 1e-4).
+- the driver is C++ (test.cpp, krome.hpp); the output rows are written
+  with 8 digits (legacy 3).
+- output files (legacy name): abundances.dat (fort.66), initial.dat (fort.77).

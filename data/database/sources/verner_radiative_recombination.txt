@@ -1,0 +1,2500 @@
+############################
+############################
+#radiative recombination from Verner's database
+# www.pa.uky.edu/~verner/atom.html
+
+@type: radrec
+@reacts: Be+,E
+@prods: Be
+@rate: recV96(Tgas, 4.500d-13, 6.480d-01)
+
+@type: radrec
+@reacts: B++,E
+@prods: B+
+@rate: recV96(Tgas, 2.680d-12, 7.250d-01)
+
+@type: radrec
+@reacts: C+++,E
+@prods: C++
+@rate: recV96(Tgas, 4.900d-12, 8.030d-01)
+
+@type: radrec
+@reacts: N++++,E
+@prods: N+++
+@rate: recV96(Tgas, 9.400d-12, 7.650d-01)
+
+@type: radrec
+@reacts: O+++++,E
+@prods: O++++
+@rate: recV96(Tgas, 1.590d-11, 7.590d-01)
+
+@type: radrec
+@reacts: F++++++,E
+@prods: F+++++
+@rate: recV96(Tgas, 1.919d-11, 7.849d-01)
+
+@type: radrec
+@reacts: Ne+++++++,E
+@prods: Ne++++++
+@rate: recV96(Tgas, 2.800d-11, 7.710d-01)
+
+@type: radrec
+@reacts: Na++++++++,E
+@prods: Na+++++++
+@rate: recV96(Tgas, 4.030d-11, 7.873d-01)
+
+@type: radrec
+@reacts: Mg+++++++++,E
+@prods: Mg++++++++
+@rate: recV96(Tgas, 6.830d-11, 7.650d-01)
+
+@type: radrec
+@reacts: Al++++++++++,E
+@prods: Al+++++++++
+@rate: recV96(Tgas, 8.343d-11, 8.291d-01)
+
+@type: radrec
+@reacts: Si+++++++++++,E
+@prods: Si++++++++++
+@rate: recV96(Tgas, 1.430d-10, 8.230d-01)
+
+@type: radrec
+@reacts: P++++++++++++,E
+@prods: P+++++++++++
+@rate: recV96(Tgas, 1.460d-10, 8.391d-01)
+
+@type: radrec
+@reacts: S+++++++++++++,E
+@prods: S++++++++++++
+@rate: recV96(Tgas, 2.000d-10, 8.060d-01)
+
+@type: radrec
+@reacts: Cl++++++++++++++,E
+@prods: Cl+++++++++++++
+@rate: recV96(Tgas, 2.091d-10, 8.691d-01)
+
+@type: radrec
+@reacts: Ar+++++++++++++++,E
+@prods: Ar++++++++++++++
+@rate: recV96(Tgas, 3.070d-10, 8.190d-01)
+
+@type: radrec
+@reacts: K++++++++++++++++,E
+@prods: K+++++++++++++++
+@rate: recV96(Tgas, 3.210d-10, 8.934d-01)
+
+@type: radrec
+@reacts: Ca+++++++++++++++++,E
+@prods: Ca++++++++++++++++
+@rate: recV96(Tgas, 4.610d-10, 8.330d-01)
+
+@type: radrec
+@reacts: Sc++++++++++++++++++,E
+@prods: Sc+++++++++++++++++
+@rate: recV96(Tgas, 4.870d-10, 8.060d-01)
+
+@type: radrec
+@reacts: Ti+++++++++++++++++++,E
+@prods: Ti++++++++++++++++++
+@rate: recV96(Tgas, 5.139d-10, 7.781d-01)
+
+@type: radrec
+@reacts: V++++++++++++++++++++,E
+@prods: V+++++++++++++++++++
+@rate: recV96(Tgas, 5.850d-10, 7.570d-01)
+
+@type: radrec
+@reacts: Cr+++++++++++++++++++++,E
+@prods: Cr++++++++++++++++++++
+@rate: recV96(Tgas, 6.556d-10, 7.359d-01)
+
+@type: radrec
+@reacts: Mn++++++++++++++++++++++,E
+@prods: Mn+++++++++++++++++++++
+@rate: recV96(Tgas, 7.238d-10, 7.242d-01)
+
+@type: radrec
+@reacts: Co++++++++++++++++++++++++,E
+@prods: Co+++++++++++++++++++++++
+@rate: recV96(Tgas, 8.404d-10, 7.167d-01)
+
+@type: radrec
+@reacts: Ni+++++++++++++++++++++++++,E
+@prods: Ni++++++++++++++++++++++++
+@rate: recV96(Tgas, 1.360d-09, 8.420d-01)
+
+@type: radrec
+@reacts: Cu++++++++++++++++++++++++++,E
+@prods: Cu+++++++++++++++++++++++++
+@rate: recV96(Tgas, 1.880d-09, 8.420d-01)
+
+@type: radrec
+@reacts: Zn+++++++++++++++++++++++++++,E
+@prods: Zn++++++++++++++++++++++++++
+@rate: recV96(Tgas, 2.400d-09, 8.420d-01)
+
+@type: radrec
+@reacts: B+,E
+@prods: B
+@rate: recV96(Tgas, 4.600d-13, 6.360d-01)
+
+@type: radrec
+@reacts: C++,E
+@prods: C+
+@rate: recV96(Tgas, 2.300d-12, 6.450d-01)
+
+@type: radrec
+@reacts: N+++,E
+@prods: N++
+@rate: recV96(Tgas, 5.000d-12, 6.760d-01)
+
+@type: radrec
+@reacts: O++++,E
+@prods: O+++
+@rate: recV96(Tgas, 9.600d-12, 6.700d-01)
+
+@type: radrec
+@reacts: F+++++,E
+@prods: F++++
+@rate: recV96(Tgas, 1.558d-11, 6.816d-01)
+
+@type: radrec
+@reacts: Ne++++++,E
+@prods: Ne+++++
+@rate: recV96(Tgas, 2.300d-11, 7.040d-01)
+
+@type: radrec
+@reacts: Na+++++++,E
+@prods: Na++++++
+@rate: recV96(Tgas, 3.253d-11, 7.075d-01)
+
+@type: radrec
+@reacts: Mg++++++++,E
+@prods: Mg+++++++
+@rate: recV96(Tgas, 4.600d-11, 7.110d-01)
+
+@type: radrec
+@reacts: Al+++++++++,E
+@prods: Al++++++++
+@rate: recV96(Tgas, 5.951d-11, 7.125d-01)
+
+@type: radrec
+@reacts: Si++++++++++,E
+@prods: Si+++++++++
+@rate: recV96(Tgas, 7.700d-11, 7.140d-01)
+
+@type: radrec
+@reacts: P+++++++++++,E
+@prods: P++++++++++
+@rate: recV96(Tgas, 1.042d-10, 7.330d-01)
+
+@type: radrec
+@reacts: S++++++++++++,E
+@prods: S+++++++++++
+@rate: recV96(Tgas, 1.400d-10, 7.550d-01)
+
+@type: radrec
+@reacts: Cl+++++++++++++,E
+@prods: Cl++++++++++++
+@rate: recV96(Tgas, 1.760d-10, 7.682d-01)
+
+@type: radrec
+@reacts: Ar++++++++++++++,E
+@prods: Ar+++++++++++++
+@rate: recV96(Tgas, 2.140d-10, 7.740d-01)
+
+@type: radrec
+@reacts: K+++++++++++++++,E
+@prods: K++++++++++++++
+@rate: recV96(Tgas, 2.629d-10, 7.772d-01)
+
+@type: radrec
+@reacts: Ca++++++++++++++++,E
+@prods: Ca+++++++++++++++
+@rate: recV96(Tgas, 3.240d-10, 7.800d-01)
+
+@type: radrec
+@reacts: Sc+++++++++++++++++,E
+@prods: Sc++++++++++++++++
+@rate: recV96(Tgas, 3.970d-10, 7.840d-01)
+
+@type: radrec
+@reacts: Ti++++++++++++++++++,E
+@prods: Ti+++++++++++++++++
+@rate: recV96(Tgas, 4.700d-10, 7.873d-01)
+
+@type: radrec
+@reacts: V+++++++++++++++++++,E
+@prods: V++++++++++++++++++
+@rate: recV96(Tgas, 5.500d-10, 7.910d-01)
+
+@type: radrec
+@reacts: Cr++++++++++++++++++++,E
+@prods: Cr+++++++++++++++++++
+@rate: recV96(Tgas, 6.301d-10, 7.952d-01)
+
+@type: radrec
+@reacts: Mn+++++++++++++++++++++,E
+@prods: Mn++++++++++++++++++++
+@rate: recV96(Tgas, 7.058d-10, 7.982d-01)
+
+@type: radrec
+@reacts: Co+++++++++++++++++++++++,E
+@prods: Co++++++++++++++++++++++
+@rate: recV96(Tgas, 8.252d-10, 8.004d-01)
+
+@type: radrec
+@reacts: Ni++++++++++++++++++++++++,E
+@prods: Ni+++++++++++++++++++++++
+@rate: recV96(Tgas, 8.710d-10, 8.000d-01)
+
+@type: radrec
+@reacts: Cu+++++++++++++++++++++++++,E
+@prods: Cu++++++++++++++++++++++++
+@rate: recV96(Tgas, 9.170d-10, 8.000d-01)
+
+@type: radrec
+@reacts: Zn++++++++++++++++++++++++++,E
+@prods: Zn+++++++++++++++++++++++++
+@rate: recV96(Tgas, 9.630d-10, 7.990d-01)
+
+@type: radrec
+@reacts: C+,E
+@prods: C
+@rate: recV96(Tgas, 4.700d-13, 6.240d-01)
+
+@type: radrec
+@reacts: N++,E
+@prods: N+
+@rate: recV96(Tgas, 2.200d-12, 6.390d-01)
+
+@type: radrec
+@reacts: O+++,E
+@prods: O++
+@rate: recV96(Tgas, 5.100d-12, 6.600d-01)
+
+@type: radrec
+@reacts: F++++,E
+@prods: F+++
+@rate: recV96(Tgas, 9.171d-12, 6.757d-01)
+
+@type: radrec
+@reacts: Ne+++++,E
+@prods: Ne++++
+@rate: recV96(Tgas, 1.500d-11, 6.840d-01)
+
+@type: radrec
+@reacts: Na++++++,E
+@prods: Na+++++
+@rate: recV96(Tgas, 2.191d-11, 6.875d-01)
+
+@type: radrec
+@reacts: Mg+++++++,E
+@prods: Mg++++++
+@rate: recV96(Tgas, 3.200d-11, 6.910d-01)
+
+@type: radrec
+@reacts: Al++++++++,E
+@prods: Al+++++++
+@rate: recV96(Tgas, 4.308d-11, 6.970d-01)
+
+@type: radrec
+@reacts: Si+++++++++,E
+@prods: Si++++++++
+@rate: recV96(Tgas, 5.800d-11, 7.030d-01)
+
+@type: radrec
+@reacts: P++++++++++,E
+@prods: P+++++++++
+@rate: recV96(Tgas, 7.316d-11, 7.027d-01)
+
+@type: radrec
+@reacts: S+++++++++++,E
+@prods: S++++++++++
+@rate: recV96(Tgas, 9.200d-11, 7.140d-01)
+
+@type: radrec
+@reacts: Cl++++++++++++,E
+@prods: Cl+++++++++++
+@rate: recV96(Tgas, 1.198d-10, 7.508d-01)
+
+@type: radrec
+@reacts: Ar+++++++++++++,E
+@prods: Ar++++++++++++
+@rate: recV96(Tgas, 1.580d-10, 7.900d-01)
+
+@type: radrec
+@reacts: K++++++++++++++,E
+@prods: K+++++++++++++
+@rate: recV96(Tgas, 2.048d-10, 8.032d-01)
+
+@type: radrec
+@reacts: Ca+++++++++++++++,E
+@prods: Ca++++++++++++++
+@rate: recV96(Tgas, 2.600d-10, 8.000d-01)
+
+@type: radrec
+@reacts: Sc++++++++++++++++,E
+@prods: Sc+++++++++++++++
+@rate: recV96(Tgas, 3.280d-10, 7.990d-01)
+
+@type: radrec
+@reacts: Ti+++++++++++++++++,E
+@prods: Ti++++++++++++++++
+@rate: recV96(Tgas, 3.966d-10, 7.973d-01)
+
+@type: radrec
+@reacts: V++++++++++++++++++,E
+@prods: V+++++++++++++++++
+@rate: recV96(Tgas, 4.760d-10, 8.000d-01)
+
+@type: radrec
+@reacts: Cr+++++++++++++++++++,E
+@prods: Cr++++++++++++++++++
+@rate: recV96(Tgas, 5.547d-10, 8.027d-01)
+
+@type: radrec
+@reacts: Mn++++++++++++++++++++,E
+@prods: Mn+++++++++++++++++++
+@rate: recV96(Tgas, 6.313d-10, 8.058d-01)
+
+@type: radrec
+@reacts: Co++++++++++++++++++++++,E
+@prods: Co+++++++++++++++++++++
+@rate: recV96(Tgas, 7.503d-10, 8.085d-01)
+
+@type: radrec
+@reacts: Ni+++++++++++++++++++++++,E
+@prods: Ni++++++++++++++++++++++
+@rate: recV96(Tgas, 7.940d-10, 8.080d-01)
+
+@type: radrec
+@reacts: Cu++++++++++++++++++++++++,E
+@prods: Cu+++++++++++++++++++++++
+@rate: recV96(Tgas, 8.380d-10, 8.080d-01)
+
+@type: radrec
+@reacts: Zn+++++++++++++++++++++++++,E
+@prods: Zn++++++++++++++++++++++++
+@rate: recV96(Tgas, 8.810d-10, 8.070d-01)
+
+@type: radrec
+@reacts: N+,E
+@prods: N
+@rate: recV96(Tgas, 4.100d-13, 6.080d-01)
+
+@type: radrec
+@reacts: O++,E
+@prods: O+
+@rate: recV96(Tgas, 2.000d-12, 6.460d-01)
+
+@type: radrec
+@reacts: F+++,E
+@prods: F++
+@rate: recV96(Tgas, 5.231d-12, 6.615d-01)
+
+@type: radrec
+@reacts: Ne++++,E
+@prods: Ne+++
+@rate: recV96(Tgas, 9.100d-12, 6.680d-01)
+
+@type: radrec
+@reacts: Na+++++,E
+@prods: Na++++
+@rate: recV96(Tgas, 1.447d-11, 6.814d-01)
+
+@type: radrec
+@reacts: Mg++++++,E
+@prods: Mg+++++
+@rate: recV96(Tgas, 2.300d-11, 6.950d-01)
+
+@type: radrec
+@reacts: Al+++++++,E
+@prods: Al++++++
+@rate: recV96(Tgas, 3.145d-11, 6.915d-01)
+
+@type: radrec
+@reacts: Si++++++++,E
+@prods: Si+++++++
+@rate: recV96(Tgas, 4.300d-11, 6.880d-01)
+
+@type: radrec
+@reacts: P+++++++++,E
+@prods: P++++++++
+@rate: recV96(Tgas, 5.659d-11, 7.023d-01)
+
+@type: radrec
+@reacts: S++++++++++,E
+@prods: S+++++++++
+@rate: recV96(Tgas, 7.400d-11, 7.160d-01)
+
+@type: radrec
+@reacts: Cl+++++++++++,E
+@prods: Cl++++++++++
+@rate: recV96(Tgas, 9.561d-11, 7.102d-01)
+
+@type: radrec
+@reacts: Ar++++++++++++,E
+@prods: Ar+++++++++++
+@rate: recV96(Tgas, 1.230d-10, 7.020d-01)
+
+@type: radrec
+@reacts: K+++++++++++++,E
+@prods: K++++++++++++
+@rate: recV96(Tgas, 1.587d-10, 7.105d-01)
+
+@type: radrec
+@reacts: Ca++++++++++++++,E
+@prods: Ca+++++++++++++
+@rate: recV96(Tgas, 2.040d-10, 7.300d-01)
+
+@type: radrec
+@reacts: Sc+++++++++++++++,E
+@prods: Sc++++++++++++++
+@rate: recV96(Tgas, 2.630d-10, 7.490d-01)
+
+@type: radrec
+@reacts: Ti++++++++++++++++,E
+@prods: Ti+++++++++++++++
+@rate: recV96(Tgas, 3.220d-10, 7.683d-01)
+
+@type: radrec
+@reacts: V+++++++++++++++++,E
+@prods: V++++++++++++++++
+@rate: recV96(Tgas, 3.950d-10, 7.830d-01)
+
+@type: radrec
+@reacts: Cr++++++++++++++++++,E
+@prods: Cr+++++++++++++++++
+@rate: recV96(Tgas, 4.671d-10, 7.967d-01)
+
+@type: radrec
+@reacts: Mn+++++++++++++++++++,E
+@prods: Mn++++++++++++++++++
+@rate: recV96(Tgas, 5.407d-10, 8.058d-01)
+
+@type: radrec
+@reacts: Co+++++++++++++++++++++,E
+@prods: Co++++++++++++++++++++
+@rate: recV96(Tgas, 6.611d-10, 8.121d-01)
+
+@type: radrec
+@reacts: Ni++++++++++++++++++++++,E
+@prods: Ni+++++++++++++++++++++
+@rate: recV96(Tgas, 7.080d-10, 8.110d-01)
+
+@type: radrec
+@reacts: Cu+++++++++++++++++++++++,E
+@prods: Cu++++++++++++++++++++++
+@rate: recV96(Tgas, 7.550d-10, 8.100d-01)
+
+@type: radrec
+@reacts: Zn++++++++++++++++++++++++,E
+@prods: Zn+++++++++++++++++++++++
+@rate: recV96(Tgas, 8.020d-10, 8.090d-01)
+
+@type: radrec
+@reacts: O+,E
+@prods: O
+@rate: recV96(Tgas, 3.100d-13, 6.780d-01)
+
+@type: radrec
+@reacts: F++,E
+@prods: F+
+@rate: recV96(Tgas, 1.344d-12, 6.708d-01)
+
+@type: radrec
+@reacts: Ne+++,E
+@prods: Ne++
+@rate: recV96(Tgas, 4.400d-12, 6.750d-01)
+
+@type: radrec
+@reacts: Na++++,E
+@prods: Na+++
+@rate: recV96(Tgas, 7.849d-12, 6.952d-01)
+
+@type: radrec
+@reacts: Mg+++++,E
+@prods: Mg++++
+@rate: recV96(Tgas, 1.400d-11, 7.160d-01)
+
+@type: radrec
+@reacts: Al++++++,E
+@prods: Al+++++
+@rate: recV96(Tgas, 2.049d-11, 7.090d-01)
+
+@type: radrec
+@reacts: Si+++++++,E
+@prods: Si++++++
+@rate: recV96(Tgas, 3.000d-11, 7.020d-01)
+
+@type: radrec
+@reacts: P++++++++,E
+@prods: P+++++++
+@rate: recV96(Tgas, 4.125d-11, 6.965d-01)
+
+@type: radrec
+@reacts: S+++++++++,E
+@prods: S++++++++
+@rate: recV96(Tgas, 5.500d-11, 7.110d-01)
+
+@type: radrec
+@reacts: Cl++++++++++,E
+@prods: Cl+++++++++
+@rate: recV96(Tgas, 7.280d-11, 7.518d-01)
+
+@type: radrec
+@reacts: Ar+++++++++++,E
+@prods: Ar++++++++++
+@rate: recV96(Tgas, 9.550d-11, 7.930d-01)
+
+@type: radrec
+@reacts: K++++++++++++,E
+@prods: K+++++++++++
+@rate: recV96(Tgas, 1.235d-10, 8.052d-01)
+
+@type: radrec
+@reacts: Ca+++++++++++++,E
+@prods: Ca++++++++++++
+@rate: recV96(Tgas, 1.580d-10, 8.000d-01)
+
+@type: radrec
+@reacts: Sc++++++++++++++,E
+@prods: Sc+++++++++++++
+@rate: recV96(Tgas, 2.060d-10, 7.990d-01)
+
+@type: radrec
+@reacts: Ti+++++++++++++++,E
+@prods: Ti++++++++++++++
+@rate: recV96(Tgas, 2.537d-10, 7.977d-01)
+
+@type: radrec
+@reacts: V++++++++++++++++,E
+@prods: V+++++++++++++++
+@rate: recV96(Tgas, 3.190d-10, 8.020d-01)
+
+@type: radrec
+@reacts: Cr+++++++++++++++++,E
+@prods: Cr++++++++++++++++
+@rate: recV96(Tgas, 3.844d-10, 8.071d-01)
+
+@type: radrec
+@reacts: Mn++++++++++++++++++,E
+@prods: Mn+++++++++++++++++
+@rate: recV96(Tgas, 4.564d-10, 8.124d-01)
+
+@type: radrec
+@reacts: Co++++++++++++++++++++,E
+@prods: Co+++++++++++++++++++
+@rate: recV96(Tgas, 5.842d-10, 8.168d-01)
+
+@type: radrec
+@reacts: Ni+++++++++++++++++++++,E
+@prods: Ni++++++++++++++++++++
+@rate: recV96(Tgas, 6.380d-10, 8.160d-01)
+
+@type: radrec
+@reacts: Cu++++++++++++++++++++++,E
+@prods: Cu+++++++++++++++++++++
+@rate: recV96(Tgas, 6.920d-10, 8.150d-01)
+
+@type: radrec
+@reacts: Zn+++++++++++++++++++++++,E
+@prods: Zn++++++++++++++++++++++
+@rate: recV96(Tgas, 7.460d-10, 8.140d-01)
+
+@type: radrec
+@reacts: F+,E
+@prods: F
+@rate: recV96(Tgas, 6.273d-13, 6.798d-01)
+
+@type: radrec
+@reacts: Ne++,E
+@prods: Ne+
+@rate: recV96(Tgas, 1.500d-12, 6.930d-01)
+
+@type: radrec
+@reacts: Na+++,E
+@prods: Na++
+@rate: recV96(Tgas, 3.399d-12, 7.054d-01)
+
+@type: radrec
+@reacts: Mg++++,E
+@prods: Mg+++
+@rate: recV96(Tgas, 7.700d-12, 7.180d-01)
+
+@type: radrec
+@reacts: Al+++++,E
+@prods: Al++++
+@rate: recV96(Tgas, 1.275d-11, 7.170d-01)
+
+@type: radrec
+@reacts: Si++++++,E
+@prods: Si+++++
+@rate: recV96(Tgas, 2.110d-11, 7.160d-01)
+
+@type: radrec
+@reacts: P+++++++,E
+@prods: P++++++
+@rate: recV96(Tgas, 2.975d-11, 6.945d-01)
+
+@type: radrec
+@reacts: S++++++++,E
+@prods: S+++++++
+@rate: recV96(Tgas, 4.000d-11, 6.960d-01)
+
+@type: radrec
+@reacts: Cl+++++++++,E
+@prods: Cl++++++++
+@rate: recV96(Tgas, 5.281d-11, 7.491d-01)
+
+@type: radrec
+@reacts: Ar++++++++++,E
+@prods: Ar+++++++++
+@rate: recV96(Tgas, 6.920d-11, 8.110d-01)
+
+@type: radrec
+@reacts: K+++++++++++,E
+@prods: K++++++++++
+@rate: recV96(Tgas, 9.044d-11, 8.251d-01)
+
+@type: radrec
+@reacts: Ca++++++++++++,E
+@prods: Ca+++++++++++
+@rate: recV96(Tgas, 1.180d-10, 8.100d-01)
+
+@type: radrec
+@reacts: Sc+++++++++++++,E
+@prods: Sc++++++++++++
+@rate: recV96(Tgas, 1.580d-10, 8.040d-01)
+
+@type: radrec
+@reacts: Ti++++++++++++++,E
+@prods: Ti+++++++++++++
+@rate: recV96(Tgas, 1.983d-10, 7.980d-01)
+
+@type: radrec
+@reacts: V+++++++++++++++,E
+@prods: V++++++++++++++
+@rate: recV96(Tgas, 2.570d-10, 8.040d-01)
+
+@type: radrec
+@reacts: Cr++++++++++++++++,E
+@prods: Cr+++++++++++++++
+@rate: recV96(Tgas, 3.154d-10, 8.101d-01)
+
+@type: radrec
+@reacts: Mn+++++++++++++++++,E
+@prods: Mn++++++++++++++++
+@rate: recV96(Tgas, 3.837d-10, 8.183d-01)
+
+@type: radrec
+@reacts: Co+++++++++++++++++++,E
+@prods: Co++++++++++++++++++
+@rate: recV96(Tgas, 5.147d-10, 8.253d-01)
+
+@type: radrec
+@reacts: Ni++++++++++++++++++++,E
+@prods: Ni+++++++++++++++++++
+@rate: recV96(Tgas, 5.750d-10, 8.240d-01)
+
+@type: radrec
+@reacts: Cu+++++++++++++++++++++,E
+@prods: Cu++++++++++++++++++++
+@rate: recV96(Tgas, 6.350d-10, 8.230d-01)
+
+@type: radrec
+@reacts: Zn++++++++++++++++++++++,E
+@prods: Zn+++++++++++++++++++++
+@rate: recV96(Tgas, 6.960d-10, 8.210d-01)
+
+@type: radrec
+@reacts: Ne+,E
+@prods: Ne
+@rate: recV96(Tgas, 2.200d-13, 7.590d-01)
+
+@type: radrec
+@reacts: Na++,E
+@prods: Na+
+@rate: recV96(Tgas, 8.775d-13, 7.467d-01)
+
+@type: radrec
+@reacts: Mg+++,E
+@prods: Mg++
+@rate: recV96(Tgas, 3.500d-12, 7.340d-01)
+
+@type: radrec
+@reacts: Al++++,E
+@prods: Al+++
+@rate: recV96(Tgas, 6.481d-12, 7.345d-01)
+
+@type: radrec
+@reacts: Si+++++,E
+@prods: Si++++
+@rate: recV96(Tgas, 1.200d-11, 7.350d-01)
+
+@type: radrec
+@reacts: P++++++,E
+@prods: P+++++
+@rate: recV96(Tgas, 1.834d-11, 7.285d-01)
+
+@type: radrec
+@reacts: S+++++++,E
+@prods: S++++++
+@rate: recV96(Tgas, 2.700d-11, 7.330d-01)
+
+@type: radrec
+@reacts: Cl++++++++,E
+@prods: Cl+++++++
+@rate: recV96(Tgas, 3.711d-11, 7.641d-01)
+
+@type: radrec
+@reacts: Ar+++++++++,E
+@prods: Ar++++++++
+@rate: recV96(Tgas, 4.900d-11, 8.010d-01)
+
+@type: radrec
+@reacts: K++++++++++,E
+@prods: K+++++++++
+@rate: recV96(Tgas, 6.444d-11, 8.175d-01)
+
+@type: radrec
+@reacts: Ca+++++++++++,E
+@prods: Ca++++++++++
+@rate: recV96(Tgas, 8.510d-11, 8.200d-01)
+
+@type: radrec
+@reacts: Sc++++++++++++,E
+@prods: Sc+++++++++++
+@rate: recV96(Tgas, 1.170d-10, 8.220d-01)
+
+@type: radrec
+@reacts: Ti+++++++++++++,E
+@prods: Ti++++++++++++
+@rate: recV96(Tgas, 1.494d-10, 8.242d-01)
+
+@type: radrec
+@reacts: V++++++++++++++,E
+@prods: V+++++++++++++
+@rate: recV96(Tgas, 2.010d-10, 8.280d-01)
+
+@type: radrec
+@reacts: Cr+++++++++++++++,E
+@prods: Cr++++++++++++++
+@rate: recV96(Tgas, 2.525d-10, 8.311d-01)
+
+@type: radrec
+@reacts: Mn++++++++++++++++,E
+@prods: Mn+++++++++++++++
+@rate: recV96(Tgas, 3.177d-10, 8.341d-01)
+
+@type: radrec
+@reacts: Co++++++++++++++++++,E
+@prods: Co+++++++++++++++++
+@rate: recV96(Tgas, 4.552d-10, 8.364d-01)
+
+@type: radrec
+@reacts: Ni+++++++++++++++++++,E
+@prods: Ni++++++++++++++++++
+@rate: recV96(Tgas, 5.250d-10, 8.360d-01)
+
+@type: radrec
+@reacts: Cu++++++++++++++++++++,E
+@prods: Cu+++++++++++++++++++
+@rate: recV96(Tgas, 5.950d-10, 8.360d-01)
+
+@type: radrec
+@reacts: Zn+++++++++++++++++++++,E
+@prods: Zn++++++++++++++++++++
+@rate: recV96(Tgas, 6.650d-10, 8.350d-01)
+
+@type: radrec
+@reacts: Mg+,E
+@prods: Mg
+@rate: recV96(Tgas, 1.400d-13, 8.550d-01)
+
+@type: radrec
+@reacts: Al++,E
+@prods: Al+
+@rate: recV96(Tgas, 7.197d-13, 7.697d-01)
+
+@type: radrec
+@reacts: Si+++,E
+@prods: Si++
+@rate: recV96(Tgas, 3.700d-12, 6.930d-01)
+
+@type: radrec
+@reacts: P++++,E
+@prods: P+++
+@rate: recV96(Tgas, 7.980d-12, 6.829d-01)
+
+@type: radrec
+@reacts: S+++++,E
+@prods: S++++
+@rate: recV96(Tgas, 1.200d-11, 7.010d-01)
+
+@type: radrec
+@reacts: Cl++++++,E
+@prods: Cl+++++
+@rate: recV96(Tgas, 1.800d-11, 7.232d-01)
+
+@type: radrec
+@reacts: Ar+++++++,E
+@prods: Ar++++++
+@rate: recV96(Tgas, 2.690d-11, 7.440d-01)
+
+@type: radrec
+@reacts: K++++++++,E
+@prods: K+++++++
+@rate: recV96(Tgas, 3.748d-11, 7.628d-01)
+
+@type: radrec
+@reacts: Ca+++++++++,E
+@prods: Ca++++++++
+@rate: recV96(Tgas, 5.040d-11, 7.800d-01)
+
+@type: radrec
+@reacts: Sc++++++++++,E
+@prods: Sc+++++++++
+@rate: recV96(Tgas, 7.240d-11, 7.950d-01)
+
+@type: radrec
+@reacts: Ti+++++++++++,E
+@prods: Ti++++++++++
+@rate: recV96(Tgas, 9.440d-11, 8.107d-01)
+
+@type: radrec
+@reacts: V++++++++++++,E
+@prods: V+++++++++++
+@rate: recV96(Tgas, 1.350d-10, 8.220d-01)
+
+@type: radrec
+@reacts: Cr+++++++++++++,E
+@prods: Cr++++++++++++
+@rate: recV96(Tgas, 1.751d-10, 8.340d-01)
+
+@type: radrec
+@reacts: Mn++++++++++++++,E
+@prods: Mn+++++++++++++
+@rate: recV96(Tgas, 2.298d-10, 8.417d-01)
+
+@type: radrec
+@reacts: Co++++++++++++++++,E
+@prods: Co+++++++++++++++
+@rate: recV96(Tgas, 3.461d-10, 8.469d-01)
+
+@type: radrec
+@reacts: Ni+++++++++++++++++,E
+@prods: Ni++++++++++++++++
+@rate: recV96(Tgas, 4.030d-10, 8.460d-01)
+
+@type: radrec
+@reacts: Cu++++++++++++++++++,E
+@prods: Cu+++++++++++++++++
+@rate: recV96(Tgas, 4.600d-10, 8.450d-01)
+
+@type: radrec
+@reacts: Zn+++++++++++++++++++,E
+@prods: Zn++++++++++++++++++
+@rate: recV96(Tgas, 5.170d-10, 8.440d-01)
+
+@type: radrec
+@reacts: Al+,E
+@prods: Al
+@rate: recV96(Tgas, 3.980d-13, 8.019d-01)
+
+@type: radrec
+@reacts: Si++,E
+@prods: Si+
+@rate: recV96(Tgas, 1.000d-12, 7.860d-01)
+
+@type: radrec
+@reacts: P+++,E
+@prods: P++
+@rate: recV96(Tgas, 2.558d-12, 7.629d-01)
+
+@type: radrec
+@reacts: S++++,E
+@prods: S+++
+@rate: recV96(Tgas, 5.700d-12, 7.550d-01)
+
+@type: radrec
+@reacts: Cl+++++,E
+@prods: Cl++++
+@rate: recV96(Tgas, 1.011d-11, 7.703d-01)
+
+@type: radrec
+@reacts: Ar++++++,E
+@prods: Ar+++++
+@rate: recV96(Tgas, 1.580d-11, 7.930d-01)
+
+@type: radrec
+@reacts: K+++++++,E
+@prods: K++++++
+@rate: recV96(Tgas, 2.448d-11, 8.052d-01)
+
+@type: radrec
+@reacts: Ca++++++++,E
+@prods: Ca+++++++
+@rate: recV96(Tgas, 3.760d-11, 8.100d-01)
+
+@type: radrec
+@reacts: Sc+++++++++,E
+@prods: Sc++++++++
+@rate: recV96(Tgas, 5.870d-11, 8.150d-01)
+
+@type: radrec
+@reacts: Ti++++++++++,E
+@prods: Ti+++++++++
+@rate: recV96(Tgas, 7.972d-11, 8.206d-01)
+
+@type: radrec
+@reacts: V+++++++++++,E
+@prods: V++++++++++
+@rate: recV96(Tgas, 1.130d-10, 8.270d-01)
+
+@type: radrec
+@reacts: Cr++++++++++++,E
+@prods: Cr+++++++++++
+@rate: recV96(Tgas, 1.470d-10, 8.325d-01)
+
+@type: radrec
+@reacts: Mn+++++++++++++,E
+@prods: Mn++++++++++++
+@rate: recV96(Tgas, 1.908d-10, 8.372d-01)
+
+@type: radrec
+@reacts: Co+++++++++++++++,E
+@prods: Co++++++++++++++
+@rate: recV96(Tgas, 2.976d-10, 8.406d-01)
+
+@type: radrec
+@reacts: Ni++++++++++++++++,E
+@prods: Ni+++++++++++++++
+@rate: recV96(Tgas, 3.630d-10, 8.400d-01)
+
+@type: radrec
+@reacts: Cu+++++++++++++++++,E
+@prods: Cu++++++++++++++++
+@rate: recV96(Tgas, 4.280d-10, 8.390d-01)
+
+@type: radrec
+@reacts: Zn++++++++++++++++++,E
+@prods: Zn+++++++++++++++++
+@rate: recV96(Tgas, 4.940d-10, 8.390d-01)
+
+@type: radrec
+@reacts: Si+,E
+@prods: Si
+@rate: recV96(Tgas, 5.900d-13, 6.010d-01)
+
+@type: radrec
+@reacts: P++,E
+@prods: P+
+@rate: recV96(Tgas, 1.294d-12, 6.766d-01)
+
+@type: radrec
+@reacts: S+++,E
+@prods: S++
+@rate: recV96(Tgas, 2.700d-12, 7.450d-01)
+
+@type: radrec
+@reacts: Cl++++,E
+@prods: Cl+++
+@rate: recV96(Tgas, 5.165d-12, 7.893d-01)
+
+@type: radrec
+@reacts: Ar+++++,E
+@prods: Ar++++
+@rate: recV96(Tgas, 9.120d-12, 8.110d-01)
+
+@type: radrec
+@reacts: K++++++,E
+@prods: K+++++
+@rate: recV96(Tgas, 1.513d-11, 8.186d-01)
+
+@type: radrec
+@reacts: Ca+++++++,E
+@prods: Ca++++++
+@rate: recV96(Tgas, 2.400d-11, 8.200d-01)
+
+@type: radrec
+@reacts: Sc++++++++,E
+@prods: Sc+++++++
+@rate: recV96(Tgas, 3.960d-11, 8.220d-01)
+
+@type: radrec
+@reacts: Ti+++++++++,E
+@prods: Ti++++++++
+@rate: recV96(Tgas, 5.518d-11, 8.245d-01)
+
+@type: radrec
+@reacts: V++++++++++,E
+@prods: V+++++++++
+@rate: recV96(Tgas, 8.370d-11, 8.280d-01)
+
+@type: radrec
+@reacts: Cr+++++++++++,E
+@prods: Cr++++++++++
+@rate: recV96(Tgas, 1.123d-10, 8.313d-01)
+
+@type: radrec
+@reacts: Mn++++++++++++,E
+@prods: Mn+++++++++++
+@rate: recV96(Tgas, 1.525d-10, 8.342d-01)
+
+@type: radrec
+@reacts: Fe+++++++++++++,E
+@prods: Fe++++++++++++
+@rate: recV96(Tgas, 2.000d-10, 8.360d-01)
+
+@type: radrec
+@reacts: Co++++++++++++++,E
+@prods: Co+++++++++++++
+@rate: recV96(Tgas, 2.537d-10, 8.364d-01)
+
+@type: radrec
+@reacts: Ni+++++++++++++++,E
+@prods: Ni++++++++++++++
+@rate: recV96(Tgas, 3.160d-10, 8.360d-01)
+
+@type: radrec
+@reacts: Cu++++++++++++++++,E
+@prods: Cu+++++++++++++++
+@rate: recV96(Tgas, 3.780d-10, 8.360d-01)
+
+@type: radrec
+@reacts: Zn+++++++++++++++++,E
+@prods: Zn++++++++++++++++
+@rate: recV96(Tgas, 4.410d-10, 8.350d-01)
+
+@type: radrec
+@reacts: P+,E
+@prods: P
+@rate: recV96(Tgas, 9.761d-13, 6.209d-01)
+
+@type: radrec
+@reacts: S++,E
+@prods: S+
+@rate: recV96(Tgas, 1.800d-12, 6.860d-01)
+
+@type: radrec
+@reacts: Cl+++,E
+@prods: Cl++
+@rate: recV96(Tgas, 3.320d-12, 7.579d-01)
+
+@type: radrec
+@reacts: Ar++++,E
+@prods: Ar+++
+@rate: recV96(Tgas, 6.030d-12, 8.120d-01)
+
+@type: radrec
+@reacts: K+++++,E
+@prods: K++++
+@rate: recV96(Tgas, 1.063d-11, 8.269d-01)
+
+@type: radrec
+@reacts: Ca++++++,E
+@prods: Ca+++++
+@rate: recV96(Tgas, 1.800d-11, 8.200d-01)
+
+@type: radrec
+@reacts: Sc+++++++,E
+@prods: Sc++++++
+@rate: recV96(Tgas, 3.130d-11, 8.180d-01)
+
+@type: radrec
+@reacts: Ti++++++++,E
+@prods: Ti+++++++
+@rate: recV96(Tgas, 4.451d-11, 8.153d-01)
+
+@type: radrec
+@reacts: V+++++++++,E
+@prods: V++++++++
+@rate: recV96(Tgas, 6.830d-11, 8.200d-01)
+
+@type: radrec
+@reacts: Cr++++++++++,E
+@prods: Cr+++++++++
+@rate: recV96(Tgas, 9.206d-11, 8.246d-01)
+
+@type: radrec
+@reacts: Mn+++++++++++,E
+@prods: Mn++++++++++
+@rate: recV96(Tgas, 1.250d-10, 8.302d-01)
+
+@type: radrec
+@reacts: Fe++++++++++++,E
+@prods: Fe+++++++++++
+@rate: recV96(Tgas, 1.640d-10, 8.340d-01)
+
+@type: radrec
+@reacts: Co+++++++++++++,E
+@prods: Co++++++++++++
+@rate: recV96(Tgas, 2.093d-10, 8.349d-01)
+
+@type: radrec
+@reacts: Ni++++++++++++++,E
+@prods: Ni+++++++++++++
+@rate: recV96(Tgas, 2.630d-10, 8.340d-01)
+
+@type: radrec
+@reacts: Cu+++++++++++++++,E
+@prods: Cu++++++++++++++
+@rate: recV96(Tgas, 3.170d-10, 8.330d-01)
+
+@type: radrec
+@reacts: Zn++++++++++++++++,E
+@prods: Zn+++++++++++++++
+@rate: recV96(Tgas, 3.700d-10, 8.320d-01)
+
+@type: radrec
+@reacts: S+,E
+@prods: S
+@rate: recV96(Tgas, 4.100d-13, 6.300d-01)
+
+@type: radrec
+@reacts: Cl++,E
+@prods: Cl+
+@rate: recV96(Tgas, 1.248d-12, 7.663d-01)
+
+@type: radrec
+@reacts: Ar+++,E
+@prods: Ar++
+@rate: recV96(Tgas, 3.230d-12, 8.690d-01)
+
+@type: radrec
+@reacts: K++++,E
+@prods: K+++
+@rate: recV96(Tgas, 6.384d-12, 8.790d-01)
+
+@type: radrec
+@reacts: Ca+++++,E
+@prods: Ca++++
+@rate: recV96(Tgas, 1.070d-11, 8.400d-01)
+
+@type: radrec
+@reacts: Sc++++++,E
+@prods: Sc+++++
+@rate: recV96(Tgas, 1.920d-11, 8.210d-01)
+
+@type: radrec
+@reacts: Ti+++++++,E
+@prods: Ti++++++
+@rate: recV96(Tgas, 2.765d-11, 8.012d-01)
+
+@type: radrec
+@reacts: V++++++++,E
+@prods: V+++++++
+@rate: recV96(Tgas, 4.650d-11, 8.060d-01)
+
+@type: radrec
+@reacts: Cr+++++++++,E
+@prods: Cr++++++++
+@rate: recV96(Tgas, 6.539d-11, 8.099d-01)
+
+@type: radrec
+@reacts: Mn++++++++++,E
+@prods: Mn+++++++++
+@rate: recV96(Tgas, 9.539d-11, 8.202d-01)
+
+@type: radrec
+@reacts: Fe+++++++++++,E
+@prods: Fe++++++++++
+@rate: recV96(Tgas, 1.330d-10, 8.280d-01)
+
+@type: radrec
+@reacts: Co++++++++++++,E
+@prods: Co+++++++++++
+@rate: recV96(Tgas, 1.769d-10, 8.299d-01)
+
+@type: radrec
+@reacts: Ni+++++++++++++,E
+@prods: Ni++++++++++++
+@rate: recV96(Tgas, 2.290d-10, 8.280d-01)
+
+@type: radrec
+@reacts: Cu++++++++++++++,E
+@prods: Cu+++++++++++++
+@rate: recV96(Tgas, 2.810d-10, 8.260d-01)
+
+@type: radrec
+@reacts: Zn+++++++++++++++,E
+@prods: Zn++++++++++++++
+@rate: recV96(Tgas, 3.330d-10, 8.240d-01)
+
+@type: radrec
+@reacts: Cl+,E
+@prods: Cl
+@rate: recV96(Tgas, 1.010d-12, 7.380d-01)
+
+@type: radrec
+@reacts: Ar++,E
+@prods: Ar+
+@rate: recV96(Tgas, 1.950d-12, 7.520d-01)
+
+@type: radrec
+@reacts: K+++,E
+@prods: K++
+@rate: recV96(Tgas, 3.766d-12, 7.662d-01)
+
+@type: radrec
+@reacts: Ca++++,E
+@prods: Ca+++
+@rate: recV96(Tgas, 7.080d-12, 7.800d-01)
+
+@type: radrec
+@reacts: Sc+++++,E
+@prods: Sc++++
+@rate: recV96(Tgas, 1.430d-11, 7.920d-01)
+
+@type: radrec
+@reacts: Ti++++++,E
+@prods: Ti+++++
+@rate: recV96(Tgas, 2.152d-11, 8.038d-01)
+
+@type: radrec
+@reacts: V+++++++,E
+@prods: V++++++
+@rate: recV96(Tgas, 3.740d-11, 8.120d-01)
+
+@type: radrec
+@reacts: Cr++++++++,E
+@prods: Cr+++++++
+@rate: recV96(Tgas, 5.335d-11, 8.207d-01)
+
+@type: radrec
+@reacts: Mn+++++++++,E
+@prods: Mn++++++++
+@rate: recV96(Tgas, 7.807d-11, 8.260d-01)
+
+@type: radrec
+@reacts: Fe++++++++++,E
+@prods: Fe+++++++++
+@rate: recV96(Tgas, 1.090d-10, 8.290d-01)
+
+@type: radrec
+@reacts: Co+++++++++++,E
+@prods: Co++++++++++
+@rate: recV96(Tgas, 1.459d-10, 8.296d-01)
+
+@type: radrec
+@reacts: Ni++++++++++++,E
+@prods: Ni+++++++++++
+@rate: recV96(Tgas, 1.910d-10, 8.290d-01)
+
+@type: radrec
+@reacts: Cu+++++++++++++,E
+@prods: Cu++++++++++++
+@rate: recV96(Tgas, 2.360d-10, 8.280d-01)
+
+@type: radrec
+@reacts: Zn++++++++++++++,E
+@prods: Zn+++++++++++++
+@rate: recV96(Tgas, 2.810d-10, 8.280d-01)
+
+@type: radrec
+@reacts: Ar+,E
+@prods: Ar
+@rate: recV96(Tgas, 3.770d-13, 6.510d-01)
+
+@type: radrec
+@reacts: K++,E
+@prods: K+
+@rate: recV96(Tgas, 1.304d-12, 6.753d-01)
+
+@type: radrec
+@reacts: Ca+++,E
+@prods: Ca++
+@rate: recV96(Tgas, 3.960d-12, 7.000d-01)
+
+@type: radrec
+@reacts: Sc++++,E
+@prods: Sc+++
+@rate: recV96(Tgas, 1.130d-11, 7.240d-01)
+
+@type: radrec
+@reacts: Ti+++++,E
+@prods: Ti++++
+@rate: recV96(Tgas, 1.857d-11, 7.484d-01)
+
+@type: radrec
+@reacts: V++++++,E
+@prods: V+++++
+@rate: recV96(Tgas, 3.170d-11, 7.680d-01)
+
+@type: radrec
+@reacts: Cr+++++++,E
+@prods: Cr++++++
+@rate: recV96(Tgas, 4.479d-11, 7.883d-01)
+
+@type: radrec
+@reacts: Mn++++++++,E
+@prods: Mn+++++++
+@rate: recV96(Tgas, 6.106d-11, 8.020d-01)
+
+@type: radrec
+@reacts: Fe+++++++++,E
+@prods: Fe++++++++
+@rate: recV96(Tgas, 8.130d-11, 8.100d-01)
+
+@type: radrec
+@reacts: Co++++++++++,E
+@prods: Co+++++++++
+@rate: recV96(Tgas, 1.098d-10, 8.118d-01)
+
+@type: radrec
+@reacts: Ni+++++++++++,E
+@prods: Ni++++++++++
+@rate: recV96(Tgas, 1.500d-10, 8.100d-01)
+
+@type: radrec
+@reacts: Cu++++++++++++,E
+@prods: Cu+++++++++++
+@rate: recV96(Tgas, 1.900d-10, 8.080d-01)
+
+@type: radrec
+@reacts: Zn+++++++++++++,E
+@prods: Zn++++++++++++
+@rate: recV96(Tgas, 2.300d-10, 8.060d-01)
+
+@type: radrec
+@reacts: K+,E
+@prods: K
+@rate: recV96(Tgas, 2.762d-13, 8.023d-01)
+
+@type: radrec
+@reacts: Ca++,E
+@prods: Ca+
+@rate: recV96(Tgas, 6.780d-13, 8.000d-01)
+
+@type: radrec
+@reacts: Sc+++,E
+@prods: Sc++
+@rate: recV96(Tgas, 2.330d-12, 7.980d-01)
+
+@type: radrec
+@reacts: Ti++++,E
+@prods: Ti+++
+@rate: recV96(Tgas, 3.983d-12, 7.955d-01)
+
+@type: radrec
+@reacts: V+++++,E
+@prods: V++++
+@rate: recV96(Tgas, 1.150d-11, 7.940d-01)
+
+@type: radrec
+@reacts: Cr++++++,E
+@prods: Cr+++++
+@rate: recV96(Tgas, 1.906d-11, 7.919d-01)
+
+@type: radrec
+@reacts: Mn+++++++,E
+@prods: Mn++++++
+@rate: recV96(Tgas, 3.620d-11, 7.907d-01)
+
+@type: radrec
+@reacts: Fe++++++++,E
+@prods: Fe+++++++
+@rate: recV96(Tgas, 6.050d-11, 7.900d-01)
+
+@type: radrec
+@reacts: Co+++++++++,E
+@prods: Co++++++++
+@rate: recV96(Tgas, 8.818d-11, 7.898d-01)
+
+@type: radrec
+@reacts: Ni++++++++++,E
+@prods: Ni+++++++++
+@rate: recV96(Tgas, 1.190d-10, 7.900d-01)
+
+@type: radrec
+@reacts: Cu+++++++++++,E
+@prods: Cu++++++++++
+@rate: recV96(Tgas, 1.500d-10, 7.900d-01)
+
+@type: radrec
+@reacts: Zn++++++++++++,E
+@prods: Zn+++++++++++
+@rate: recV96(Tgas, 1.810d-10, 7.900d-01)
+
+@type: radrec
+@reacts: Ca+,E
+@prods: Ca
+@rate: recV96(Tgas, 1.120d-13, 9.000d-01)
+
+@type: radrec
+@reacts: Sc++,E
+@prods: Sc+
+@rate: recV96(Tgas, 6.540d-13, 8.670d-01)
+
+@type: radrec
+@reacts: Ti+++,E
+@prods: Ti++
+@rate: recV96(Tgas, 1.196d-12, 8.344d-01)
+
+@type: radrec
+@reacts: V++++,E
+@prods: V+++
+@rate: recV96(Tgas, 5.330d-12, 8.090d-01)
+
+@type: radrec
+@reacts: Cr+++++,E
+@prods: Cr++++
+@rate: recV96(Tgas, 9.471d-12, 7.846d-01)
+
+@type: radrec
+@reacts: Mn++++++,E
+@prods: Mn+++++
+@rate: recV96(Tgas, 2.169d-11, 7.683d-01)
+
+@type: radrec
+@reacts: Fe+++++++,E
+@prods: Fe++++++
+@rate: recV96(Tgas, 4.120d-11, 7.590d-01)
+
+@type: radrec
+@reacts: Co++++++++,E
+@prods: Co+++++++
+@rate: recV96(Tgas, 6.409d-11, 7.570d-01)
+
+@type: radrec
+@reacts: Ni+++++++++,E
+@prods: Ni++++++++
+@rate: recV96(Tgas, 8.910d-11, 7.590d-01)
+
+@type: radrec
+@reacts: Cu++++++++++,E
+@prods: Cu+++++++++
+@rate: recV96(Tgas, 1.140d-10, 7.610d-01)
+
+@type: radrec
+@reacts: Zn+++++++++++,E
+@prods: Zn++++++++++
+@rate: recV96(Tgas, 1.390d-10, 7.630d-01)
+
+@type: radrec
+@reacts: Sc+,E
+@prods: Sc
+@rate: recV96(Tgas, 1.170d-13, 8.980d-01)
+
+@type: radrec
+@reacts: Ti++,E
+@prods: Ti+
+@rate: recV96(Tgas, 5.330d-12, 8.640d-01)
+
+@type: radrec
+@reacts: V+++,E
+@prods: V++
+@rate: recV96(Tgas, 1.060d-11, 8.300d-01)
+
+@type: radrec
+@reacts: Cr++++,E
+@prods: Cr+++
+@rate: recV96(Tgas, 1.580d-11, 7.960d-01)
+
+@type: radrec
+@reacts: Mn+++++,E
+@prods: Mn++++
+@rate: recV96(Tgas, 2.100d-11, 7.620d-01)
+
+@type: radrec
+@reacts: Fe++++++,E
+@prods: Fe+++++
+@rate: recV96(Tgas, 2.620d-11, 7.280d-01)
+
+@type: radrec
+@reacts: Co+++++++,E
+@prods: Co++++++
+@rate: recV96(Tgas, 2.822d-11, 7.280d-01)
+
+@type: radrec
+@reacts: Ni++++++++,E
+@prods: Ni+++++++
+@rate: recV96(Tgas, 3.040d-11, 7.280d-01)
+
+@type: radrec
+@reacts: Cu+++++++++,E
+@prods: Cu++++++++
+@rate: recV96(Tgas, 3.260d-11, 7.280d-01)
+
+@type: radrec
+@reacts: Zn++++++++++,E
+@prods: Zn+++++++++
+@rate: recV96(Tgas, 3.480d-11, 7.280d-01)
+
+@type: radrec
+@reacts: Ti+,E
+@prods: Ti
+@rate: recV96(Tgas, 1.220d-13, 8.970d-01)
+
+@type: radrec
+@reacts: V++,E
+@prods: V+
+@rate: recV96(Tgas, 3.870d-12, 8.480d-01)
+
+@type: radrec
+@reacts: Cr+++,E
+@prods: Cr++
+@rate: recV96(Tgas, 7.610d-12, 7.980d-01)
+
+@type: radrec
+@reacts: Mn++++,E
+@prods: Mn+++
+@rate: recV96(Tgas, 1.140d-11, 7.480d-01)
+
+@type: radrec
+@reacts: Fe+++++,E
+@prods: Fe++++
+@rate: recV96(Tgas, 1.510d-11, 6.990d-01)
+
+@type: radrec
+@reacts: Co++++++,E
+@prods: Co+++++
+@rate: recV96(Tgas, 1.626d-11, 6.990d-01)
+
+@type: radrec
+@reacts: Ni+++++++,E
+@prods: Ni++++++
+@rate: recV96(Tgas, 1.750d-11, 6.990d-01)
+
+@type: radrec
+@reacts: Cu++++++++,E
+@prods: Cu+++++++
+@rate: recV96(Tgas, 1.870d-11, 6.990d-01)
+
+@type: radrec
+@reacts: Zn+++++++++,E
+@prods: Zn++++++++
+@rate: recV96(Tgas, 2.000d-11, 6.990d-01)
+
+@type: radrec
+@reacts: V+,E
+@prods: V
+@rate: recV96(Tgas, 1.270d-13, 8.950d-01)
+
+@type: radrec
+@reacts: Cr++,E
+@prods: Cr+
+@rate: recV96(Tgas, 2.680d-12, 8.240d-01)
+
+@type: radrec
+@reacts: Mn+++,E
+@prods: Mn++
+@rate: recV96(Tgas, 5.240d-12, 7.530d-01)
+
+@type: radrec
+@reacts: Fe++++,E
+@prods: Fe+++
+@rate: recV96(Tgas, 7.800d-12, 6.820d-01)
+
+@type: radrec
+@reacts: Co+++++,E
+@prods: Co++++
+@rate: recV96(Tgas, 8.402d-12, 6.820d-01)
+
+@type: radrec
+@reacts: Ni++++++,E
+@prods: Ni+++++
+@rate: recV96(Tgas, 9.050d-12, 6.820d-01)
+
+@type: radrec
+@reacts: Cu+++++++,E
+@prods: Cu++++++
+@rate: recV96(Tgas, 9.700d-12, 6.820d-01)
+
+@type: radrec
+@reacts: Zn++++++++,E
+@prods: Zn+++++++
+@rate: recV96(Tgas, 1.030d-11, 6.820d-01)
+
+@type: radrec
+@reacts: Cr+,E
+@prods: Cr
+@rate: recV96(Tgas, 1.320d-13, 8.940d-01)
+
+@type: radrec
+@reacts: Mn++,E
+@prods: Mn+
+@rate: recV96(Tgas, 1.730d-12, 8.200d-01)
+
+@type: radrec
+@reacts: Fe+++,E
+@prods: Fe++
+@rate: recV96(Tgas, 3.320d-12, 7.460d-01)
+
+@type: radrec
+@reacts: Co++++,E
+@prods: Co+++
+@rate: recV96(Tgas, 3.575d-12, 7.460d-01)
+
+@type: radrec
+@reacts: Ni+++++,E
+@prods: Ni++++
+@rate: recV96(Tgas, 3.580d-12, 7.460d-01)
+
+@type: radrec
+@reacts: Cu++++++,E
+@prods: Cu+++++
+@rate: recV96(Tgas, 3.580d-12, 7.460d-01)
+
+@type: radrec
+@reacts: Zn+++++++,E
+@prods: Zn++++++
+@rate: recV96(Tgas, 3.590d-12, 7.460d-01)
+
+@type: radrec
+@reacts: Mn+,E
+@prods: Mn
+@rate: recV96(Tgas, 1.370d-13, 8.920d-01)
+
+@type: radrec
+@reacts: Fe++,E
+@prods: Fe+
+@rate: recV96(Tgas, 1.020d-12, 8.430d-01)
+
+@type: radrec
+@reacts: Co+++,E
+@prods: Co++
+@rate: recV96(Tgas, 1.278d-12, 7.682d-01)
+
+@type: radrec
+@reacts: Ni++++,E
+@prods: Ni+++
+@rate: recV96(Tgas, 1.600d-12, 7.000d-01)
+
+@type: radrec
+@reacts: Cu+++++,E
+@prods: Cu++++
+@rate: recV96(Tgas, 1.920d-12, 7.000d-01)
+
+@type: radrec
+@reacts: Zn++++++,E
+@prods: Zn+++++
+@rate: recV96(Tgas, 2.240d-12, 7.000d-01)
+
+@type: radrec
+@reacts: Fe+,E
+@prods: Fe
+@rate: recV96(Tgas, 1.420d-13, 8.910d-01)
+
+@type: radrec
+@reacts: Co++,E
+@prods: Co+
+@rate: recV96(Tgas, 4.459d-13, 7.897d-01)
+
+@type: radrec
+@reacts: Ni+++,E
+@prods: Ni++
+@rate: recV96(Tgas, 1.400d-12, 7.000d-01)
+
+@type: radrec
+@reacts: Cu++++,E
+@prods: Cu+++
+@rate: recV96(Tgas, 1.500d-12, 7.000d-01)
+
+@type: radrec
+@reacts: Zn+++++,E
+@prods: Zn++++
+@rate: recV96(Tgas, 1.600d-12, 7.000d-01)
+
+@type: radrec
+@reacts: Co+,E
+@prods: Co
+@rate: recV96(Tgas, 2.510d-13, 7.950d-01)
+
+@type: radrec
+@reacts: Ni++,E
+@prods: Ni+
+@rate: recV96(Tgas, 1.000d-12, 7.000d-01)
+
+@type: radrec
+@reacts: Cu+++,E
+@prods: Cu++
+@rate: recV96(Tgas, 1.000d-12, 7.000d-01)
+
+@type: radrec
+@reacts: Zn++++,E
+@prods: Zn+++
+@rate: recV96(Tgas, 1.100d-12, 7.000d-01)
+
+@type: radrec
+@reacts: Ni+,E
+@prods: Ni
+@rate: recV96(Tgas, 3.600d-13, 7.000d-01)
+
+@type: radrec
+@reacts: Cu++,E
+@prods: Cu+
+@rate: recV96(Tgas, 3.600d-13, 7.000d-01)
+
+@type: radrec
+@reacts: Zn+++,E
+@prods: Zn++
+@rate: recV96(Tgas, 3.600d-13, 7.000d-01)
+
+@type: radrec
+@reacts: Cu+,E
+@prods: Cu
+@rate: recV96(Tgas, 3.600d-13, 7.000d-01)
+
+@type: radrec
+@reacts: Zn++,E
+@prods: Zn+
+@rate: recV96(Tgas, 3.600d-13, 7.000d-01)
+
+@type: radrec
+@reacts: Zn+,E
+@prods: Zn
+@rate: recV96(Tgas, 3.600d-13, 7.000d-01)
+
+@type: radrec
+@reacts: Fe++++++++++++++++++++++++++++++,E
+@prods: Fe+++++++++++++++++++++++++++++
+@rate: recNewV96(Tgas, 7.982d-11, 7.480d-01, 3.148d+00, 7.036d+05)
+
+@type: radrec
+@reacts: He++,E
+@prods: He+
+@rate: recNewV96(Tgas, 1.891d-10, 7.524d-01, 9.370d+00, 2.774d+06)
+
+@type: radrec
+@reacts: Li+++,E
+@prods: Li++
+@rate: recNewV96(Tgas, 3.039d-10, 7.539d-01, 1.871d+01, 6.209d+06)
+
+@type: radrec
+@reacts: Be++++,E
+@prods: Be+++
+@rate: recNewV96(Tgas, 4.290d-10, 7.557d-01, 3.000d+01, 1.093d+07)
+
+@type: radrec
+@reacts: B+++++,E
+@prods: B++++
+@rate: recNewV96(Tgas, 5.437d-10, 7.560d-01, 4.576d+01, 1.706d+07)
+
+@type: radrec
+@reacts: C++++++,E
+@prods: C+++++
+@rate: recNewV96(Tgas, 6.556d-10, 7.567d-01, 6.523d+01, 2.446d+07)
+
+@type: radrec
+@reacts: N+++++++,E
+@prods: N++++++
+@rate: recNewV96(Tgas, 7.586d-10, 7.563d-01, 9.015d+01, 3.338d+07)
+
+@type: radrec
+@reacts: O++++++++,E
+@prods: O+++++++
+@rate: recNewV96(Tgas, 8.616d-10, 7.563d-01, 1.191d+02, 4.352d+07)
+
+@type: radrec
+@reacts: F+++++++++,E
+@prods: F++++++++
+@rate: recNewV96(Tgas, 9.712d-10, 7.566d-01, 1.499d+02, 5.498d+07)
+
+@type: radrec
+@reacts: Ne++++++++++,E
+@prods: Ne+++++++++
+@rate: recNewV96(Tgas, 1.085d-09, 7.570d-01, 1.834d+02, 6.776d+07)
+
+@type: radrec
+@reacts: Na+++++++++++,E
+@prods: Na++++++++++
+@rate: recNewV96(Tgas, 1.163d-09, 7.558d-01, 2.328d+02, 8.262d+07)
+
+@type: radrec
+@reacts: Mg++++++++++++,E
+@prods: Mg+++++++++++
+@rate: recNewV96(Tgas, 1.317d-09, 7.574d-01, 2.585d+02, 9.769d+07)
+
+@type: radrec
+@reacts: Al+++++++++++++,E
+@prods: Al++++++++++++
+@rate: recNewV96(Tgas, 1.419d-09, 7.578d-01, 3.057d+02, 1.143d+08)
+
+@type: radrec
+@reacts: Si++++++++++++++,E
+@prods: Si+++++++++++++
+@rate: recNewV96(Tgas, 1.517d-09, 7.574d-01, 3.601d+02, 1.329d+08)
+
+@type: radrec
+@reacts: P+++++++++++++++,E
+@prods: P++++++++++++++
+@rate: recNewV96(Tgas, 1.586d-09, 7.560d-01, 4.327d+02, 1.534d+08)
+
+@type: radrec
+@reacts: S++++++++++++++++,E
+@prods: S+++++++++++++++
+@rate: recNewV96(Tgas, 1.729d-09, 7.568d-01, 4.725d+02, 1.746d+08)
+
+@type: radrec
+@reacts: Cl+++++++++++++++++,E
+@prods: Cl++++++++++++++++
+@rate: recNewV96(Tgas, 1.791d-09, 7.565d-01, 5.591d+02, 1.972d+08)
+
+@type: radrec
+@reacts: Ar++++++++++++++++++,E
+@prods: Ar+++++++++++++++++
+@rate: recNewV96(Tgas, 1.913d-09, 7.567d-01, 6.175d+02, 2.212d+08)
+
+@type: radrec
+@reacts: K+++++++++++++++++++,E
+@prods: K++++++++++++++++++
+@rate: recNewV96(Tgas, 2.033d-09, 7.569d-01, 6.797d+02, 2.463d+08)
+
+@type: radrec
+@reacts: Ca++++++++++++++++++++,E
+@prods: Ca+++++++++++++++++++
+@rate: recNewV96(Tgas, 2.129d-09, 7.570d-01, 7.591d+02, 2.739d+08)
+
+@type: radrec
+@reacts: Sc+++++++++++++++++++++,E
+@prods: Sc++++++++++++++++++++
+@rate: recNewV96(Tgas, 2.262d-09, 7.578d-01, 8.186d+02, 3.000d+08)
+
+@type: radrec
+@reacts: Ti++++++++++++++++++++++,E
+@prods: Ti+++++++++++++++++++++
+@rate: recNewV96(Tgas, 2.370d-09, 7.574d-01, 9.002d+02, 3.307d+08)
+
+@type: radrec
+@reacts: V+++++++++++++++++++++++,E
+@prods: V++++++++++++++++++++++
+@rate: recNewV96(Tgas, 2.415d-09, 7.565d-01, 1.032d+03, 3.635d+08)
+
+@type: radrec
+@reacts: Cr++++++++++++++++++++++++,E
+@prods: Cr+++++++++++++++++++++++
+@rate: recNewV96(Tgas, 2.537d-09, 7.571d-01, 1.108d+03, 3.954d+08)
+
+@type: radrec
+@reacts: Mn+++++++++++++++++++++++++,E
+@prods: Mn++++++++++++++++++++++++
+@rate: recNewV96(Tgas, 2.618d-09, 7.565d-01, 1.225d+03, 4.307d+08)
+
+@type: radrec
+@reacts: Fe++++++++++++++++++++++++++,E
+@prods: Fe+++++++++++++++++++++++++
+@rate: recNewV96(Tgas, 2.735d-09, 7.568d-01, 1.314d+03, 4.659d+08)
+
+@type: radrec
+@reacts: Co+++++++++++++++++++++++++++,E
+@prods: Co++++++++++++++++++++++++++
+@rate: recNewV96(Tgas, 2.809d-09, 7.565d-01, 1.444d+03, 5.042d+08)
+
+@type: radrec
+@reacts: Ni++++++++++++++++++++++++++++,E
+@prods: Ni+++++++++++++++++++++++++++
+@rate: recNewV96(Tgas, 3.002d-09, 7.581d-01, 1.467d+03, 5.409d+08)
+
+@type: radrec
+@reacts: Cu+++++++++++++++++++++++++++++,E
+@prods: Cu++++++++++++++++++++++++++++
+@rate: recNewV96(Tgas, 3.022d-09, 7.564d-01, 1.666d+03, 5.855d+08)
+
+@type: radrec
+@reacts: Zn++++++++++++++++++++++++++++++,E
+@prods: Zn+++++++++++++++++++++++++++++
+@rate: recNewV96(Tgas, 3.127d-09, 7.567d-01, 1.779d+03, 6.246d+08)
+
+@type: radrec
+@reacts: Li++,E
+@prods: Li+
+@rate: recNewV96(Tgas, 1.112d-10, 6.926d-01, 2.437d+01, 8.323d+06)
+
+@type: radrec
+@reacts: Be+++,E
+@prods: Be++
+@rate: recNewV96(Tgas, 1.317d-10, 6.691d-01, 8.473d+01, 1.412d+07)
+
+@type: radrec
+@reacts: B++++,E
+@prods: B+++
+@rate: recNewV96(Tgas, 1.922d-10, 6.717d-01, 1.272d+02, 1.975d+07)
+
+@type: radrec
+@reacts: C+++++,E
+@prods: C++++
+@rate: recNewV96(Tgas, 2.765d-10, 6.858d-01, 1.535d+02, 2.556d+07)
+
+@type: radrec
+@reacts: N++++++,E
+@prods: N+++++
+@rate: recNewV96(Tgas, 3.910d-10, 6.988d-01, 1.611d+02, 3.271d+07)
+
+@type: radrec
+@reacts: O+++++++,E
+@prods: O++++++
+@rate: recNewV96(Tgas, 4.897d-10, 7.048d-01, 1.906d+02, 4.093d+07)
+
+@type: radrec
+@reacts: F++++++++,E
+@prods: F+++++++
+@rate: recNewV96(Tgas, 5.602d-10, 7.052d-01, 2.476d+02, 5.077d+07)
+
+@type: radrec
+@reacts: Ne+++++++++,E
+@prods: Ne++++++++
+@rate: recNewV96(Tgas, 6.161d-10, 7.029d-01, 3.274d+02, 6.243d+07)
+
+@type: radrec
+@reacts: Na++++++++++,E
+@prods: Na+++++++++
+@rate: recNewV96(Tgas, 6.833d-10, 7.018d-01, 4.060d+02, 7.491d+07)
+
+@type: radrec
+@reacts: Mg+++++++++++,E
+@prods: Mg++++++++++
+@rate: recNewV96(Tgas, 7.510d-10, 7.020d-01, 4.921d+02, 8.643d+07)
+
+@type: radrec
+@reacts: Al++++++++++++,E
+@prods: Al+++++++++++
+@rate: recNewV96(Tgas, 8.182d-10, 7.008d-01, 5.875d+02, 1.007d+08)
+
+@type: radrec
+@reacts: Si+++++++++++++,E
+@prods: Si++++++++++++
+@rate: recNewV96(Tgas, 8.722d-10, 6.996d-01, 7.098d+02, 1.155d+08)
+
+@type: radrec
+@reacts: P++++++++++++++,E
+@prods: P+++++++++++++
+@rate: recNewV96(Tgas, 9.142d-10, 6.961d-01, 8.682d+02, 1.335d+08)
+
+@type: radrec
+@reacts: S+++++++++++++++,E
+@prods: S++++++++++++++
+@rate: recNewV96(Tgas, 9.692d-10, 6.945d-01, 1.017d+03, 1.517d+08)
+
+@type: radrec
+@reacts: Cl++++++++++++++++,E
+@prods: Cl+++++++++++++++
+@rate: recNewV96(Tgas, 1.021d-09, 6.932d-01, 1.184d+03, 1.695d+08)
+
+@type: radrec
+@reacts: Ar+++++++++++++++++,E
+@prods: Ar++++++++++++++++
+@rate: recNewV96(Tgas, 1.087d-09, 6.936d-01, 1.329d+03, 1.880d+08)
+
+@type: radrec
+@reacts: K++++++++++++++++++,E
+@prods: K+++++++++++++++++
+@rate: recNewV96(Tgas, 1.145d-09, 6.921d-01, 1.503d+03, 2.098d+08)
+
+@type: radrec
+@reacts: Ca+++++++++++++++++++,E
+@prods: Ca++++++++++++++++++
+@rate: recNewV96(Tgas, 1.179d-09, 6.893d-01, 1.757d+03, 2.344d+08)
+
+@type: radrec
+@reacts: Sc++++++++++++++++++++,E
+@prods: Sc+++++++++++++++++++
+@rate: recNewV96(Tgas, 1.265d-09, 6.902d-01, 1.877d+03, 2.555d+08)
+
+@type: radrec
+@reacts: Ti+++++++++++++++++++++,E
+@prods: Ti++++++++++++++++++++
+@rate: recNewV96(Tgas, 1.322d-09, 6.885d-01, 2.092d+03, 2.829d+08)
+
+@type: radrec
+@reacts: V++++++++++++++++++++++,E
+@prods: V+++++++++++++++++++++
+@rate: recNewV96(Tgas, 1.375d-09, 6.885d-01, 2.321d+03, 3.056d+08)
+
+@type: radrec
+@reacts: Cr+++++++++++++++++++++++,E
+@prods: Cr++++++++++++++++++++++
+@rate: recNewV96(Tgas, 1.422d-09, 6.874d-01, 2.589d+03, 3.336d+08)
+
+@type: radrec
+@reacts: Mn++++++++++++++++++++++++,E
+@prods: Mn+++++++++++++++++++++++
+@rate: recNewV96(Tgas, 1.488d-09, 6.867d-01, 2.802d+03, 3.623d+08)
+
+@type: radrec
+@reacts: Fe+++++++++++++++++++++++++,E
+@prods: Fe++++++++++++++++++++++++
+@rate: recNewV96(Tgas, 1.542d-09, 6.859d-01, 3.073d+03, 3.926d+08)
+
+@type: radrec
+@reacts: Co++++++++++++++++++++++++++,E
+@prods: Co+++++++++++++++++++++++++
+@rate: recNewV96(Tgas, 1.589d-09, 6.846d-01, 3.373d+03, 4.267d+08)
+
+@type: radrec
+@reacts: Ni+++++++++++++++++++++++++++,E
+@prods: Ni++++++++++++++++++++++++++
+@rate: recNewV96(Tgas, 1.676d-09, 6.861d-01, 3.530d+03, 4.538d+08)
+
+@type: radrec
+@reacts: Cu++++++++++++++++++++++++++++,E
+@prods: Cu+++++++++++++++++++++++++++
+@rate: recNewV96(Tgas, 1.686d-09, 6.824d-01, 4.031d+03, 4.948d+08)
+
+@type: radrec
+@reacts: Zn+++++++++++++++++++++++++++++,E
+@prods: Zn++++++++++++++++++++++++++++
+@rate: recNewV96(Tgas, 1.758d-09, 6.834d-01, 4.254d+03, 5.258d+08)
+
+@type: radrec
+@reacts: Li+,E
+@prods: Li
+@rate: recNewV96(Tgas, 1.036d-11, 3.880d-01, 1.077d+02, 1.177d+07)
+
+@type: radrec
+@reacts: Be++,E
+@prods: Be+
+@rate: recNewV96(Tgas, 2.338d-11, 4.211d-01, 3.647d+02, 1.215d+07)
+
+@type: radrec
+@reacts: B+++,E
+@prods: B++
+@rate: recNewV96(Tgas, 4.487d-11, 4.644d-01, 5.371d+02, 1.465d+07)
+
+@type: radrec
+@reacts: C++++,E
+@prods: C+++
+@rate: recNewV96(Tgas, 8.540d-11, 5.247d-01, 5.014d+02, 1.479d+07)
+
+@type: radrec
+@reacts: N+++++,E
+@prods: N++++
+@rate: recNewV96(Tgas, 1.169d-10, 5.470d-01, 6.793d+02, 1.650d+07)
+
+@type: radrec
+@reacts: O++++++,E
+@prods: O+++++
+@rate: recNewV96(Tgas, 2.053d-10, 6.019d-01, 4.772d+02, 1.711d+07)
+
+@type: radrec
+@reacts: F+++++++,E
+@prods: F++++++
+@rate: recNewV96(Tgas, 2.739d-10, 6.188d-01, 5.033d+02, 2.064d+07)
+
+@type: radrec
+@reacts: Ne++++++++,E
+@prods: Ne+++++++
+@rate: recNewV96(Tgas, 3.200d-10, 6.198d-01, 6.329d+02, 2.616d+07)
+
+@type: radrec
+@reacts: Na+++++++++,E
+@prods: Na++++++++
+@rate: recNewV96(Tgas, 3.873d-10, 6.295d-01, 7.000d+02, 2.989d+07)
+
+@type: radrec
+@reacts: Mg++++++++++,E
+@prods: Mg+++++++++
+@rate: recNewV96(Tgas, 4.284d-10, 6.287d-01, 8.748d+02, 3.586d+07)
+
+@type: radrec
+@reacts: Al+++++++++++,E
+@prods: Al++++++++++
+@rate: recNewV96(Tgas, 4.881d-10, 6.326d-01, 9.941d+02, 4.085d+07)
+
+@type: radrec
+@reacts: Si++++++++++++,E
+@prods: Si+++++++++++
+@rate: recNewV96(Tgas, 5.373d-10, 6.337d-01, 1.164d+03, 4.677d+07)
+
+@type: radrec
+@reacts: P+++++++++++++,E
+@prods: P++++++++++++
+@rate: recNewV96(Tgas, 5.876d-10, 6.354d-01, 1.341d+03, 5.292d+07)
+
+@type: radrec
+@reacts: S++++++++++++++,E
+@prods: S+++++++++++++
+@rate: recNewV96(Tgas, 6.571d-10, 6.400d-01, 1.452d+03, 5.796d+07)
+
+@type: radrec
+@reacts: Cl+++++++++++++++,E
+@prods: Cl++++++++++++++
+@rate: recNewV96(Tgas, 7.076d-10, 6.397d-01, 1.653d+03, 6.555d+07)
+
+@type: radrec
+@reacts: Ar++++++++++++++++,E
+@prods: Ar+++++++++++++++
+@rate: recNewV96(Tgas, 7.538d-10, 6.388d-01, 1.889d+03, 7.306d+07)
+
+@type: radrec
+@reacts: K+++++++++++++++++,E
+@prods: K++++++++++++++++
+@rate: recNewV96(Tgas, 8.182d-10, 6.411d-01, 2.044d+03, 8.057d+07)
+
+@type: radrec
+@reacts: Ca++++++++++++++++++,E
+@prods: Ca+++++++++++++++++
+@rate: recNewV96(Tgas, 8.577d-10, 6.403d-01, 2.334d+03, 8.850d+07)
+
+@type: radrec
+@reacts: Sc+++++++++++++++++++,E
+@prods: Sc++++++++++++++++++
+@rate: recNewV96(Tgas, 9.162d-10, 6.413d-01, 2.543d+03, 9.690d+07)
+
+@type: radrec
+@reacts: Ti++++++++++++++++++++,E
+@prods: Ti+++++++++++++++++++
+@rate: recNewV96(Tgas, 9.844d-10, 6.440d-01, 2.708d+03, 1.044d+08)
+
+@type: radrec
+@reacts: V+++++++++++++++++++++,E
+@prods: V++++++++++++++++++++
+@rate: recNewV96(Tgas, 1.020d-09, 6.427d-01, 3.057d+03, 1.140d+08)
+
+@type: radrec
+@reacts: Cr++++++++++++++++++++++,E
+@prods: Cr+++++++++++++++++++++
+@rate: recNewV96(Tgas, 1.091d-09, 6.445d-01, 3.225d+03, 1.229d+08)
+
+@type: radrec
+@reacts: Mn+++++++++++++++++++++++,E
+@prods: Mn++++++++++++++++++++++
+@rate: recNewV96(Tgas, 1.151d-09, 6.451d-01, 3.461d+03, 1.334d+08)
+
+@type: radrec
+@reacts: Fe++++++++++++++++++++++++,E
+@prods: Fe+++++++++++++++++++++++
+@rate: recNewV96(Tgas, 1.198d-09, 6.443d-01, 3.789d+03, 1.437d+08)
+
+@type: radrec
+@reacts: Co+++++++++++++++++++++++++,E
+@prods: Co++++++++++++++++++++++++
+@rate: recNewV96(Tgas, 1.211d-09, 6.406d-01, 4.357d+03, 1.572d+08)
+
+@type: radrec
+@reacts: Ni++++++++++++++++++++++++++,E
+@prods: Ni+++++++++++++++++++++++++
+@rate: recNewV96(Tgas, 1.288d-09, 6.440d-01, 4.506d+03, 1.651d+08)
+
+@type: radrec
+@reacts: Cu+++++++++++++++++++++++++++,E
+@prods: Cu++++++++++++++++++++++++++
+@rate: recNewV96(Tgas, 1.372d-09, 6.472d-01, 4.627d+03, 1.740d+08)
+
+@type: radrec
+@reacts: Zn++++++++++++++++++++++++++++,E
+@prods: Zn+++++++++++++++++++++++++++
+@rate: recNewV96(Tgas, 1.412d-09, 6.454d-01, 5.053d+03, 1.891d+08)
+
+@type: radrec
+@reacts: C+++,E
+@prods: C++
+@rate: recNewV96(Tgas, 2.020d-09, 7.798d-01, 6.690d-01, 2.425d+06)
+
+@type: radrec
+@reacts: N++++,E
+@prods: N+++
+@rate: recNewV96(Tgas, 1.595d-11, 3.529d-01, 9.870d+03, 2.584d+07)
+
+@type: radrec
+@reacts: O+++++,E
+@prods: O++++
+@rate: recNewV96(Tgas, 2.008d-11, 3.567d-01, 1.520d+04, 3.843d+07)
+
+@type: radrec
+@reacts: Ne+++++++,E
+@prods: Ne++++++
+@rate: recNewV96(Tgas, 2.793d-11, 3.533d-01, 3.017d+04, 7.872d+07)
+
+@type: radrec
+@reacts: C++,E
+@prods: C+
+@rate: recNewV96(Tgas, 8.577d-10, 7.837d-01, 7.286d-01, 1.140d+07)
+
+@type: radrec
+@reacts: N+++,E
+@prods: N++
+@rate: recNewV96(Tgas, 7.039d-10, 8.607d-01, 2.203d+00, 3.029d+06)
+
+@type: radrec
+@reacts: O++++,E
+@prods: O+++
+@rate: recNewV96(Tgas, 1.542d-10, 6.712d-01, 1.775d+02, 1.535d+08)
+
+@type: radrec
+@reacts: Ne++++++,E
+@prods: Ne+++++
+@rate: recNewV96(Tgas, 2.515d-10, 7.011d-01, 3.028d+02, 8.903d+06)
+
+@type: radrec
+@reacts: C+,E
+@prods: C
+@rate: recNewV96(Tgas, 7.651d-09, 8.027d-01, 1.193d-03, 9.334d+12)
+
+@type: radrec
+@reacts: N++,E
+@prods: N+
+@rate: recNewV96(Tgas, 5.989d-10, 7.560d-01, 1.377d+00, 1.517d+09)
+
+@type: radrec
+@reacts: O+++,E
+@prods: O++
+@rate: recNewV96(Tgas, 3.672d-09, 7.676d-01, 2.900d-01, 8.521d+07)
+
+@type: radrec
+@reacts: Ne+++++,E
+@prods: Ne++++
+@rate: recNewV96(Tgas, 9.353d-11, 6.270d-01, 9.031d+02, 2.387d+07)
+
+@type: radrec
+@reacts: N+,E
+@prods: N
+@rate: recNewV96(Tgas, 1.243d-08, 7.022d-01, 1.136d-03, 1.015d+13)
+
+@type: radrec
+@reacts: O++,E
+@prods: O+
+@rate: recNewV96(Tgas, 1.816d-08, 7.170d-01, 6.717d-03, 3.286d+12)
+
+@type: radrec
+@reacts: Ne++++,E
+@prods: Ne+++
+@rate: recNewV96(Tgas, 4.227d-11, 5.395d-01, 1.687d+03, 1.491d+17)
+
+@type: radrec
+@reacts: O+,E
+@prods: O
+@rate: recNewV96(Tgas, 1.341d-10, 6.159d-01, 1.673d+00, 6.366d+16)
+
+@type: radrec
+@reacts: Ne+++,E
+@prods: Ne++
+@rate: recNewV96(Tgas, 9.563d-12, 3.067d-01, 9.768d+03, 4.851d+17)
+
+@type: radrec
+@reacts: Ne++,E
+@prods: Ne+
+@rate: recNewV96(Tgas, 5.417d-08, 6.930d-01, 1.179d-03, 1.060d+07)
+
+@type: radrec
+@reacts: Ne+,E
+@prods: Ne
+@rate: recNewV96(Tgas, 5.023d-12, 2.420d-01, 3.181d+02, 1.450d+18)
+
+@type: radrec
+@reacts: Na+,E
+@prods: Na
+@rate: recNewV96(Tgas, 5.641d-12, 1.749d-01, 3.077d+02, 2.617d+06)
+
+@type: radrec
+@reacts: Mg++,E
+@prods: Mg+
+@rate: recNewV96(Tgas, 1.920d-11, 3.028d-01, 4.849d+02, 5.890d+06)
+
+@type: radrec
+@reacts: Al+++,E
+@prods: Al++
+@rate: recNewV96(Tgas, 3.753d-11, 3.585d-01, 6.848d+02, 9.035d+06)
+
+@type: radrec
+@reacts: Si++++,E
+@prods: Si+++
+@rate: recNewV96(Tgas, 5.942d-11, 3.930d-01, 8.962d+02, 1.213d+07)
+
+@type: radrec
+@reacts: P+++++,E
+@prods: P++++
+@rate: recNewV96(Tgas, 1.721d-10, 5.429d-01, 2.848d+02, 3.975d+07)
+
+@type: radrec
+@reacts: S++++++,E
+@prods: S+++++
+@rate: recNewV96(Tgas, 3.502d-10, 6.266d-01, 1.532d+02, 1.755d+07)
+
+@type: radrec
+@reacts: Cl+++++++,E
+@prods: Cl++++++
+@rate: recNewV96(Tgas, 2.502d-10, 5.580d-01, 5.303d+02, 4.558d+07)
+
+@type: radrec
+@reacts: Ar++++++++,E
+@prods: Ar+++++++
+@rate: recNewV96(Tgas, 2.862d-10, 5.621d-01, 7.002d+02, 4.885d+07)
+
+@type: radrec
+@reacts: K+++++++++,E
+@prods: K++++++++
+@rate: recNewV96(Tgas, 2.757d-10, 5.364d-01, 1.204d+03, 7.013d+07)
+
+@type: radrec
+@reacts: Ca++++++++++,E
+@prods: Ca+++++++++
+@rate: recNewV96(Tgas, 5.273d-10, 6.281d-01, 5.329d+02, 3.188d+07)
+
+@type: radrec
+@reacts: Sc+++++++++++,E
+@prods: Sc++++++++++
+@rate: recNewV96(Tgas, 3.890d-10, 5.645d-01, 1.391d+03, 6.295d+07)
+
+@type: radrec
+@reacts: Ti++++++++++++,E
+@prods: Ti+++++++++++
+@rate: recNewV96(Tgas, 4.207d-10, 5.646d-01, 1.688d+03, 6.872d+07)
+
+@type: radrec
+@reacts: V+++++++++++++,E
+@prods: V++++++++++++
+@rate: recNewV96(Tgas, 4.605d-10, 5.659d-01, 1.949d+03, 7.419d+07)
+
+@type: radrec
+@reacts: Cr++++++++++++++,E
+@prods: Cr+++++++++++++
+@rate: recNewV96(Tgas, 4.975d-10, 5.655d-01, 2.257d+03, 8.072d+07)
+
+@type: radrec
+@reacts: Mn+++++++++++++++,E
+@prods: Mn++++++++++++++
+@rate: recNewV96(Tgas, 5.349d-10, 5.658d-01, 2.577d+03, 8.710d+07)
+
+@type: radrec
+@reacts: Fe++++++++++++++++,E
+@prods: Fe+++++++++++++++
+@rate: recNewV96(Tgas, 7.688d-10, 6.173d-01, 1.653d+03, 6.161d+07)
+
+@type: radrec
+@reacts: Co+++++++++++++++++,E
+@prods: Co++++++++++++++++
+@rate: recNewV96(Tgas, 5.850d-10, 5.598d-01, 3.538d+03, 1.052d+08)
+
+@type: radrec
+@reacts: Ni++++++++++++++++++,E
+@prods: Ni+++++++++++++++++
+@rate: recNewV96(Tgas, 6.347d-10, 5.631d-01, 3.780d+03, 1.116d+08)
+
+@type: radrec
+@reacts: Cu+++++++++++++++++++,E
+@prods: Cu++++++++++++++++++
+@rate: recNewV96(Tgas, 6.619d-10, 5.602d-01, 4.322d+03, 1.210d+08)
+
+@type: radrec
+@reacts: Zn++++++++++++++++++++,E
+@prods: Zn+++++++++++++++++++
+@rate: recNewV96(Tgas, 7.002d-10, 5.612d-01, 4.726d+03, 1.287d+08)
+
+@type: radrec
+@reacts: Fe+++++++++++++++,E
+@prods: Fe++++++++++++++
+@rate: recNewV96(Tgas, 8.110d-10, 5.442d-01, 1.755d+03, 6.799d+07)
+
+@type: radrec
+@reacts: Fe++++++++++++++,E
+@prods: Fe+++++++++++++
+@rate: recNewV96(Tgas, 6.967d-10, 5.602d-01, 1.727d+03, 5.618d+07)
+
+@type: radrec
+@reacts: Fe+++++++++++++,E
+@prods: Fe++++++++++++
+@rate: recNewV96(Tgas, 3.236d-08, 3.247d-01, 2.338d+01, 8.337d+12)
+
+@type: radrec
+@reacts: Fe++++++++++++,E
+@prods: Fe+++++++++++
+@rate: recNewV96(Tgas, 2.664d-08, 3.285d-01, 2.297d+01, 6.672d+12)
+
+@type: radrec
+@reacts: Fe+++++++++++,E
+@prods: Fe++++++++++
+@rate: recNewV96(Tgas, 2.165d-08, 3.403d-01, 2.195d+01, 6.383d+12)
+
+@type: radrec
+@reacts: Fe++++++++++,E
+@prods: Fe+++++++++
+@rate: recNewV96(Tgas, 2.460d-08, 3.387d-01, 1.487d+01, 5.228d+12)
+
+@type: radrec
+@reacts: Fe+++++++++,E
+@prods: Fe++++++++
+@rate: recNewV96(Tgas, 1.907d-08, 3.768d-01, 1.216d+01, 5.431d+12)
+
+@type: radrec
+@reacts: Fe++++++++,E
+@prods: Fe+++++++
+@rate: recNewV96(Tgas, 1.439d-08, 4.170d-01, 1.006d+01, 4.898d+12)
+
+@type: radrec
+@reacts: Fe+++++++,E
+@prods: Fe++++++
+@rate: recNewV96(Tgas, 1.184d-08, 4.798d-01, 5.883d+00, 2.582d+12)
+
+@type: radrec
+@reacts: Fe++++++,E
+@prods: Fe+++++
+@rate: recNewV96(Tgas, 1.036d-08, 5.428d-01, 2.743d+00, 1.014d+12)
+
+@type: radrec
+@reacts: Fe+++++,E
+@prods: Fe++++
+@rate: recNewV96(Tgas, 8.288d-09, 6.012d-01, 1.216d+00, 1.182d+12)
+
+@type: radrec
+@reacts: Fe++++,E
+@prods: Fe+++
+@rate: recNewV96(Tgas, 6.330d-09, 6.355d-01, 5.457d-01, 8.545d+11)
+
+@type: radrec
+@reacts: Fe+++,E
+@prods: Fe++
+@rate: recNewV96(Tgas, 5.422d-09, 5.067d-01, 4.998d-01, 8.079d+11)
+
+@type: radrec
+@reacts: Fe++,E
+@prods: Fe+
+@rate: recNewV96(Tgas, 6.076d-09, 3.112d-01, 3.401d-01, 1.960d+12)
+
+@type: radrec
+@reacts: Fe+,E
+@prods: Fe
+@rate: recNewV96(Tgas, 8.945d-09, 2.156d-01, 4.184d-02, 5.353d+13)
+
+@type: radrec
+@reacts: Fe+++++++++++++++++++++++,E
+@prods: Fe++++++++++++++++++++++
+@rate: recFeV96(Tgas, 4.330d-10, 5.310d-01, 5.770d-02)
+
+@type: radrec
+@reacts: Fe++++++++++++++++++++++,E
+@prods: Fe+++++++++++++++++++++
+@rate: recFeV96(Tgas, 3.910d-10, 5.230d-01, 6.150d-02)
+
+@type: radrec
+@reacts: Fe+++++++++++++++++++++,E
+@prods: Fe++++++++++++++++++++
+@rate: recFeV96(Tgas, 3.490d-10, 5.210d-01, 6.220d-02)
+
+@type: radrec
+@reacts: Fe++++++++++++++++++++,E
+@prods: Fe+++++++++++++++++++
+@rate: recFeV96(Tgas, 3.160d-10, 5.340d-01, 6.020d-02)
+
+@type: radrec
+@reacts: Fe+++++++++++++++++++,E
+@prods: Fe++++++++++++++++++
+@rate: recFeV96(Tgas, 2.960d-10, 5.570d-01, 5.790d-02)
+
+@type: radrec
+@reacts: Fe++++++++++++++++++,E
+@prods: Fe+++++++++++++++++
+@rate: recFeV96(Tgas, 2.590d-10, 5.670d-01, 5.650d-02)
+
+@type: radrec
+@reacts: Fe+++++++++++++++++,E
+@prods: Fe++++++++++++++++
+@rate: recFeV96(Tgas, 2.240d-10, 5.790d-01, 5.490d-02)
+
+@type: radrec
+@reacts: Fe++++++++++++++++,E
+@prods: Fe+++++++++++++++
+@rate: recFeV96(Tgas, 1.910d-10, 6.010d-01, 5.100d-02)
+
+@type: radrec
+@reacts: Fe+++++++++++++++,E
+@prods: Fe++++++++++++++
+@rate: recFeV96(Tgas, 1.680d-10, 6.020d-01, 5.070d-02)
+
+@type: radrec
+@reacts: Fe++++++++++++++,E
+@prods: Fe+++++++++++++
+@rate: recFeV96(Tgas, 1.460d-10, 5.970d-01, 5.220d-02)
+

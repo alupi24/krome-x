@@ -1,0 +1,15 @@
+# legacy tests/lamda: O2 line cooling from the LAMDA data over an (n, T)
+# grid, the chemistry of the COthin network solved to equilibrium
+# legacy -coolFile=data/coolO2.dat: the KROME-X data/cooling/coolO2.dat (the
+# LAMDA O2 file re-converted with the correct cm^-1 -> K factor); its O2
+# coolant is the cooling term "O2"
+# legacy -useThermoToggle dropped: thermal evolution is the runtime option
+# SolverOpts::evolve_T (off by default; the driver's krome_thermo_OFF)
+# (the network path is relative to the KROME-X folder)
+
+[project]
+network = "networks/COthin.knet"
+
+[thermal]
+cooling = ["O2"]
+coolant_files = ["data/cooling/coolO2.dat"]

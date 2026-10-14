@@ -1,0 +1,12 @@
+# legacy tests/shock1D: Sedov-like 1D Lagrangian shock + primordial chemistry
+# legacy options: -n networks/react_primordial -useX
+# KROME-X changes:
+#  - the network is the converted networks/primordial.knet (identical rates)
+#  - -useX is dropped: mass fractions are a runtime choice in KROME-X, the
+#    driver calls krome_solve_x
+#  - no -cooling/-heating: legacy integrated dT/dt = 0 (isothermal
+#    chemistry), which is the KROME-X default evolve_T = 0
+# (the network path is relative to the KROME-X folder)
+
+[project]
+network = "networks/primordial.knet"

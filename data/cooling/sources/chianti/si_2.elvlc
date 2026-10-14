@@ -1,0 +1,9 @@
+      1     3s2.3p                            2  P    0.5          0.000          0.000
+      2     3s2.3p                            2  P    1.5        287.240        287.512
+ -1
+%filename: si_2.elvlc
+%observed energies: v.3 of the NIST Atomic Database
+%theoretical energies: Tayal, 2008, ApJS, 179, 534
+% produced as part of the Arcetri/Cambridge/NRL 'CHIANTI' atomic data base collaboration
+%
+%     Peter Young, Jan-2009

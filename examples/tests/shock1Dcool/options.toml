@@ -1,0 +1,17 @@
+# legacy tests/shock1Dcool: tests/shock1D with primordial cooling
+# legacy options: -n networks/react_primordial -cooling=H2,HD,Z,DH -useX
+# KROME-X changes:
+#  - the network is the converted networks/primordial.knet (identical rates)
+#  - -useX is dropped: mass fractions are a runtime choice in KROME-X, the
+#    driver calls solve_cells_x
+#  - the cooling list is unchanged: Z (metal lines) is empty with this
+#    metal-free network (legacy too); DH (reaction enthalpies) is the
+#    cooling of the endothermic reactions, as legacy (no -heating: the
+#    exothermic ones are not counted); the driver sets evolve_T = true
+# (the network path is relative to the KROME-X folder)
+
+[project]
+network = "networks/primordial.knet"
+
+[thermal]
+cooling = ["H2", "HD", "Z", "DH"]

@@ -1,0 +1,25 @@
+krome_format 1
+# converted from legacy network 'react_customCool' by convert_legacy.py
+
+#in this network we only show how to add a custom
+# cooling expression to KROME.
+# see eqns. (A13)-(A14) http://adsabs.harvard.edu/abs/2003MNRAS.339....1S
+
+#for this cooling function ghosts are needed
+species H, H2, H2O
+
+#cooling block START
+
+ #additional variables in F90 format
+ # note that the @var tokens inside a @cooling block do not interfere with the other ones
+var a = 1.35e0-0.3e0*log10(Tgas*1e-3)
+var lambda3 = 1.32e-23*(Tgas*1e-3)**a
+
+ #cooling expression for rotational part
+ # note that the index are written in the internal KROME way (without "krome_")
+cooling custom_1 = (n(H2) + 1.39e0*n(H)) * n(H2O) * lambda3
+
+#cooling block END
+
+#dummy reaction
+# [legacy dummy reaction dropped: KROME-X allows empty networks]

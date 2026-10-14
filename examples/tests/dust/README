@@ -1,0 +1,40 @@
+!****************************************************************
+!This test consists of a gas with an initial population of dust,
+! both silicon and carbon based, with 10 bins each.
+!The dust-to-gas mass ratio is 1e-2 and the dust distribution
+! follows an MRN power-law. (legacy tests/dust)
+!****************************************************************
+
+KROME-X notes
+- C++ driver (test.cpp): the population is a DustBins (10 bins per type,
+  MRN 5e-7 - 2.5e-5 cm, the legacy krome_init_dust_distribution defaults);
+  dust.evolve = ["GROWTH", "EVAP"] (legacy -dustOptions) makes the grain radii
+  solver state. Tdust = Tgas as in legacy (dust.evolve_Td with thermal
+  evolution off holds the given Td); d2g = 1e-2 (the legacy header and
+  README said 1e-5, the driver used 1e-2).
+- outputs as legacy: gas.dat (Tgas, gas-phase C and Si mass densities),
+  dust.dat (dust type 0 carbon / 1 silicon, Tgas, dust mass density per
+  bin, one block per bin), mass_check.dat (Tgas, total C + Si mass: constant,
+  the exchange conserves the key elements exactly). The dust mass uses
+  each type's bulk density (2.25 / 3.13 g cm^-3; legacy wrote 2.2 for
+  both). Plot: python3 plot.py.
+- KROME-X vs legacy (the same run, gas-phase mass densities [g cm^-3]):
+
+      Tgas [K]   C KROME-X      C legacy   Si KROME-X     Si legacy
+      10         1.91e-21  1.72e-21   4.65e-21  4.62e-21
+      327        1.89e-22  3.73e-25   4.01e-21  9.70e-22
+      1322       1.91e-21  1.72e-21   6.47e-21  4.62e-21
+      2656       1.70e-20  9.66e-21   6.47e-21  6.48e-21
+      1e4        1.70e-20  1.69e-20   6.47e-21  6.48e-21
+
+  The same shape (depletion at intermediate Tgas, full return when the
+  grains evaporate; the same final gas values). The differences are the
+  KROME-X fixes of the legacy dust evolution:
+  - growth: legacy used the proton's thermal speed for the accreting
+    atom, 3.5x (C) and 5.3x (Si) too fast: KROME-X depletes less;
+  - evaporation: KROME-X removes atomic layers at the Polanyi-Wigner rate,
+    size independent (Grassi et al. 2017 sec. 2.3), with E0 = 7.2 eV
+    (carbon, Lenzuni et al. 1995) and 4.66 eV (silicate, Nozawa et al.
+    2006); legacy removed one atom per grain (a rate ~1/a^2) with Evans's
+    7.66 / 5.22 eV. Silicates evaporate by ~1300 K, carbon by ~2600 K.
+- output files (legacy name): gas.dat (fort.66), dust.dat (fort.77), mass_check.dat (fort.88).

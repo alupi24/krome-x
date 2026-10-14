@@ -1,0 +1,10 @@
+# legacy tests/reverse: the Zel'dovich NO mechanism with its reverse
+# reactions from thermochemistry.
+# KROME-X changes: legacy -reverse (a generation flag reversing every
+# reaction) is not an option in KROME-X: the reverse reactions are written in
+# the network as <-> (NO_reverse.knet here, = kromex/convert_legacy.py
+# networks/react_NO --reverse); -noSinkCheck is a no-op (no sink check)
+# (the network path is relative to the KROME-X folder)
+
+[project]
+network = "examples/tests/reverse/NO_reverse.knet"

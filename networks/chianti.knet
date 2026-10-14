@@ -1,0 +1,28 @@
+krome_format 1
+# converted from legacy network 'react_chianti' by convert_legacy.py
+
+species H, H+
+
+C -> C+ + e-                      []  photo(xsec=auto)
+C+ -> C++ + e-                    []  photo(xsec=auto)
+C++ -> C+++ + e-                  []  photo(xsec=auto)
+C+++ -> C++++ + e-                []  photo(xsec=auto)
+C++++ -> C+++++ + e-              []  photo(xsec=auto)
+C+++++ -> C++++++ + e-            []  photo(xsec=auto)
+
+
+C+ + e- -> C                      []  auto
+C++ + e- -> C+                    []  auto
+C+++ + e- -> C++                  []  auto
+C++++ + e- -> C+++                []  auto
+C+++++ + e- -> C++++              []  auto
+C++++++ + e- -> C+++++            []  auto
+
+C + e- -> C+ + e- + e-            []  auto
+C+ + e- -> C++ + e- + e-          []  auto
+C++ + e- -> C+++ + e- + e-        []  auto
+C+++ + e- -> C++++ + e- + e-      []  auto
+C++++ + e- -> C+++++ + e- + e-    []  auto
+C+++++ + e- -> C++++++ + e- + e-  []  auto
+
+

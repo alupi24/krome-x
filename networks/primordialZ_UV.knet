@@ -1,0 +1,159 @@
+krome_format 1
+# converted from legacy network 'react_primordialZ_UV' by convert_legacy.py
+
+param redshift = 0.0    # runtime parameter (legacy @common:user_redshift); set default!
+
+# legacy shortcut symbols, now ordinary vars:
+var lnTe     = log(Tgas_eV)
+var invTe    = 1.0/Tgas_eV
+var logT     = log10(Tgas)
+var invT     = 1.0/Tgas
+var sqrTgas  = sqrt(Tgas)
+var invsqrT  = 1.0/sqrt(Tgas)
+var T32      = Tgas/300.0
+var invsqrT32 = sqrt(300.0/Tgas)
+
+# functions provided by runtime physics modules:
+extern sigma_v96
+
+#############
+#primordial chemistry including carbon and oxygen chemistry from Omukai et al. 2005
+
+#primordial rates from Omukai+2000
+
+var T = Tgas
+var invT = 1e0/Tgas
+var invsqrT = 1e0/sqrt(Tgas)
+
+H + e- -> H+ + e- + e-      []             exp(-32.71396786e0+13.5365560e0*lnTe-5.73932875e0*(lnTe**2)+1.56315498e0*(lnTe**3)-0.28770560e0*(lnTe**4)+3.48255977e-2*(lnTe**5)-2.63197617e-3*(lnTe**6)+1.11954395e-4*(lnTe**7)-2.03914985e-6*(lnTe**8))
+
+H+ + e- -> H                []             exp(-28.61303380689232e0-0.7241125657826851e0*lnTe-0.02026044731984691e0*lnTe**2-0.002380861877349834e0*lnTe**3-0.0003212605213188796e0*lnTe**4-0.00001421502914054107e0*lnTe**5+4.989108920299513e-6*lnTe**6+5.755614137575758e-7*lnTe**7-1.856767039775261e-8*lnTe**8-3.071135243196595e-9*lnTe**9)
+
+He + e- -> He+ + e- + e-    []             exp(-44.09864886e0+23.91596563e0*lnTe-10.7532302e0*(lnTe**2)+3.05803875e0*(lnTe**3)-0.56851189e0*(lnTe**4)+6.79539123e-2*(lnTe**5)-5.00905610e-3*(lnTe**6)+2.06723616e-4*(lnTe**7)-3.64916141e-6*(lnTe**8))
+
+He+ + e- -> He              []             3.925e-13*invTe**0.6353+1.544e-9*invTe**1.5*(3e-1*exp(-48.596e0*invTe)+exp(-40.496e0*invTe))
+
+He+ + e- -> He++ + e- + e-  []             exp(-68.71040990212001e0+43.93347632635e0*lnTe-18.48066993568e0*lnTe**2+4.701626486759002e0*lnTe**3-0.7692466334492e0*lnTe**4+0.08113042097303e0*lnTe**5-0.005324020628287001e0*lnTe**6+0.0001975705312221e0*lnTe**7-3.165581065665e-6*lnTe**8)
+
+He++ + e- -> He+            []             3.36e-10/sqrTgas/(Tgas*1.e-3)**0.2/(1.e0+(Tgas*1.e-6)**0.7)
+
+H + e- -> H-                []             1.4e-18*Tgas**0.928*exp(-Tgas/1.62e4)
+
+H- + H -> H2 + e-           [2.73e0, 3e2]  1.5e-9
+H- + H -> H2 + e-           [3e2, 1e8]     4e-9*Tgas**(-.17)
+
+H + H+ -> H2+               []             1e1**(-19.38-1.523*logT+1.118*logT**2-0.1269*logT**3)
+
+H2+ + H -> H2 + H+          []             6.4e-10
+
+H2 + H+ -> H2+ + H          []             3e-10*exp(-2.1050e4*invT)
+
+H2 + e- -> H + H + e-       []             4.4e-10*Tgas**0.35*exp(-1.02e5*invT)
+
+# [legacy 'var Hnuclei' dropped: builtin in KROME-X]
+var kl13 = 1.12e-10*exp(-7.035e4*invT)
+var kh13 = 6.5e-7*invsqrT*exp(-5.2e4*invT)*(1.e0-exp(-6e3*invT))
+var ncr13 = 1e1**(4.e0-0.416e0*log10(T*1e-4)-0.327e0*log10(T*1e-4)**2)
+var a13 = 1.e0/(1.e0+(Hnuclei/ncr13))
+H2 + H -> H + H + H         []             kh13**(1.-a13)*kl13**a13
+
+H- + e- -> H + e- + e-      []             exp(-18.01849334273e0+2.360852208681e0*lnTe-0.2827443061704e0*lnTe**2+0.01623316639567e0*lnTe**3-0.03365012031362999e0*lnTe**4+0.01178329782711e0*lnTe**5-0.001656194699504e0*lnTe**6+0.0001068275202678e0*lnTe**7-2.631285809207e-6*lnTe**8)
+
+H- + H+ -> H + H            []             5.7e-6*invsqrT +6.3e-8 -9.2e-11*sqrTgas +4.4e-13*Tgas
+
+H- + H+ -> H2+ + e-         [2.73e0, 8e3]  6.9e-9*Tgas**(-0.35)
+H- + H+ -> H2+ + e-         [8e3, 1e8]     9.6e-7*Tgas**(-0.9)
+
+H2+ + e- -> H + H           []             2e-7*invsqrT
+
+H2+ + H- -> H + H2          []             2.3e-7/sqrt(T32)
+
+H + H + H -> H2 + H         []             5.5e-29*invT
+
+H2 + H + H -> H2 + H2       []             5.5e-29*invT*0.125e0
+
+var kl21 = 1.18e-10*exp(-6.95e4*invT)
+var kh21 = 8.125e-8*invsqrT*exp(-5.2e4*invT)*(1.e0-exp(-6e3*invT))
+var ncr21 = 1e1**(4.845e0-1.3e0*log10(T*1e-4)+1.62e0*log10(T*1e-4)**2)
+var a21 = 1.e0/(1.e0+(Hnuclei/ncr21))
+H2 + H2 -> H + H + H2       []             kh21**(1.-a21)*kl21**a21
+
+
+H + H -> H+ + e- + H        []             1.7e-4*exp(-32.71396786e0+13.5365560e0*lnTe-5.73932875e0*(lnTe**2)+1.56315498e0*(lnTe**3)-0.28770560e0*(lnTe**4)+3.48255977e-2*(lnTe**5)-2.63197617e-3*(lnTe**6)+1.11954395e-4*(lnTe**7)-2.03914985e-6*(lnTe**8))
+
+He+ + H2 -> H+ + He + H     []             3.7e-14*exp(-35e0*invT)
+
+H2+ + He -> HeH+ + H        []             1.3e-10
+
+H2+ + H2 -> H3+ + H         []             2.08e-9
+
+H3+ + H- -> H2 + H2         []             2.3e-7*invsqrT32
+
+He+ + H -> H+ + He          []             1.9e-15
+
+He+ + H- -> H + He          []             2.3e-7*invsqrT32
+
+He+ + H2 -> H2+ + He        []             7.20e-15
+
+HeH+ + H -> H2+ + He        []             9.1e-10
+
+HeH+ + H2 -> H3+ + He       []             1.5e-9
+
+H3+ + e- -> H2 + H          []             1.5e-8*invsqrT32
+
+H3+ + e- -> H + H + H       []             1.5e-8*invsqrT32
+
+HeH+ + e- -> H + He         []             2e-7*invsqrT32
+
+H -> H+ + e-                []             photo(xsec=sigma_v96(E_eV, 4.298e-01, 5.475e+04, 3.288e+01, 2.963e+00, 0.000e+00, 0.000e+00, 0.000e+00), Emin=13.6, Emax=1e4)
+
+He -> He+ + e-              []             photo(xsec=sigma_v96(E_eV, 1.361e+01, 9.492e+02, 1.469e+00, 3.188e+00, 2.039e+00, 4.434e-01, 2.136e+00), Emin=24.6, Emax=1e4)
+
+C -> C+ + e-                []             photo(xsec=sigma_v96(E_eV, 2.144e+00, 5.027e+02, 6.216e+01, 5.101e+00, 9.157e-02, 1.133e+00, 1.607e+00), Emin=11.26, Emax=291e0)
+O -> O+ + e-                []             photo(xsec=sigma_v96(E_eV, 1.240e+00, 1.745e+03, 3.784e+00, 1.764e+01, 7.589e-02, 8.698e+00, 1.271e-01), Emin=13.62, Emax=538e0)
+
+O+ + H -> H+ + O            []             6.80*1e-10
+H+ + O -> O+ + H            []             7.00*1e-10*exp(-232.*invT)
+O+ + H2 -> OH+ + H          []             1.70*1e-9
+OH+ + H2 -> H2O+ + H        []             1.01*1e-9
+H2O+ + H2 -> H3O+ + H       []             8.30*1e-10
+H2O+ + e- -> O + H2         []             2.00*1e-7*(T32)**(-0.50)
+H2O+ + e- -> OH + H         []             1.60*1e-7*(T32)**(-0.50)
+H3O+ + e- -> H2O + H        []             3.50*1e-7*(T32)**(-0.50)
+O + H -> OH                 []             9.90*1e-19*(T32)**(-0.38)
+O + H2 -> OH + H            []             3.43*1e-13*(T32)**2.67*exp(-3160*invT)
+H2 + OH -> H2O + H          []             1.55*1e-12*(T32)**1.60*exp(-1660*invT)
+OH + OH -> H2O + O          []             1.65*1e-12*(T32)**1.14*exp(-50*invT)
+H+ + OH -> OH+ + H          []             2.10*1e-9
+H+ + H2O -> H2O+ + H        []             6.90*1e-9
+H + OH -> H2 + O            []             7.00*1e-14*(T32)**2.80*exp(-1950*invT)
+H + H2O -> OH + H2          []             6.83*1e-12*(T32)**1.60*exp(-9720*invT)
+O + O -> O2                 []             4.90*1e-20*(T32)**1.58
+O + OH -> O2 + H            []             4.34*1e-11*(T32)**(-0.50)*exp(-30*invT)
+H + O2 -> OH + O            []             3.30*1e-10*exp(-8460*invT)
+H+ + O2 -> O2+ + H          []             2.00*1e-9
+O2+ + e- -> O + O           []             1.95*1e-7*(T32)**(-0.70)
+O + CH -> CO + H            []             6.60*1e-11
+C + OH -> CO + H            []             1.10*1e-10*(T32)**0.50
+C + O2 -> CO + O            []             3.30*1e-11
+C+ + O2 -> O+ + CO          []             6.20*1e-10
+OH + CO -> CO2 + H          []             1.00*1e-13
+C+ + e- -> C                []             4.40*1e-12*(T32)**(-0.61)
+C+ + OH -> CO+ + H          []             7.70*1e-10
+CO+ + H -> H+ + CO          []             7.50*1e-10
+C + H -> CH                 []             1.00*1e-17
+C + H2 -> CH + H            []             6.64*1e-10*exp(-11700*invT)
+H + CH -> C + H2            []             4.98*1e-11
+H2 + CH -> CH2 + H          []             2.38*1e-10*exp(-1760*invT)
+H + CH2 -> CH + H2          []             2.70*1e-10
+H2 + CH2 -> CH3 + H         []             5.18*1e-11*(T32)**0.17*exp(-6400*invT)
+H + CH3 -> CH2 + H2         []             1.00*1e-10*exp(-7600*invT)
+H2 + CH3 -> CH4 + H         []             6.86*1e-14*(T32)**2.74*exp(-4740*invT)
+H + CH4 -> H2 + CH3         []             5.82*1e-13*(T32)**3.00*exp(-4045*invT)
+H2 + C -> CH2               []             1.00*1e-17
+H3O+ + e- -> OH + H + H     []             6.50e-7*(T32)**(-0.50)
+OH+ + e- -> O + H           []             6.3e-9*(T32)**(-0.48)
+O+ + e- -> O                []             auto
+CO+ + e- -> CO              []             auto
+CO+ + e- -> C + O           []             auto
+

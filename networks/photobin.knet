@@ -1,0 +1,36 @@
+krome_format 1
+# converted from legacy network 'react_photobin' by convert_legacy.py
+
+param crate    = 0.0    # runtime parameter (legacy @common:user_crate); set default!
+
+# legacy shortcut symbols, now ordinary vars:
+var lnTe     = log(Tgas_eV)
+var invTe    = 1.0/Tgas_eV
+var invT     = 1.0/Tgas
+var T32      = Tgas/300.0
+
+#Glover+2010 MNRAS
+H+ + e- -> H    [2.73e0, 5.5e3]   3.92e-13*invTe**0.6353e0
+H+ + e- -> H    [5.5e3, 1e8]      exp(-28.61303380689232e0-0.7241125657826851e0*lnTe-0.02026044731984691e0*lnTe**2-0.002380861877349834e0*lnTe**3-0.0003212605213188796e0*lnTe**4-0.00001421502914054107e0*lnTe**5+4.989108920299513e-6*lnTe**6+5.755614137575758e-7*lnTe**7-1.856767039775261e-8*lnTe**8-3.071135243196595e-9*lnTe**9)
+
+C+ + e- -> C    [2.73e0, 7950e0]  4.67e-12*(T32)**(-0.6e0)
+C+ + e- -> C    [7950e0, 21140e0]  1.23e-17*(T32)**2.49*exp(21845.6e0*invT)
+C+ + e- -> C    [21140e0, 21140e0]  9.62e-8*(T32)**(-1.37)*exp(115786.2e0*invT)
+
+C -> C+ + e-    []                photo(xsec=auto)
+H -> H+ + e-    []                photo(xsec=auto)
+
+species H2
+# species He
+
+#TEST ANYTAB and XRAY
+# [legacy @XRAY block: converted to photo() -- KROME-X does X-ray chemistry through the photo machinery with bins extending to X-ray energies; tabulated X-ray rates are retired]
+# table xray_tab = "data/ratexH.dat"
+# var xray = xray_tab(n(H), n(He))
+# [legacy XRAY duplicate of photo reaction dropped: H -> H+ + e-]
+He -> He+ + e-  []                photo(xsec=auto)
+
+# [legacy @CR_start marker removed: these are ordinary reactions in KROME-X]
+H -> H+ + e-    []                4.6e-1*crate
+C -> C+ + e-    []                1.02e3*crate
+# [legacy @CR_stop marker removed: these are ordinary reactions in KROME-X]

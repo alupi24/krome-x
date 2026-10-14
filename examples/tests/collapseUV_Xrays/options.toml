@@ -1,0 +1,27 @@
+# legacy tests/collapseUV_Xrays: one-zone primordial free-fall collapse
+# irradiated by a UV flux below 13.6 eV (J21 = 0, 10, 1e3, 3e3, T4
+# spectrum) and a 2-10 keV X-ray flux (J21_X = 0.1), Inayoshi+11, Latif+14
+# legacy -heating=COMPRESS,CHEM,XRAY: KROME-X has no tabulated X-ray rates
+# (data/ratexH.dat, heatxH.dat...); X-rays are the photo reactions H, He ->
+# ion + e- on photon bins (the driver sets 2-10 keV bins with the legacy
+# J21_X spectrum attenuated by the Jeans columns), PHOTO is their
+# photoheating, and radiation.secondary_ionization the fast-photoelectron
+# ionization and heating efficiency that the legacy tables included
+# 2.0.0: -gamma=EXACT (legacy -gamma=FULL, H2 always 7/5, was removed)
+# legacy -columnDensityMethod=JEANS: radiation.num2col = "jeans"
+# legacy -conserve is a runtime option in KROME-X: SolverOpts::conserve = 2,
+# set in the driver
+# (the network path is relative to the KROME-X folder)
+
+[project]
+network = "networks/xrays.knet"
+
+[thermal]
+cooling = ["H2", "CIE", "ATOMIC", "FF", "COMPTON"]
+heating = ["COMPRESS", "CHEM", "PHOTO"]
+gamma = "EXACT"
+h2_opacity = "OMUKAI"
+
+[radiation]
+num2col = "jeans"
+secondary_ionization = ["H", "He"]

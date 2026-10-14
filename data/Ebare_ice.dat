@@ -1,0 +1,17 @@
+#Binding energies for the substrates bare grain and water ice (K)
+#(Tab.2 of http://arxiv.org/pdf/1408.5029.pdf)
+H 500 650
+H2 300 300
+O 1700 1700
+O2 1250 900
+O3 2100 1800
+OH 1360 3500
+CO 1100 1300
+CO2 2300 2300
+H2O 4800 4800
+H2O2 6000 5000
+HCO 1100 3100
+H2CO 1100 3100
+CH3O 1100 3100
+CH3O 1100 3100
+CH3OH 1100 3100 

@@ -1,0 +1,13 @@
+# legacy tests/map: one-zone models on a grid of J21 and density,
+# primordial chemistry with photochemistry and H2 photodissociation
+# legacy -photoBins=10: the photon bins are runtime setup in KROME-X
+# (Radiation + PhotoModule in test.cpp: 10 log bins 5-50 eV)
+# legacy -useX: mass fractions are a runtime choice in KROME-X (solve_cells_x in test.cpp)
+# (the network path is relative to the KROME-X folder)
+
+[project]
+network = "networks/primordial_photoH2.knet"
+
+[thermal]
+cooling = ["ATOMIC", "HD", "H2"]
+heating = ["PHOTO"]

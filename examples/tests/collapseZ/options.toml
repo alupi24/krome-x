@@ -1,0 +1,21 @@
+# legacy tests/collapseZ: one-zone free-fall collapse of a metal-enriched
+# cloud (Omukai 2005), Z = -inf, -4, -3, -2, -1 (log Z/Zsun)
+# legacy CI,CII,OI,OII line cooling = the KROME-X Z cooling with the
+# metals C, C+, O, O+
+# 2.0.0: -gamma=EXACT (legacy -gamma=FULL, H2 always 7/5, was removed)
+# legacy -noSinkCheck and -maxord=1 dropped (no KROME-X equivalent: no sink
+# check; CVODE chooses the BDF order)
+# (the network path is relative to the KROME-X folder)
+
+[project]
+network = "networks/primordialZ.knet"
+
+[thermal]
+cooling = ["H2", "COMPTON", "CONT", "CHEM", "Z"]
+heating = ["COMPRESS", "CHEM"]
+gamma = "EXACT"
+h2_opacity = "OMUKAI"
+metals = ["C", "C+", "O", "O+"]
+
+[solver]
+atol = 1e-40

@@ -1,0 +1,8 @@
+# legacy tests/auto: automatic rates (C+ + e- -> C, C + e- -> C+ + 2e-)
+# and bin-based photoionization of C
+# legacy -photoBins=10: the photon bins are runtime setup in KROME-X
+# (Radiation + PhotoModule in test.cpp: 10 log bins 10-100 eV)
+# (the network path is relative to the KROME-X folder)
+
+[project]
+network = "networks/auto.knet"

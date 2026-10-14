@@ -1,0 +1,620 @@
+krome_format 1
+# converted from legacy network 'react_COthin_ice' by convert_legacy.py
+
+param Av       = 0.0    # runtime parameter (legacy @common:user_Av); set default!
+param crate    = 0.0    # runtime parameter (legacy @common:user_crate); set default!
+
+# legacy shortcut symbols, now ordinary vars:
+var Te       = Tgas_eV
+var lnTe     = log(Tgas_eV)
+var invTe    = 1.0/Tgas_eV
+var logT     = log10(Tgas)
+var invT     = 1.0/Tgas
+var invTgas  = 1.0/Tgas
+var T32      = Tgas/300.0
+var invT32   = 300.0/Tgas
+
+# functions provided by runtime physics modules:
+extern fHnOj
+extern fselfH2
+extern get_table_Tdust
+extern krate_evaporation
+extern krate_nonthermal_evaporation
+extern krate_stickSi
+extern n_global
+
+#######################
+#This is a prototype network for CO formation
+#######################
+#rates for CO network similar to Glover+2010 MNRAS from there and other authors
+# [legacy 'var Hnuclei' dropped: builtin in KROME-X]
+# [legacy 'var ntot' dropped: builtin in KROME-X]
+
+var T32 = Tgas/3e2
+var Te = Tgas_eV
+var invT = 1e0/Tgas
+var lnTe = log(Te)
+var T = Tgas
+var invT32 = 1e0/T32
+
+#Janev 1987
+H + e- -> H+ + e- + e-      []                exp(-32.71396786e0+13.5365560e0*lnTe-5.73932875e0*(lnTe**2)+1.56315498e0*(lnTe**3)-0.28770560e0*(lnTe**4)+3.48255977e-2*(lnTe**5)-2.63197617e-3*(lnTe**6)+1.11954395e-4*(lnTe**7)-2.03914985e-6*(lnTe**8))
+
+#Abel et al. 1997, fit by data from Ferland et al. 1992
+H+ + e- -> H                [2.73e0, 5.5e3]   3.92e-13*invTe**0.6353e0
+H+ + e- -> H                [5.5e3, 1e8]      exp(-28.61303380689232e0-0.7241125657826851e0*lnTe-0.02026044731984691e0*lnTe**2-0.002380861877349834e0*lnTe**3-0.0003212605213188796e0*lnTe**4-0.00001421502914054107e0*lnTe**5+4.989108920299513e-6*lnTe**6+5.755614137575758e-7*lnTe**7-1.856767039775261e-8*lnTe**8-3.071135243196595e-9*lnTe**9)
+
+#Janev 1987
+He + e- -> He+ + e- + e-    []                exp(-44.09864886e0+23.91596563e0*lnTe-10.7532302e0*(lnTe**2)+3.05803875e0*(lnTe**3)-0.56851189e0*(lnTe**4)+6.79539123e-2*(lnTe**5)-5.00905610e-3*(lnTe**6)+2.06723616e-4*(lnTe**7)-3.64916141e-6*(lnTe**8))
+
+#Radiative+dielectronic from Cen 1992, Aldrovandi & Pequignot 1973
+He+ + e- -> He              [2.73e0, 9.28e3]  3.92e-13*invTe**0.6353e0
+He+ + e- -> He              [9.28e3, 1e8]     1.54e-9*(1.e0+0.3e0/exp(8.099328789667e0*invTe))/(exp(40.49664394833662e0*invTe)*Te**1.5e0)+3.92e-13/Te**0.6353e0
+
+#Aladdin database 1989 (see Abel et al. 1997)
+He+ + e- -> He++ + e- + e-  []                exp(-68.71040990212001e0+43.93347632635e0*lnTe-18.48066993568e0*lnTe**2+4.701626486759002e0*lnTe**3-0.7692466334492e0*lnTe**4+0.08113042097303e0*lnTe**5-0.005324020628287001e0*lnTe**6+0.0001975705312221e0*lnTe**7-3.165581065665e-6*lnTe**8)
+
+#Yoshida 2006, ApJ-652
+He+ + H -> He + H+          []                1.25e-15*(T32)**.25
+
+# De Jong (1972)
+He + H+ -> He+ + H          [0, 1e4]          1.26e-9*Tgas**(-.75)*exp(-1.275e5*invT)
+He + H+ -> He+ + H          [1e4, inf]        4e-37*Tgas**4.74
+
+
+var invTe = 1e0/Te
+var logT = log10(Tgas)
+var invsqrT = 1e0/sqrt(Tgas)
+var kl11 = 1e1**(-27.029e0+3.801e0*logT-29487e0*invT)
+var kh11 = 1e1**(-2.729e0-1.75e0*logT-23474e0*invT)
+var ncr11 = 1e1**(5.0792e0*(1e0-1.23e-5*(Tgas-2e3)))
+var ax11 = 1.e0/(1.e0+(Hnuclei/(ncr11+1e-40)))
+# [legacy @noTabNext dropped: handled outside the network file in KROME-X]
+H2 + He -> H + H + He       []                kh11**(1.-ax11)*kl11**ax11
+
+
+#Glover+2011 ####XXXX#####
+H2 + He+ -> He + H2+        []                7.2e-15
+
+H2 + He+ -> He + H + H+     []                3.7e-14*exp(-35e0*invT)
+
+#KIDA Harada+2010
+H2 + He+ -> He+ + H + H     []                3e-11*sqrt(T32)*exp(-5.2e4*invT)
+
+#Verner & Ferland 1996
+He++ + e- -> He+            []                1.891e-10/(sqrt(Tgas/9.37)*(1.+sqrt(Tgas/9.37))**0.2476*(1.+sqrt(Tgas/2.774e6))**1.7524)
+
+#De Jong (1972)
+H + e- -> H-                []                1.4e-18*Tgas**0.928*exp(-Tgas/16200.)
+
+# fit by Kreckel et al. 2010
+var a1 = 1.3500e-09
+var a2 = 9.8493e-02
+var a3 = 3.2852e-01
+var a4 = 5.5610e-01
+var a5 = 2.7710e-07
+var a6 = 2.1826e+00
+var a7 = 6.1910e-03
+var a8 = 1.0461e+00
+var a9 = 8.9712e-11
+var a10 = 3.0424e+00
+var a11 = 3.2576e-14
+var a12 = 3.7741e+00
+H- + H -> H2 + e-           []                a1*(Tgas**a2+a3*Tgas**a4+a5*Tgas**a6)/(1.+a7*Tgas**a8+a9*Tgas**a10+a11*Tgas**a12)
+
+# fit to Ramaker & Peek 1976, corrected by Coppola
+H + H+ -> H2+               [0, 3e1]          2.10e-20*(Tgas/30.)**(-0.15)
+H + H+ -> H2+               [3e1, inf]        10**(-18.20-3.194*log10(Tgas)+1.786*(log10(Tgas))**2-0.2072*(log10(Tgas))**3)
+
+#Karpas 1979 ####XXXX###
+H2+ + H -> H2 + H+          []                6e-10
+
+# [legacy @noTab_start dropped: handled outside the network file in KROME-X]
+#fit by Savin et al. 2004, see also Grassi et al. 2011, lower limits is extended below 100K
+var asav0 = -1.9153214e2
+var asav1 = 4.0129114e2
+var asav2 = -3.7446991e2
+var asav3 = 1.9078410e2
+var asav4 = -5.7263467e1
+var asav5 = 1.0133210e1
+var asav6 = -9.8012853e-1
+var asav7 = 4.0023414e-2
+var bsav0 = -8.8755774e3
+var bsav1 = 1.0081246e4
+var bsav2 = -4.8606622e3
+var bsav3 = 1.2889659e3
+var bsav4 = -2.0319575e2
+var bsav5 = 1.9057493e1
+var bsav6 = -9.8530668e-1
+var bsav7 = 2.1675387e-2
+var sumsav = asav0+asav1*log10(Tgas)+asav2*(log10(Tgas))**2+asav3*(log10(Tgas))**3+asav4*(log10(Tgas))**4+asav5*(log10(Tgas))**5+asav6*(log10(Tgas))**6+asav7*(log10(Tgas))**7
+var sumsbv = bsav0+bsav1*log10(Tgas)+bsav2*(log10(Tgas))**2+bsav3*(log10(Tgas))**3+bsav4*(log10(Tgas))**4+bsav5*(log10(Tgas))**5+bsav6*(log10(Tgas))**6+bsav7*(log10(Tgas))**7
+H2 + H+ -> H2+ + H          [0, 1e5]          1e1**sumsav
+H2 + H+ -> H2+ + H          [1e5, inf]        1e1**sumsbv
+# [legacy @noTab_stop dropped: handled outside the network file in KROME-X]
+
+
+#fit by Mitchell & Deveau 1983 of data by Corrigan 1965
+H2 + e- -> H + H + e-       []                4.38e-10*exp(-1.02e5*invT)*Tgas**(0.35)
+
+
+#Lepp+Shull 1983, updated with Glover+2010
+var kHdiss = 3.52e-9*exp(-4.39e4*invT) + 1e-40
+var kLdiss = 6.67e-12*sqrt(Tgas)*exp(-(1e0+63590.*invT)) + 1e-40
+var ncrdiss = 1e1**(3. - 0.416*log10(Tgas/1e4) - 0.327*log10(Tgas/1e4)**2)
+# [legacy @noTabNext dropped: handled outside the network file in KROME-X]
+H2 + H -> H + H + H         []                1e1**(log10(kHdiss)-log10(kHdiss/kLdiss)/(1e0+ntot/ncrdiss))
+
+
+#Janev 1987
+H- + e- -> H + e- + e-      []                exp(-18.01849334273e0+2.360852208681e0*lnTe-0.2827443061704e0*lnTe**2+0.01623316639567e0*lnTe**3-0.03365012031362999e0*lnTe**4+0.01178329782711e0*lnTe**5-0.001656194699504e0*lnTe**6+0.0001068275202678e0*lnTe**7-2.631285809207e-6*lnTe**8)
+
+#Abel+1997, based on Janev 1987
+H- + H -> H + H + e-        [0, 1.16e3]       2.56e-9*Te**1.78186
+H- + H -> H + H + e-        [1.16e3, inf]     exp(-20.37260896533324e0+1.139449335841631e0*lnTe-0.1421013521554148e0*lnTe**2+0.00846445538663e0*lnTe**3-0.0014327641212992e0*lnTe**4+0.0002012250284791e0*lnTe**5+0.0000866396324309e0*lnTe**6-0.00002585009680264e0*lnTe**7+2.4555011970392e-6*lnTe**8-8.06838246118e-8*lnTe**9)
+
+#Stenrup+2009, extended to higher temperature (extrapolation from xsecs, but new calculations are required)
+H- + H+ -> H + H            []                (2.96e-6/sqrt(Tgas) - 1.73e-9 + 2.50e-10*sqrt(Tgas))
+
+#Poulart 1978
+H- + H+ -> H2+ + e-         []                1.e-8*Tgas**(-0.4)
+
+#Abel et al. 1997, fit by data from Schneider 1994
+H2+ + e- -> H + H           [0, 6.17e2]       1.e-8
+H2+ + e- -> H + H           [6.17e2, inf]     1.32e-6*Tgas**(-0.76)
+
+#Dalgarno+Lepp 1987
+H2+ + H- -> H + H2          []                5e-7*sqrt(1e2*invT)
+
+#Lepp+Shull 1983, updated with Glover+2010
+var kHdissH2 = 1.3e-9*exp(-5.33e4*invT) + 1e-40
+var kLdissH2 = 5.996e-30*Tgas**4.1881/(1.+6.761e-6*Tgas)**5.6881 * exp(-5.46574e4*invT) + 1e-40
+var ncrdissH2 = 1e1**(4.845 - 1.3*log10(Tgas/1e4) + 1.62*log10(Tgas/1e4)**2)
+# [legacy @noTabNext dropped: handled outside the network file in KROME-X]
+H2 + H2 -> H2 + H + H       []                1e1**(log10(kHdissH2)-log10(kHdissH2/kLdissH2)/(1e0+ntot/ncrdissH2))
+
+#Glover+2010
+H + H + He -> H2 + He       []                6.9e-32*Tgas**(-.4)
+
+#Forrey 2013
+H + H + H -> H2 + H         []                6e-32*Tgas**(-.25) + 2e-31*Tgas**(-.5)
+
+#Glover&Abel 2008
+H2 + H + H -> H2 + H2       []                (6e-32*Tgas**(-0.25) + 2e-31*Tgas**(-.5)) / 8e0
+
+#METALS FROM Glover&Jappsen 2010 from
+C+ + e- -> C                [0, 7950e0]       4.67e-12*(T32)**(-0.6)
+C+ + e- -> C                [7950e0, 21140e0]  1.23e-17*(T32)**2.49*exp(21845.6e0*invT)
+C+ + e- -> C                [21140e0, inf]    9.62e-8*(T32)**(-1.37)*exp(-115786.2e0*invT)
+
+O+ + e- -> O                [0, 4e2]          1.30e-10*(Tgas)**(-0.64)
+O+ + e- -> O                [4e2, inf]        1.41e-10*(Tgas)**(-0.66) + 7.4e-4*(Tgas)**(-1.5)*exp(-1.75e5*invT)*(1e0 + 0.062e0*exp(-1.45e5*invT))
+
+var u1 = 11.26e0*invTe
+var u2 = 8.2e0*invTe
+var u3 = 13.6*invTe
+C + e- -> C+ + e- + e-      []                6.85e-8*u1**0.25*exp(-u1)/(0.193e0+u1)
+O + e- -> O+ + e- + e-      []                3.59e-8*u3**0.34*exp(-u3)/(0.073e0+u3)
+
+O+ + H -> O + H+            []                4.99e-11*Tgas**0.405 + 7.54e-10*invT**(0.458)
+O + H+ -> O+ + H            []                (1.08e-11*Tgas**0.517 + 4e-10*Tgas**(0.00669))*exp(-2.27e2*invT)
+O + He+ -> O+ + He          []                4.991e-15*(Tgas*1e-4)**0.3794*exp(-Tgas*8.9206e-7) + 2.78e-15*(Tgas*1e-4)**(-0.2163)*exp(-Tgas*1.2258e-6)
+C + H+ -> C+ + H            []                3.9e-16*Tgas**(0.213)
+C+ + H -> C + H+            []                6.08e-14*(Tgas*1e-4)**(1.96)*exp(-1.7e5*invT)
+
+C + He+ -> C+ + He          [0, 2e2]          8.58e-17*Tgas**(0.757)
+C + He+ -> C+ + He          [2e2, 2e3]        3.25e-17*Tgas**(0.968)
+C + He+ -> C+ + He          [2e3, 1e8]        2.77e-19*Tgas**(1.597)
+
+OH + H -> O + H + H         []                6e-9*exp(-5.09e4*invT)
+HOC+ + H2 -> HCO+ + H2      []                3e-10
+
+#ionpol1 rate from 10 K. Below this limit constant ionpol1(T=10K), otherwise explodes
+HOC+ + CO -> HCO+ + CO      [0, 1e1]          1.604e-9
+HOC+ + CO -> HCO+ + CO      [1e1, inf]        8.68e-10*(1.+2.42717e-2*sqrt(3e2*invT)+7.1537*invT)
+
+C + H2 -> CH + H            []                6.64e-10*exp(-11700e0*invT)
+CH + H -> C + H2            []                1.31e-10*exp(-8e1*invT)
+CH + H2 -> CH2 + H          []                5.46e-10*exp(-1943e0*invT)
+CH + C -> C2 + H            []                2.40e-10
+CH + O -> CO + H            []                1.02e-10*exp(-914e0*invT)
+
+#UMIST
+CH + O -> HCO+ + e-         []                1.9e-11*(T32)**(-2.2)*exp(-165.1e0*invT)
+
+#UMIST
+CH + O -> OH + C            []                2.52e-11*exp(-2381e0*invT)
+
+#KIDA
+CH2 + H -> CH + H2          []                2.2e-10
+
+#KIDA
+CH2 + O -> CO + H + H       []                2.04e-10*exp(-270e0*invT)
+
+#KIDA
+CH2 + O -> CO + H2          []                1.36e-10*exp(-270e0*invT)
+
+#KIDA
+CH2 + O -> HCO + H          []                5.01e-11
+
+#KIDA
+CH2 + O -> CH + OH          []                4.98e-10*exp(-6e3*invT)
+
+#KIDA below 300K, while above Glover+2010 only for slope (0.757)
+C2 + O -> CO + C            [0, 3e2]          2e-12*(T32)**(-.12)
+C2 + O -> CO + C            [3e2, inf]        2e-12*(T32)**(.757)
+
+#KIDA (lower recomanded value)
+O + H2 -> OH + H            []                1.46e-12*exp(-9650.*invT)
+
+#Glover+2010
+OH + H -> O + H2            [0, 280.]         6.99e-14*T32**2.8*exp(-1950e0*invT)
+OH + H -> O + H2            [280., inf]       5.45e-17
+
+#from Baluch+2005
+H2 + OH -> H2O + H          []                3.6e-16*T**(1.52)*exp(-1.74e3*invT)
+
+#KIDA, recomended, below 10K constant
+C + OH -> H + CO            [0, 1e1]          7.051e-11
+C + OH -> H + CO            [1e1, inf]        2.25e-11*(T32)**(-.339)*exp(-.108e0*invT)
+
+#KIDA, recomended, below 150K constant
+O + OH -> H + O2            [150., inf]       2.4e-11*exp(110e0*invT)
+O + OH -> H + O2            [0, 150.]         4.997e-11
+
+#Glover+2010
+OH + OH -> H2O + O          []                1.65e-12*(T32)**1.14*exp(-5e1*invT)
+
+#Glover+2010
+H2O + H -> H2 + OH          []                1.59e-11*(T32)*1.2*exp(-9610.*invT)
+
+#Glover+2010
+O2 + H -> OH + O            []                2.61e-10*1.2*exp(-8156.*invT)
+
+#Glover+2010
+O2 + H2 -> OH + OH          []                3.16e-10*exp(-21890.e0*invT)
+
+#Glover+2010 (limit 1052. for continuity)
+O2 + C -> CO + O            [0, 1052e0]       4.7e-11*T32**(-.34)
+O2 + C -> CO + O            [1052e0, inf]     2.48e-12*T32**1.54*exp(613e0*invT)
+
+#Glover+2010
+CO + H -> C + OH            []                1.1e-10*T32**0.5*exp(-77700e0*invT)
+
+#Glover+2010
+H2+ + H2 -> H3+ + H         []                2.24e-9*T32**.042*exp(-Tgas/46600.)
+
+#Glover+2010
+H3+ + H -> H2+ + H2         []                7.7e-9*exp(-17560e0*invT)
+
+#Glover+2010
+C + H2+ -> CH+ + H          []                2.4e-9
+
+#O'Connor+2014 (http://arxiv.org/abs/1408.4696), original range 10-1e4 K, here extended
+C + H3+ -> CH+ + H2         []                (1.0218e-9 + 7.2733e-11*sqrt(Tgas) + 5.9203e-14*Tgas)/(Tgas**0.1667 + 4.4914e-2*sqrt(Tgas) - 5.9203e-14*Tgas + 2.6397e-6*Tgas**1.5)
+
+#additional channel from O'Connor+2014 (http://arxiv.org/abs/1408.4696), original range 10-1e4 K, here extended
+C + H3+ -> CH2+ + H         []                (8.5145e-10)/(Tgas**(.1667) + 9.5666e-4*sqrt(Tgas) - 4.404e-5*Tgas + 2.3496e-6 * Tgas**1.5)
+
+#Glover+2010
+C+ + H2 -> CH+ + H          []                1e-10*exp(-4640e0*invT)
+
+#Glover+2010
+CH+ + H -> C+ + H2          []                7.5e-10
+
+#Glover+2010
+CH+ + H2 -> CH2+ + H        []                1.2e-9
+
+#Glover+2010
+CH+ + O -> CO+ + H          []                3.5e-10
+
+#Glover+2010
+CH2+ + H -> CH+ + H2        []                1e-9*exp(-7080e0*invT)
+
+#Glover+2010
+CH2+ + H2 -> CH3+ + H       []                1.6e-9
+
+#Glover+2010
+CH2+ + O -> HCO+ + H        []                7.5e-10
+
+#Glover+2010
+CH3+ + H -> CH2+ + H2       []                7.e-10*exp(-10560e0*invT)
+
+#KIDA, including additional channel, while H2CO+ channel ignored
+CH3+ + O -> HOC+ + H2       []                2.5e-10
+CH3+ + O -> HCO+ + H2       []                2.5e-10
+
+#KIDA
+C2 + O+ -> CO+ + C          []                4.8e-10
+
+#KIDA
+O+ + H2 -> H + OH+          []                1.69e-9
+
+#Glover+2010
+O + H2+ -> H + OH+          []                1.5e-9
+
+#KIDA and additional channel both recomended
+O + H3+ -> H2 + OH+         []                7.98e-10*T32**(-.156)*exp(-1.41e0*invT)
+O + H3+ -> H + H2O+         []                3.42e-10*T32**(-.156)*exp(-1.41e0*invT)
+
+#KIDA, below 10K constant
+OH + H3+ -> H2 + H2O+       [0, 1e1]          2.277e-8
+OH + H3+ -> H2 + H2O+       [1e1, inf]        1.52e-9*(0.62e0 + 2.62185e0*(3e2*invT)**.5)
+
+#KIDA, below 10K constant
+OH + C+ -> H + CO+          [0, 1e1]          1.371e-08
+OH + C+ -> H + CO+          [1e1, inf]        9.15e-10*(0.62e0 + 2.62185e0*(3e2*invT)**.5)
+
+#Glover+2010
+OH+ + H2 -> H2O+ + H        []                1.01e-9
+
+#Glover+2010
+H2O+ + H2 -> H3O+ + H       []                6.4e-10
+
+#KIDA, constant below 10K
+H2O + H3+ -> H2 + H3O+      [0, 1e1]          2.55e-8
+H2O + H3+ -> H2 + H3O+      [1e1, inf]        1.73e-9*(0.62e0 + 2.578947e0*(3e2*invT)**.5)
+
+#Glover+2010, KIDA, constant below 10K, and KIDA for additional channel
+H2O + C+ -> HOC+ + H        []                1.8e-9
+H2O + C+ -> HCO+ + H        [0, 1e1]          5.027e-9
+H2O + C+ -> HCO+ + H        [1e1, inf]        3.4093e-10*(0.62e0 + 2.578947e0*(3e2*invT)**.5)
+H2O + C+ -> H2O+ + C        []                2.4e-10
+
+#Glover+2010
+H3O+ + C -> HCO+ + H2       []                1e-11
+
+#KIDA, both recomended
+O2 + C+ -> CO+ + O          []                3.42e-10
+O2 + C+ -> CO + O+          []                4.53e-10
+
+#Glover+2010, KIDA HOCO+ channel ignored
+O2 + CH2+ -> HCO+ + OH      []                9.1e-10
+
+#Glover+2010, KIDA additional channel
+C + O2+ -> O + CO+          []                5.2e-11
+C + O2+ -> O2 + C+          []                5.2e-11
+
+#KIDA, constant below 10K
+CO + H3+ -> H2 + HCO+       [0, 1e1]          2.468e-9
+CO + H3+ -> H2 + HCO+       [1e1, inf]        1.88055e-9*(1e0 + 0.02427e0*(3e2*invT)**.5 + 1.79558e0*invT)
+
+#KIDA, constant below 10K
+CO + H3+ -> H2 + HOC+       [0, 1e1]          1.421e-10
+CO + H3+ -> H2 + HOC+       [1e1, inf]        1.08256e-10*(1e0 + 0.02427e0*(3e2*invT)**.5 + 1.79558e0*invT)
+
+#KIDA
+HCO+ + C -> CO + CH+        []                1.1e-9
+
+#KIDA, constant below 10K
+HCO+ + H2O -> CO + H3O+     [0, 1e1]          7.279e-08
+HCO+ + H2O -> CO + H3O+     [1e1, inf]        8.34e-10*(1e0 + 0.5232e0*(3e2*invT)**.5 + 834.165880*invT)
+
+#KIDA, constant below 10K
+CH + H+ -> CH+ + H          [0, 1e1]          3.297e-8
+CH + H+ -> CH+ + H          [1e1, inf]        3.54e-09*(0.62e0 + 1.587411e0*(3e2*invT)**.5)
+
+#KIDA, same rate for both channels
+CH2 + H+ -> H2 + CH+        [0, 1.5e2]        1.765e-9*(0.62e0 + 0.672147e0*(3e2*invT)**.5)
+CH2 + H+ -> H2 + CH+        [1.5e2, inf]      1.765e-9*(1e0 + 0.136347e0*(3e2*invT)**.5 + 56.66255e0*invT)
+CH2 + H+ -> H + CH2+        [0, 1.5e2]        1.765e-9*(0.62e0 + 0.672147e0*(3e2*invT)**.5)
+CH2 + H+ -> H + CH2+        [1.5e2, inf]      1.765e-9*(1e0 + 0.136347e0*(3e2*invT)**.5 + 56.66255e0*invT)
+
+#KIDA, same rate for both channels
+CH2 + He+ -> He + H2 + C+   [0, 1.5e2]        9.65e-10*(0.62e0 + 0.672147e0*(3e2*invT)**.5)
+CH2 + He+ -> He + H2 + C+   [1.5e2, inf]      9.65e-10*(1e0 + 0.136347e0*(3e2*invT)**.5 + 56.6625498765e0*invT)
+CH2 + He+ -> He + H + CH+   [0, 1.5e2]        9.65e-10*(0.62e0 + 0.672147e0*(3e2*invT)**.5)
+CH2 + He+ -> He + H + CH+   [1.5e2, inf]      9.65e-10*(1e0 + 0.136347e0*(3e2*invT)**.5 + 56.6625498765e0*invT)
+
+C2 + He+ -> C+ + C + He     []                1.6e-9
+
+#KIDA, constant below 10K
+OH + H+ -> OH+ + H          [0, 1e1]          3.745e-8
+OH + H+ -> OH+ + H          [1e1, inf]        2.5e-9*(0.62e0 + 2.62185e0*(3e2*invT)**.5)
+
+#KIDA, constant below 10K
+OH + He+ -> O+ + He + H     [0, 1e1]          2.022e-8
+OH + He+ -> O+ + He + H     [1e1, inf]        1.35e-9*(0.62e0 + 2.62185e0*(3e2*invT)**.5)
+
+#KIDA, constant below 10K
+H2O + H+ -> H + H2O+        [0, 1e1]          4.202e-8
+H2O + H+ -> H + H2O+        [1e1, inf]        2.85e-9*(0.62e0 + 2.578947e0*(3e2*invT)**.5)
+
+#KIDA,constant below 10K
+H2O + He+ -> He + OH + H+   [0, 1e1]          7.562e-9
+H2O + He+ -> He + OH + H+   [1e1, inf]        5.1282e-10*(0.62e0 + 2.578947e0*(3e2*invT)**.5)
+
+#KIDA,constant below 10K
+H2O + He+ -> He + OH+ + H   [0, 1e1]          7.562e-9
+H2O + He+ -> He + OH+ + H   [1e1, inf]        5.1282e-10*(0.62e0 + 2.578947e0*(3e2*invT)**.5)
+
+#KIDA,constant below 10K
+H2O + He+ -> He + H2O+      [0, 1e1]          7.56e-9
+H2O + He+ -> He + H2O+      [1e1, inf]        5.1282e-10*(0.62e0 + 2.578947e0*(3e2*invT)**.5)
+
+#G+10
+O2 + H+ -> O2+ + H          []                2e-9
+
+#G+10
+O2 + He+ -> O2+ + He        []                3.3e-11
+
+#G+10
+O2 + He+ -> O+ + He + O     []                1.1e-9
+
+#G+10
+CO + He+ -> C+ + He + O     []                1.4e-9*(T32)**(-.5)
+CO + He+ -> C + He + O+     []                1.4e-16*(T32)**(-.5)
+
+#G+10
+CO+ + H -> CO + H+          []                7.5e-10
+
+#G+10
+C- + H+ -> C + H            []                2.3e-7*(T32)**(-.5)
+
+#G+10
+O- + H+ -> O + H            []                2.3e-7*(T32)**(-.5)
+
+#G+10
+He+ + H- -> H + He          []                2.3e-7*T32**(-.5)
+H3+ + e- -> H2 + H          []                2.34e-8*T32**(-.52)
+H3+ + e- -> H + H + H       []                4.36e-8*T32**(-.52)
+CH+ + e- -> C + H           []                7e-8*T32**(-.5)
+CH2+ + e- -> CH + H         []                1.6e-7*T32**(-.6)
+CH2+ + e- -> C + H2         []                7.68e-8*T32**(-.6)
+CH2+ + e- -> C + H + H      []                4.03e-7*T32**(-.6)
+CH3+ + e- -> CH2 + H        []                7.75e-8*T32**(-.5)
+CH3+ + e- -> CH + H2        []                1.95e-7*T32**(-.5)
+CH3+ + e- -> CH + H + H     []                2e-7*T32**(-.5)
+OH+ + e- -> O + H           []                6.3e-9*T32**(-.48)
+H2O+ + e- -> O + H2         []                3.9e-8*T32**(-.5)
+H2O+ + e- -> OH + H         []                8.6e-8*T32**(-.5)
+H2O+ + e- -> O + H + H      []                3.05e-7*T32**(-.5)
+H3O+ + e- -> OH + H + H     []                2.58e-7*T32**(-.5)
+H3O+ + e- -> O + H + H2     []                5.6e-9*T32**(-.5)
+H3O+ + e- -> H + H2O        []                1.08e-7*T32**(-.5)
+H3O+ + e- -> OH + H2        []                6.02e-7*T32**(-.5)
+O2+ + e- -> O + O           []                1.95e-7*T32**(-.7)
+CO+ + e- -> C + O           []                2.75e-7*T32**(-.55)
+HCO+ + e- -> CO + H         []                2.76e-7*T32**(-.64)
+HCO+ + e- -> OH + C         []                2.4e-8*T32**(-.64)
+HOC+ + e- -> CO + H         []                1.1e-7*invT32
+H- + C -> CH + e-           []                1e-9
+H- + O -> OH + e-           []                1e-10
+H- + OH -> H2O + e-         []                5e-10
+C- + H -> CH + e-           []                1e-13
+C- + H2 -> CH2 + e-         []                5e-10
+C- + O -> CO + e-           []                5e-10
+O- + H -> OH + e-           []                7e-10
+O- + H2 -> H2O + e-         []                7e-10
+O- + C -> CO + e-           []                5e-10
+
+H2 + H+ -> H + H + H+       []                3e-11*T32**(.5)*exp(-52000e0*invT)
+
+H2 + H+ -> H3+              []                1e-16
+
+
+#G+10
+C + e- -> C-                []                2.25e-15
+C + H -> CH                 []                1e-17
+C + H2 -> CH2               []                1e-17
+C + C -> C2                 []                4.36e-18*T32**.35*exp(-161.3e0*invT)
+C + O -> CO                 []                3.09e-17*T32**.33*exp(-1629e0*invT)
+C+ + H -> CH+               []                4.46e-16*Tgas**(-.5)*exp(-4.93*Tgas**(-.6667))
+
+#KIDA, recomended
+C+ + H2 -> CH2+             []                2e-16*T32**(-1.3)*exp(-23e0*invTgas)
+C+ + O -> CO+               [0, 3e2]          2.5e-18
+C+ + O -> CO+               [3e2, inf]        3.14e-18*T32**(-.15)*exp(-68e0*invT)
+O + e- -> O-                []                1.5e-15
+O + H -> OH                 []                9.9e-19*T32**(-.38)
+O + O -> O2                 []                4.9e-20*T32**(1.58)
+OH + H -> H2O               []                5.26e-18*T32**(-5.22)*exp(-9e1*invT)
+
+# [legacy @noTab_start dropped: handled outside the network file in KROME-X]
+#DUST FREEZE-OUT/EVAPORATION
+var tabTdust = get_table_Tdust()
+CO -> CO_ice                []                krate_stickSi(CO)
+CO_ice -> CO                []                krate_evaporation(CO)
+H2O -> H2O_ice              []                krate_stickSi(H2O)
+H2O_ice -> H2O              []                krate_evaporation(H2O)
+
+#NON-THERMAL EVAPORATION, Yield=1e-3, Gnot=1.78 is Draine Flux
+CO_ice -> CO                []                krate_nonthermal_evaporation(CO, 1.78e0, Av, crate, 1e-3)
+
+# [legacy @noTab_stop dropped: handled outside the network file in KROME-X]
+
+#PHOTOREACTIONS THIN WITH Av
+
+#integrated with J21*13.6/E flux, up to 200eV
+# H -> H+ + e-                []                2.19e-12*exp(-1.14e4*Av)
+
+# [legacy @storeOnce_start dropped: handled outside the network file in KROME-X]
+#FROM GLOVER+2009
+H- -> H + e-                []                7.1e-7*exp(-.5*Av)
+H2+ -> H + H+               []                1.1e-9*exp(-1.9*Av)
+H3+ -> H2 + H+              []                4.9e-13*exp(-1.8*Av)
+H3+ -> H2+ + H              []                4.9e-13*exp(-2.3*Av)
+C -> C+ + e-                []                3.1e-10*exp(-3.*Av)
+C- -> C + e-                []                2.4e-7*exp(-.9*Av)
+CH -> C + H                 []                8.7e-10*exp(-1.2*Av)
+CH -> CH+ + e-              []                7.7e-10*exp(-2.8*Av)
+CH+ -> C + H+               []                2.6e-10*exp(-2.5*Av)
+CH2 -> CH + H               []                7.1e-10*exp(-1.7*Av)
+CH2 -> CH2+ + e-            []                5.9e-10*exp(-2.3*Av)
+CH2+ -> CH+ + H             []                4.6e-10*exp(-1.7*Av)
+CH3+ -> CH2+ + H            []                1e-9*exp(-1.7*Av)
+CH3+ -> CH+ + H2            []                1e-9*exp(-1.7*Av)
+C2 -> C + C                 []                1.5e-10*exp(-2.1*Av)
+O- -> O + e-                []                2.4e-7*exp(-.5*Av)
+OH -> O + H                 []                3.7e-10*exp(-1.7*Av)
+OH -> OH+ + e-              []                1.6e-12*exp(-3.1*Av)
+OH+ -> O + H+               []                1e-12*exp(-1.8*Av)
+H2O -> OH + H               []                6e-10*exp(-1.7*Av)
+H2O -> H2O+ + e-            []                3.2e-11*exp(-3.9*Av)
+O2 -> O2+ + e-              []                5.6e-11*exp(-3.7*Av)
+O2 -> O + O                 []                7e-10*exp(-1.8*Av)
+CO -> C + O                 []                2.e-10*exp(-3.53*Av)
+# [legacy @storeOnce_stop dropped: handled outside the network file in KROME-X]
+
+
+# [legacy @noTab_start dropped: handled outside the network file in KROME-X]
+var H2self = fselfH2(1.87e21*(where(n(H2) > 0.0, n(H2), n_global(H2))*1e-3)**(2./3.), 1e5)
+H2 -> H + H                 []                5.6e-11*exp(-3.74*Av)*H2self
+var HnOj = fHnOj(Av)
+H2O+ -> H2+ + O             []                5.e-11*HnOj
+H2O+ -> H+ + OH             []                5.e-11*HnOj
+H2O+ -> O+ + H2             []                5.e-11*HnOj
+H2O+ -> OH+ + H             []                1.5e-10*HnOj
+H3O+ -> H+ + H2O            []                2.5e-11*HnOj
+H3O+ -> H2+ + OH            []                2.5e-11*HnOj
+H3O+ -> H2O+ + H            []                7.5e-12*HnOj
+H3O+ -> OH+ + H2            []                2.5e-11*HnOj
+# [legacy @noTab_end dropped: handled outside the network file in KROME-X]
+
+
+#cosmic rays processes from OSU
+# [legacy @CR_start marker removed: these are ordinary reactions in KROME-X]
+# [legacy @storeOnce_start dropped: handled outside the network file in KROME-X]
+H -> H+ + e-                []                4.6e-1*crate
+He -> He+ + e-              []                5.e-1*crate
+O -> O+ + e-                []                2.8e0*crate
+CO -> C + O                 []                5e0*crate
+CO -> CO+ + e-              []                3e0*crate
+C2 -> C + C                 []                2.37e2*crate
+H2 -> H + H                 []                1e-1*crate
+H2 -> H+ + H-               []                3e-4*crate
+H2 -> H2+ + e-              []                9.3e-1*crate
+C -> C+ + e-                []                1.02e3*crate
+CH -> C + H                 []                7.3e2*crate
+O2 -> O + O                 []                7.5e2*crate
+O2 -> O2+ + e-              []                1.17e2*crate
+OH -> O + H                 []                5.1e2*crate
+CH2 -> CH2+ + e-            []                5e2*crate
+H2O -> OH + H               []                9.7e2*crate
+HCO -> CO + H               []                4.21e2*crate
+HCO -> HCO+ + e-            []                1.17e3*crate
+H2 -> H + H+ + e-           []                9.3e-1*crate
+# [legacy @storeOnce_stop dropped: handled outside the network file in KROME-X]
+# [legacy @CR_stop marker removed: these are ordinary reactions in KROME-X]
+
+
+#3body catalysis
+# [legacy @noTab_start dropped: handled outside the network file in KROME-X]
+C + C -> C2                 [0, 5e3]          5.99e-33*(Tgas/5e3)**(-1.6)*ntot
+C + C -> C2                 [5e3, inf]        5.99e-33*(Tgas/5e3)**(-0.64)*exp(5255./Tgas)*ntot
+
+C + O -> CO                 [0, 2e3]          6.16e-29*(Tgas/3e2)**(-3.08)*ntot
+C + O -> CO                 [2e3, inf]        2.14e-29*(Tgas/3e2)**(-3.08)*exp(2114./Tgas)*ntot
+
+C+ + O -> CO+               [0, 2e3]          6.16e-27*(Tgas/3e2)**(-3.08)*ntot
+C+ + O -> CO+               [2e3, inf]        2.14e-27*(Tgas/3e2)**(-3.08)*exp(2114./Tgas)*ntot
+
+C + O+ -> CO+               [0, 2e3]          6.16e-27*(Tgas/3e2)**(-3.08)*ntot
+C + O+ -> CO+               [2e3, inf]        2.14e-27*(Tgas/3e2)**(-3.08)*exp(2114./Tgas)*ntot
+
+H + O -> OH                 []                4.33e-32*(T32)**(-1)*ntot
+OH + H -> H2O               []                2.56e-31*(T32)**(-2)*ntot
+O + O -> O2                 []                9.2e-34*(T32)**(-1)*ntot
+
+# [legacy @noTab_stop dropped: handled outside the network file in KROME-X]
+

@@ -1,0 +1,44 @@
+!**************************************************
+!This test represents a series of one-zone models
+! with different photon flux (J21) and an initial
+! temperature of 10^4 Kelvin.
+!**************************************************
+
+KROME-X port (examples/tests/map). Same grid (50 J21 values in 1e-3..10, 50
+densities in 1e-25..1e-21 g cm^-3), initial state (mass fractions,
+Tgas = 1e4 K, evolved), time step (the free-fall time) and output.
+Differences from legacy tests/map:
+- the driver is C++ (test.cpp, krome.hpp); legacy -useX (mass
+  fractions) is solve_cells_x: the 50 densities of one J21 are solved as
+  50 cells in one call;
+- the photon bins are runtime setup: legacy -photoBins=10 +
+  krome_set_photoBin_J21log(5, 50) + krome_photoBin_scale(J21) become
+  Radiation::log_bins(10, 5, 50) + PhotoModule::init and
+  spectra::j21(..., J21, alpha = 1), one field per cell
+  (CellsOpts::Phi); legacy krome_set_user_J21 (the H2
+  photodissociation rate 9e-13 J21) is the network parameter J21
+  (Params::J21);
+- KROME-X integrates each bin exactly; legacy sampled the bin midpoint, which
+  over-weights the bins that contain an ionization threshold (H 13.6 eV,
+  He 24.6 eV): the photoionization rates, hence the photoheating and the
+  final Tgas / ionization, differ with only 10 bins (J21 = 1: H
+  photoionization legacy 4.06e-12 s^-1, KROME-X 3.25e-12; He 2.22e-12,
+  2.45e-12; all other rates identical). Result: the final Tgas agrees
+  within 2% in 99.4% of the 2500 models (3 models on the H2-cooling
+  threshold go to a different branch); the final H2 fraction is ~15%
+  higher and H+ ~13% lower in KROME-X (medians);
+- the solver tolerances are the KROME-X defaults (rtol 1e-8; legacy 1e-4);
+- the output columns follow the KROME-X alphabetical species order, as the
+  header says (plot.py picks them by name);
+- as in legacy, the initial electrons are the neutralizing electrons
+  (get_electrons_neutral, legacy krome_get_electrons) of the mass
+  fractions (the charge-weighted sum, 1e-4): as a mass fraction this
+  is ~1836 electrons per H+ (a legacy driver quirk, kept for the
+  comparison).
+- 2.0.0: the recombination cooling of -cooling=ATOMIC comes from the
+  network's own recombination rates, n_e n_X kB T (3/2 k + T dk/dT)
+  (legacy: the Cen 1992 fits). Against v2.0.0-benchmark, with all the
+  2.0.0 changes: the final Tgas within 1.9e-3 (median) in 2497 of the 2500
+  models; 3 models on the H2-cooling threshold go to the other branch
+  (3500 -> 8300 K).
+- output files (legacy name): map.dat (fort.66).

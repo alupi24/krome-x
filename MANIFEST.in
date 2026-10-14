@@ -1,0 +1,9 @@
+# the source distribution: the package and the files setup.py ships with it
+graft kromex
+graft runtime
+graft data
+graft networks
+graft examples
+include VERSION options_template.toml README.md setup.py pyproject.toml
+global-exclude __pycache__ *.pyc *.o *.a *.so *.dylib
+exclude data/coolZ_CIE2005.dat data/coolZ_CIE2012.dat data/coolZ_CIE2012NOUV.dat

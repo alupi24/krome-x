@@ -1,0 +1,268 @@
+@var:[ndust] dust_inv_phi = dust_get_inv_phi(krome_dust_asize2(:),xdust(:))
+
+@var:[nspec] m = get_mass()
+@var:[2*nspec] Ebareice23_exp = dust_Ebareice23_exp(:)
+@var:[nspec] Eice23_exp = Ebareice23_exp(1:nspec)
+@var:[nspec] Ebare23_exp = Ebareice23_exp(nspec+1:2*nspec)
+@var:[ndust] ice_fraction = dust_ice_fraction_array(dust_inv_phi(:),n(idx_H2O_dust_1:idx_H2O_dust_1+nmols))
+
+
+#2-body rate surface-surface (H + H -> H2) from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: surf2body
+@reacts: H_dust,H_dust
+@prods: H2_dust
+@limits:
+@rate: dust_2body_rate(1.000d0,dust_inv_phi(auto_jdust-nmols),ice_fraction(auto_jdust-nmols),Eice_exp(idx_H_DUST_auto_idx),Eice_exp(idx_H_DUST_auto_idx),Ebare_exp(idx_H_DUST_auto_idx),Ebare_exp(idx_H_DUST_auto_idx),1d0,1d0)
+
+#2-body rate surface-surface (H + O -> OH) from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: surf2body
+@reacts: H_dust,O_dust
+@prods: OH_dust
+@limits:
+@rate: dust_2body_rate(1.000d0,dust_inv_phi(auto_jdust-nmols),ice_fraction(auto_jdust-nmols),Eice_exp(idx_H_DUST_auto_idx),Eice_exp(idx_O_DUST_auto_idx),Ebare_exp(idx_H_DUST_auto_idx),Ebare_exp(idx_O_DUST_auto_idx),1d0-10.0000d-2,1d0-5.0000d-1)
+
+#2-body rate surface-gas (H + O -> OH) from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: surf2body
+@reacts: H_dust,O_dust
+@prods: OH
+@limits:
+@rate: dust_2body_rate(1.000d0,dust_inv_phi(auto_jdust-nmols),ice_fraction(auto_jdust-nmols),Eice_exp(idx_H_DUST_auto_idx),Eice_exp(idx_O_DUST_auto_idx),Ebare_exp(idx_H_DUST_auto_idx),Ebare_exp(idx_O_DUST_auto_idx),10.0000d-2,5.0000d-1)
+
+#2-body rate surface-surface (H + OH -> H2O) from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: surf2body
+@reacts: H_dust,OH_dust
+@prods: H2O_dust
+@limits:
+@rate: dust_2body_rate(1.000d0,dust_inv_phi(auto_jdust-nmols),ice_fraction(auto_jdust-nmols),Eice_exp(idx_H_DUST_auto_idx),Eice_exp(idx_OH_DUST_auto_idx),Ebare_exp(idx_H_DUST_auto_idx),Ebare_exp(idx_OH_DUST_auto_idx),1d0-1.800d-1,1d0-9.0000d-1)
+
+#2-body rate surface-gas (H + OH -> H2O) from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: surf2body
+@reacts: H_dust,OH_dust
+@prods: H2O
+@limits:
+@rate: dust_2body_rate(1.000d0,dust_inv_phi(auto_jdust-nmols),ice_fraction(auto_jdust-nmols),Eice_exp(idx_H_DUST_auto_idx),Eice_exp(idx_OH_DUST_auto_idx),Ebare_exp(idx_H_DUST_auto_idx),Ebare_exp(idx_OH_DUST_auto_idx),1.800d-1,9.0000d-1)
+
+#2-body rate surface-surface (H + O2 -> HO2) from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: surf2body
+@reacts: H_dust,O2_dust
+@prods: HO2_dust
+@limits:
+@rate: dust_2body_rate(3.277d-3,dust_inv_phi(auto_jdust-nmols),ice_fraction(auto_jdust-nmols),Eice_exp(idx_H_DUST_auto_idx),Eice_exp(idx_O2_DUST_auto_idx),Ebare_exp(idx_H_DUST_auto_idx),Ebare_exp(idx_O2_DUST_auto_idx),1d0,1d0)
+
+#2-body rate surface-surface (H + CO -> HCO) from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: surf2body
+@reacts: H_dust,CO_dust
+@prods: HCO_dust
+@limits:
+@rate: dust_2body_rate(5.027d-5,dust_inv_phi(auto_jdust-nmols),ice_fraction(auto_jdust-nmols),Eice_exp(idx_H_DUST_auto_idx),Eice_exp(idx_CO_DUST_auto_idx),Ebare_exp(idx_H_DUST_auto_idx),Ebare_exp(idx_CO_DUST_auto_idx),1d0,1d0)
+
+#2-body rate surface-surface (H + HCO -> H2CO) from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: surf2body
+@reacts: H_dust,HCO_dust
+@prods: H2CO_dust
+@limits:
+@rate: dust_2body_rate(1.000d0,dust_inv_phi(auto_jdust-nmols),ice_fraction(auto_jdust-nmols),Eice_exp(idx_H_DUST_auto_idx),Eice_exp(idx_HCO_DUST_auto_idx),Ebare_exp(idx_H_DUST_auto_idx),Ebare_exp(idx_HCO_DUST_auto_idx),1d0,1d0)
+
+#2-body rate surface-surface (H + H2CO -> CH3O) from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: surf2body
+@reacts: H_dust,H2CO_dust
+@prods: CH3O_dust
+@limits:
+@rate: dust_2body_rate(3.084d-4,dust_inv_phi(auto_jdust-nmols),ice_fraction(auto_jdust-nmols),Eice_exp(idx_H_DUST_auto_idx),Eice_exp(idx_H2CO_DUST_auto_idx),Ebare_exp(idx_H_DUST_auto_idx),Ebare_exp(idx_H2CO_DUST_auto_idx),1d0-10.0000d-2,1d0-5.0000d-1)
+
+#2-body rate surface-gas (H + H2CO -> CH3O) from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: surf2body
+@reacts: H_dust,H2CO_dust
+@prods: CH3O
+@limits:
+@rate: dust_2body_rate(3.084d-4,dust_inv_phi(auto_jdust-nmols),ice_fraction(auto_jdust-nmols),Eice_exp(idx_H_DUST_auto_idx),Eice_exp(idx_H2CO_DUST_auto_idx),Ebare_exp(idx_H_DUST_auto_idx),Ebare_exp(idx_H2CO_DUST_auto_idx),10.0000d-2,5.0000d-1)
+
+#2-body rate surface-surface (H + CH3O -> CH3OH) from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: surf2body
+@reacts: H_dust,CH3O_dust
+@prods: CH3OH_dust
+@limits:
+@rate: dust_2body_rate(1.000d0,dust_inv_phi(auto_jdust-nmols),ice_fraction(auto_jdust-nmols),Eice_exp(idx_H_DUST_auto_idx),Eice_exp(idx_CH3O_DUST_auto_idx),Ebare_exp(idx_H_DUST_auto_idx),Ebare_exp(idx_CH3O_DUST_auto_idx),1d0-10.0000d-3,1d0-5.0000d-2)
+
+#2-body rate surface-gas (H + CH3O -> CH3OH) from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: surf2body
+@reacts: H_dust,CH3O_dust
+@prods: CH3OH
+@limits:
+@rate: dust_2body_rate(1.000d0,dust_inv_phi(auto_jdust-nmols),ice_fraction(auto_jdust-nmols),Eice_exp(idx_H_DUST_auto_idx),Eice_exp(idx_CH3O_DUST_auto_idx),Ebare_exp(idx_H_DUST_auto_idx),Ebare_exp(idx_CH3O_DUST_auto_idx),10.0000d-3,5.0000d-2)
+
+#2-body rate surface-surface (O + O -> O2) from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: surf2body
+@reacts: O_dust,O_dust
+@prods: O2_dust
+@limits:
+@rate: dust_2body_rate(1.000d0,dust_inv_phi(auto_jdust-nmols),ice_fraction(auto_jdust-nmols),Eice_exp(idx_O_DUST_auto_idx),Eice_exp(idx_O_DUST_auto_idx),Ebare_exp(idx_O_DUST_auto_idx),Ebare_exp(idx_O_DUST_auto_idx),1d0-1.200d-1,1d0-6.0000d-1)
+
+#2-body rate surface-gas (O + O -> O2) from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: surf2body
+@reacts: O_dust,O_dust
+@prods: O2
+@limits:
+@rate: dust_2body_rate(1.000d0,dust_inv_phi(auto_jdust-nmols),ice_fraction(auto_jdust-nmols),Eice_exp(idx_O_DUST_auto_idx),Eice_exp(idx_O_DUST_auto_idx),Ebare_exp(idx_O_DUST_auto_idx),Ebare_exp(idx_O_DUST_auto_idx),1.200d-1,6.0000d-1)
+
+#2-body rate surface-surface (O + O2 -> O3) from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: surf2body
+@reacts: O_dust,O2_dust
+@prods: O3_dust
+@limits:
+@rate: dust_2body_rate(1.000d0,dust_inv_phi(auto_jdust-nmols),ice_fraction(auto_jdust-nmols),Eice_exp(idx_O_DUST_auto_idx),Eice_exp(idx_O2_DUST_auto_idx),Ebare_exp(idx_O_DUST_auto_idx),Ebare_exp(idx_O2_DUST_auto_idx),1d0,1d0)
+
+#2-body rate surface-surface (O + CO -> CO2) from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: surf2body
+@reacts: O_dust,CO_dust
+@prods: CO2_dust
+@limits:
+@rate: dust_2body_rate(7.731d-11,dust_inv_phi(auto_jdust-nmols),ice_fraction(auto_jdust-nmols),Eice_exp(idx_O_DUST_auto_idx),Eice_exp(idx_CO_DUST_auto_idx),Ebare_exp(idx_O_DUST_auto_idx),Ebare_exp(idx_CO_DUST_auto_idx),1d0,1d0)
+
+#2-body rate surface-surface (OH + OH -> H2O2) from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: surf2body
+@reacts: OH_dust,OH_dust
+@prods: H2O2_dust
+@limits:
+@rate: dust_2body_rate(1.000d0,dust_inv_phi(auto_jdust-nmols),ice_fraction(auto_jdust-nmols),Eice_exp(idx_OH_DUST_auto_idx),Eice_exp(idx_OH_DUST_auto_idx),Ebare_exp(idx_OH_DUST_auto_idx),Ebare_exp(idx_OH_DUST_auto_idx),1d0,1d0)
+
+#2-body rate surface-surface (H + O3 -> OH + O2) from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: surf2body
+@reacts: H_dust,O3_dust
+@prods: OH_dust,O2_dust
+@limits:
+@rate: dust_2body_rate(1.384d-4,dust_inv_phi(auto_jdust-nmols),ice_fraction(auto_jdust-nmols),Eice_exp(idx_H_DUST_auto_idx),Eice_exp(idx_O3_DUST_auto_idx),Ebare_exp(idx_H_DUST_auto_idx),Ebare_exp(idx_O3_DUST_auto_idx),1d0,1d0)
+
+#2-body rate surface-surface (H + H2O2 -> OH + H2O) from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: surf2body
+@reacts: H_dust,H2O2_dust
+@prods: OH_dust,H2O_dust
+@limits:
+@rate: dust_2body_rate(2.774d-6,dust_inv_phi(auto_jdust-nmols),ice_fraction(auto_jdust-nmols),Eice_exp(idx_H_DUST_auto_idx),Eice_exp(idx_H2O2_DUST_auto_idx),Ebare_exp(idx_H_DUST_auto_idx),Ebare_exp(idx_H2O2_DUST_auto_idx),1d0,1d0)
+
+#2-body rate surface-surface (H + H2O -> OH + H2) from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: surf2body
+@reacts: H_dust,H2O_dust
+@prods: OH_dust,H2_dust
+@limits:
+@rate: dust_2body_rate(7.979d-18,dust_inv_phi(auto_jdust-nmols),ice_fraction(auto_jdust-nmols),Eice_exp(idx_H_DUST_auto_idx),Eice_exp(idx_H2O_DUST_auto_idx),Ebare_exp(idx_H_DUST_auto_idx),Ebare_exp(idx_H2O_DUST_auto_idx),1d0,1d0)
+
+#2-body rate surface-surface (H + HO2 -> OH + OH) from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: surf2body
+@reacts: H_dust,HO2_dust
+@prods: OH_dust,OH_dust
+@limits:
+@rate: dust_2body_rate(1.000d0,dust_inv_phi(auto_jdust-nmols),ice_fraction(auto_jdust-nmols),Eice_exp(idx_H_DUST_auto_idx),Eice_exp(idx_HO2_DUST_auto_idx),Ebare_exp(idx_H_DUST_auto_idx),Ebare_exp(idx_HO2_DUST_auto_idx),1d0,1d0)
+
+#2-body rate surface-surface (H + HCO -> CO + H2) from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: surf2body
+@reacts: H_dust,HCO_dust
+@prods: CO_dust,H2_dust
+@limits:
+@rate: dust_2body_rate(3.087d-4,dust_inv_phi(auto_jdust-nmols),ice_fraction(auto_jdust-nmols),Eice_exp(idx_H_DUST_auto_idx),Eice_exp(idx_HCO_DUST_auto_idx),Ebare_exp(idx_H_DUST_auto_idx),Ebare_exp(idx_HCO_DUST_auto_idx),1d0-10.0000d-3,1d0-5.0000d-2)
+
+#2-body rate surface-gas (H + HCO -> CO + H2) from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: surf2body
+@reacts: H_dust,HCO_dust
+@prods: CO,H2
+@limits:
+@rate: dust_2body_rate(3.087d-4,dust_inv_phi(auto_jdust-nmols),ice_fraction(auto_jdust-nmols),Eice_exp(idx_H_DUST_auto_idx),Eice_exp(idx_HCO_DUST_auto_idx),Ebare_exp(idx_H_DUST_auto_idx),Ebare_exp(idx_HCO_DUST_auto_idx),10.0000d-3,5.0000d-2)
+
+#2-body rate surface-surface (H + H2CO -> HCO + H2) from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: surf2body
+@reacts: H_dust,H2CO_dust
+@prods: HCO_dust,H2_dust
+@limits:
+@rate: dust_2body_rate(4.711d-9,dust_inv_phi(auto_jdust-nmols),ice_fraction(auto_jdust-nmols),Eice_exp(idx_H_DUST_auto_idx),Eice_exp(idx_H2CO_DUST_auto_idx),Ebare_exp(idx_H_DUST_auto_idx),Ebare_exp(idx_H2CO_DUST_auto_idx),1d0,1d0)
+
+#2-body rate surface-surface (H + CH3O -> H2CO + H2) from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: surf2body
+@reacts: H_dust,CH3O_dust
+@prods: H2CO_dust,H2_dust
+@limits:
+@rate: dust_2body_rate(7.075d-3,dust_inv_phi(auto_jdust-nmols),ice_fraction(auto_jdust-nmols),Eice_exp(idx_H_DUST_auto_idx),Eice_exp(idx_CH3O_DUST_auto_idx),Ebare_exp(idx_H_DUST_auto_idx),Ebare_exp(idx_CH3O_DUST_auto_idx),1d0,1d0)
+
+#2-body rate surface-surface (H + CH3OH -> CH3O + H2) from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: surf2body
+@reacts: H_dust,CH3OH_dust
+@prods: CH3O_dust,H2_dust
+@limits:
+@rate: dust_2body_rate(2.411d-10,dust_inv_phi(auto_jdust-nmols),ice_fraction(auto_jdust-nmols),Eice_exp(idx_H_DUST_auto_idx),Eice_exp(idx_CH3OH_DUST_auto_idx),Ebare_exp(idx_H_DUST_auto_idx),Ebare_exp(idx_CH3OH_DUST_auto_idx),1d0,1d0)
+
+#2-body rate surface-surface (H + CO2 -> CO + OH) from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: surf2body
+@reacts: H_dust,CO2_dust
+@prods: CO_dust,OH_dust
+@limits:
+@rate: dust_2body_rate(2.480d-18,dust_inv_phi(auto_jdust-nmols),ice_fraction(auto_jdust-nmols),Eice_exp(idx_H_DUST_auto_idx),Eice_exp(idx_CO2_DUST_auto_idx),Ebare_exp(idx_H_DUST_auto_idx),Ebare_exp(idx_CO2_DUST_auto_idx),1d0,1d0)
+
+#2-body rate surface-surface (O + O3 -> O2 + O2) from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: surf2body
+@reacts: O_dust,O3_dust
+@prods: O2_dust,O2_dust
+@limits:
+@rate: dust_2body_rate(2.396d-42,dust_inv_phi(auto_jdust-nmols),ice_fraction(auto_jdust-nmols),Eice_exp(idx_O_DUST_auto_idx),Eice_exp(idx_O3_DUST_auto_idx),Ebare_exp(idx_O_DUST_auto_idx),Ebare_exp(idx_O3_DUST_auto_idx),1d0,1d0)
+
+#2-body rate surface-surface (O + H2 -> H + OH) from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: surf2body
+@reacts: O_dust,H2_dust
+@prods: H_dust,OH_dust
+@limits:
+@rate: dust_2body_rate(1.000d0,dust_inv_phi(auto_jdust-nmols),ice_fraction(auto_jdust-nmols),Eice_exp(idx_O_DUST_auto_idx),Eice_exp(idx_H2_DUST_auto_idx),Ebare_exp(idx_O_DUST_auto_idx),Ebare_exp(idx_H2_DUST_auto_idx),1d0,1d0)
+
+#2-body rate surface-surface (O + HO2 -> O2 + OH) from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: surf2body
+@reacts: O_dust,HO2_dust
+@prods: O2_dust,OH_dust
+@limits:
+@rate: dust_2body_rate(1.324d-56,dust_inv_phi(auto_jdust-nmols),ice_fraction(auto_jdust-nmols),Eice_exp(idx_O_DUST_auto_idx),Eice_exp(idx_HO2_DUST_auto_idx),Ebare_exp(idx_O_DUST_auto_idx),Ebare_exp(idx_HO2_DUST_auto_idx),1d0,1d0)
+
+#2-body rate surface-surface (O + OH -> O2 + H) from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: surf2body
+@reacts: O_dust,OH_dust
+@prods: O2_dust,H_dust
+@limits:
+@rate: dust_2body_rate(1.000d0,dust_inv_phi(auto_jdust-nmols),ice_fraction(auto_jdust-nmols),Eice_exp(idx_O_DUST_auto_idx),Eice_exp(idx_OH_DUST_auto_idx),Ebare_exp(idx_O_DUST_auto_idx),Ebare_exp(idx_OH_DUST_auto_idx),1d0,1d0)
+
+#2-body rate surface-surface (O + HCO -> CO2 + H) from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: surf2body
+@reacts: O_dust,HCO_dust
+@prods: CO2_dust,H_dust
+@limits:
+@rate: dust_2body_rate(1.000d0,dust_inv_phi(auto_jdust-nmols),ice_fraction(auto_jdust-nmols),Eice_exp(idx_O_DUST_auto_idx),Eice_exp(idx_HCO_DUST_auto_idx),Ebare_exp(idx_O_DUST_auto_idx),Ebare_exp(idx_HCO_DUST_auto_idx),1d0,1d0)
+
+#2-body rate surface-surface (O + H2CO -> CO2 + H2) from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: surf2body
+@reacts: O_dust,H2CO_dust
+@prods: CO2_dust,H2_dust
+@limits:
+@rate: dust_2body_rate(1.165d-14,dust_inv_phi(auto_jdust-nmols),ice_fraction(auto_jdust-nmols),Eice_exp(idx_O_DUST_auto_idx),Eice_exp(idx_H2CO_DUST_auto_idx),Ebare_exp(idx_O_DUST_auto_idx),Ebare_exp(idx_H2CO_DUST_auto_idx),1d0,1d0)
+
+#2-body rate surface-surface (OH + H2 -> H + H2O) from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: surf2body
+@reacts: OH_dust,H2_dust
+@prods: H_dust,H2O_dust
+@limits:
+@rate: dust_2body_rate(7.213d-12,dust_inv_phi(auto_jdust-nmols),ice_fraction(auto_jdust-nmols),Eice_exp(idx_OH_DUST_auto_idx),Eice_exp(idx_H2_DUST_auto_idx),Ebare_exp(idx_OH_DUST_auto_idx),Ebare_exp(idx_H2_DUST_auto_idx),1d0,1d0)
+
+#2-body rate surface-surface (OH + CO -> CO2 + H) from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: surf2body
+@reacts: OH_dust,CO_dust
+@prods: CO2_dust,H_dust
+@limits:
+@rate: dust_2body_rate(1.688d-20,dust_inv_phi(auto_jdust-nmols),ice_fraction(auto_jdust-nmols),Eice_exp(idx_OH_DUST_auto_idx),Eice_exp(idx_CO_DUST_auto_idx),Ebare_exp(idx_OH_DUST_auto_idx),Ebare_exp(idx_CO_DUST_auto_idx),1d0,1d0)
+
+#2-body rate surface-surface (OH + HCO -> CO2 + H2) from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: surf2body
+@reacts: OH_dust,HCO_dust
+@prods: CO2_dust,H2_dust
+@limits:
+@rate: dust_2body_rate(1.000d0,dust_inv_phi(auto_jdust-nmols),ice_fraction(auto_jdust-nmols),Eice_exp(idx_OH_DUST_auto_idx),Eice_exp(idx_HCO_DUST_auto_idx),Ebare_exp(idx_OH_DUST_auto_idx),Ebare_exp(idx_HCO_DUST_auto_idx),1d0,1d0)
+
+#2-body rate surface-surface (HO2 + H2 -> H + H2O2) from Hollenbach+McKee 1979, Cazaux+2010, Hocuk+2014
+@type: surf2body
+@reacts: HO2_dust,H2_dust
+@prods: H_dust,H2O2_dust
+@limits:
+@rate: dust_2body_rate(3.638d-18,dust_inv_phi(auto_jdust-nmols),ice_fraction(auto_jdust-nmols),Eice_exp(idx_HO2_DUST_auto_idx),Eice_exp(idx_H2_DUST_auto_idx),Ebare_exp(idx_HO2_DUST_auto_idx),Ebare_exp(idx_H2_DUST_auto_idx),1d0,1d0)
+

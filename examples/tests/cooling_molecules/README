@@ -1,0 +1,16 @@
+!***************************************************************
+! This test is designed to check if CO, OH, H2O, and HCN cooling
+! (Neufeld & Kaufman tables) produce reasonable temperature
+! evolutions, with cosmic-ray heating, in a gas of 1e6 cm-3 starting
+! at 300 K. WARNING: do not use the network for production.
+!***************************************************************
+
+KROME-X notes:
+- Tgas is evolved (legacy default): the driver sets o.evolve_T = true.
+- legacy krome_set_user_crate is the network parameter crate
+  (p.crate = 1.3e-17 s^-1).
+- data.out now starts with a names header (#time Tgas <species>) and
+  the species are in KROME-X (alphabetical) order; plot.py picks them by
+  name.
+- KROME-X (rtol 1e-8) and legacy (rtol 1e-4) agree to < 0.7 % on every
+  column over the whole run; final Tgas 12.886 K in both.

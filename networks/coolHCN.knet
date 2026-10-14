@@ -1,0 +1,24 @@
+krome_format 1
+# converted from legacy network 'react_coolHCN' by convert_legacy.py
+
+param crate    = 0.0    # runtime parameter (legacy @common:user_crate); set default!
+
+#####################
+# NOTE: this network is designed to test the cooling from HCN, H2O, OH, and CO molecules
+CN + OH -> O + HCN  []  1e-11*exp(-1e3/Tgas)
+HCO + O -> CO + OH  []  5e-11
+OH + OH -> H2O + O  []  1.65e-12*(Tgas/3e2)**1.14*exp(-50/Tgas)
+
+# H2 on grains with rate approximation, assuming Tdust=Tgas
+var fA = 1e0 / (1e0 + 1e4*exp(-6e2/Tgas))
+# [legacy 'var Hnuclei' dropped: builtin in KROME-X]
+# [legacy @noTabNext dropped: handled outside the network file in KROME-X]
+H + H -> H2         []  3e-18 * sqrt(Tgas) * fA / (1e0+0.04e0*sqrt(2e0*Tgas)+0.002e0*Tgas+8e-6*Tgas**2) / n(H) * Hnuclei
+
+H+ + e- -> H        []  3.5e-12*(Tgas/3e2)**(-0.7)
+
+# [legacy @CR_start marker removed: these are ordinary reactions in KROME-X]
+H -> H+ + e-        []  4.6e-1*crate
+H2 -> H + H         []  1e-1*crate
+# [legacy @CR_stop marker removed: these are ordinary reactions in KROME-X]
+

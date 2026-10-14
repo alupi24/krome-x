@@ -1,0 +1,12 @@
+      1      2   2.620e-03   0.000e+00          -1    9    2   6.761e+01
+   0.000e+00   1.250e-01   2.500e-01   3.750e-01   5.000e-01   6.250e-01   7.500e-01   8.750e-01   1.000e+00
+   6.513e+00   6.228e+00   6.099e+00   6.010e+00   5.840e+00   5.423e+00   4.633e+00   3.386e+00   1.804e+00
+-1
+%filename: si_2.splups
+%theoretical energies: Tayal, S.S., 2008, ApJS, 179, 534
+%gf-values:  Tayal, S.S., 2007, J.Phys.B, 40, 2551 and Nahar, S.N., 1998, ADNDT 68, 183
+%Effective collision strengths:  Tayal, S.S., 2008, ApJS, 179, 534
+% produced as part of the Arcetri/Cambridge/NRL 'CHIANTI' atomic data base collaboration
+%
+%  Peter Young, Feb-2009
+-1

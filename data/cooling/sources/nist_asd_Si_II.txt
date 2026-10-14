@@ -1,0 +1,14 @@
+# NIST Atomic Spectra Database (Kramida, Ralchenko, Reader & NIST ASD Team),
+# lines with transition probabilities, retrieved 2026-10-02 from
+# https://physics.nist.gov/cgi-bin/ASD/lines1.pl?spectra=Si+II&low_w=2000&upp_w=2000000&unit=0&max_low_enrg=600&max_upp_enrg=45000&A_out=0&allowed_out=1&forbid_out=1&show_av=2
+# (vacuum/air wavelengths dropped). Columns: E_lower, E_upper [cm^-1],
+# A [s^-1], NIST accuracy grade, type (E1, M1, E2, M1+E2), lower and
+# upper level, NIST TP references.
+# E_low E_up A acc type | lower | upper | refs
+0.0000 42932.6200 2.3500e+01 E E1 | 3s2.3p 2P* 1/2 | 3s.3p2 4P 3/2 | c22 , T6215 , T5958
+0.0000 42824.2900 5.5100e+03 D+ E1 | 3s2.3p 2P* 1/2 | 3s.3p2 4P 1/2 | c22 , T6215 , T5958
+287.2400 43107.9100 2.4400e+03 D+ E1 | 3s2.3p 2P* 3/2 | 3s.3p2 4P 5/2 | c22 , T6215 , T5958
+287.2400 42932.6200 1.3100e+03 D E1 | 3s2.3p 2P* 3/2 | 3s.3p2 4P 3/2 | c22 , T6215 , T5958
+287.2400 42824.2900 4.7000e+03 D+ E1 | 3s2.3p 2P* 3/2 | 3s.3p2 4P 1/2 | c22 , T6215 , T5958
+0.0000 287.2400 1.6000e-09 B E2 | 3s2.3p 2P* 1/2 | 3s2.3p 2P* 3/2 | c22 , T1
+0.0000 287.2400 2.1000e-04 B+ M1 | 3s2.3p 2P* 1/2 | 3s2.3p 2P* 3/2 | c22 , T5958 , T6576 , T1416

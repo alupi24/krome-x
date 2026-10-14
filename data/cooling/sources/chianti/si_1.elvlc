@@ -1,0 +1,16 @@
+      1     3s2 3p2                           3    P  0.0          0.000          0.000
+      2     3s2 3p2                           3    P  1.0         77.115         77.009
+      3     3s2 3p2                           3    P  2.0        223.157        222.363
+ -1
+filename:si_1.elvlc
+
+Experimental energies from: Kramida, A., Ralchenko, Yu., Reader, J., and NIST ASD Team (2023). NIST Atomic Spectra Database (ver. 5.11), [Online]. Available: https://physics.nist.gov/asd [2024, August 29]. National Institute of Standards and Technology, Gaithersburg, MD. DOI: https://doi.org/10.18434/T4W30F
+
+Theoretical energies from: Dufresne, R.P., Del Zanna, G., Storey, P.J., 2021, MNRAS, 505, 3968
+
+Produced using Autostructure and including level energy corrections based on NIST for all levels
+except 36. Correcting the last level affected A-values adversely.
+ 
+Formatted for the CHIANTI database by R.P. Dufresne on Tue Nov 24 13:28:18 2020
+
+ -1

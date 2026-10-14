@@ -1,0 +1,300 @@
+# KROME-X configuration: every generation option, commented out.
+# Copy this file, uncomment the options you need (the values shown are
+# examples) and generate the project with
+#
+#     python3 -m kromex myrun.toml
+#
+# or load it in Python: kromex.Preprocessor.from_file("myrun.toml").
+# An option left commented keeps its default.
+#
+# Written by python3 -m kromex --template FILE (options_template.toml is the
+# shipped copy).
+
+# ========================================================================
+# the network, the project directory and what is generated
+# ========================================================================
+[project]
+
+# the .knet network file, or a legacy react_* file (converted into the
+# project); required (legacy -n)
+# default: none
+#network = "networks/primordial.knet"
+
+# the project directory (default generated/, or build_NAME for a shipped
+# test)
+# default: see the description
+#outdir = "myproject"
+
+# the optional bindings over the C interface: fortran (module krome,
+# example.f90) and python (krome.py, example.py, make shared)
+# default: []
+#bindings = ["fortran", "python"]
+
+# write one self-contained net_<name>.hpp instead of the split
+# core/rates/thermal/jacobian files
+# default: false
+#single = true
+
+# copy the runtime headers and write the Makefile and the example into the
+# project; false: the bare generated files only
+# default: true
+#runtime = false
+
+# ========================================================================
+# how the rate coefficients and the rate equations are written
+# ========================================================================
+[rates]
+
+# rate outside its declared T range: zero below + clamp above (asym,
+# default), clamp both, or legacy zero
+# default: "asym"
+#outside = "clamp"
+
+# the mass-action rhs, fluxes and Jacobian as generated statements
+# (unrolled) or as loops over index tables (loop: smaller code, much faster
+# to compile for large networks; the same operations in the same order;
+# legacy -iRHS); auto: loops above 500 reactions
+# default: "auto"
+#rhs = "unrolled"
+
+# flux k prod(n)/c! for a species appearing c times among the kinetic
+# reactants (legacy -nuclearMult; opt-in: use it when the rates are per
+# ordered pair)
+# default: false
+#reactant_multiplicity = true
+
+# plasma screening of the reactions between charged nuclei (legacy
+# krome_stars: Itoh / Graboske / DeWitt), from the state composition and
+# density
+# default: false
+#screening = true
+
+# write reverse_check.txt: each reaction's reverse in the network (or its
+# absence) and dH(300 K) from the thermochemical data (legacy -checkReverse)
+# default: false
+#check_reverse = true
+
+# ========================================================================
+# the thermal processes, fixed in the generated code
+# ========================================================================
+[thermal]
+
+# thermal cooling processes, FIXED in the generated code (legacy -cooling=
+# names): ATOMIC, CHEM, CIE, CO, COMPTON, CONT, DH, DISS, DUST, DUSTBINS,
+# DUSTTAB, EXPANSION, FF, H2, H2O, HCN, HD, OH, Z, Z_CIE, Z_CIENOUV,
+# Z_EXTENDED. Implies the tables they need (CO/OH/H2O/HCN molecular, Z
+# metal-line, Z_CIE/Z_CIENOUV Shen+13, Z_EXTENDED both, DH enthalpies)
+# default: []
+#cooling = ["ATOMIC", "H2"]
+
+# thermal heating processes, FIXED in the generated code (legacy -heating=
+# names): CHEM, COMPRESS, CR, DH, NUCLEAR, PHOTO, PHOTOAV, PHOTODUST,
+# PHOTODUSTNET, VISCOUS
+# default: []
+#heating = ["CHEM", "COMPRESS"]
+
+# cooling floor at the per-cell parameter Tfloor: each floored cooler is
+# evaluated as cool(Tgas) - cool(Tfloor). Without TERMS: every configured
+# radiative line cooler; with TERMS (legacy -useIndividualFloor): only
+# those, from ATOMIC, CO, H2, H2O, HCN, HD, OH, Z, Z_CIE, Z_CIENOUV,
+# Z_EXTENDED
+# default: false
+#floor = ["Z", "H2"]
+
+# adiabatic index of the thermal ODE (legacy -gamma): CONST = the per-cell
+# parameter gamma_ad (default 5/3); EXACT, POPOVAS compute it from the
+# composition and Tgas
+# default: "CONST"
+#gamma = "EXACT"
+
+# optically thick suppression of the H2 line cooling (legacy -H2opacity):
+# Ripamonti & Abel 2004 or the Omukai escape table
+# default: ""
+#h2_opacity = "RIPAMONTI"
+
+# with thermal.cooling = ['Z'] or Z_EXTENDED: restrict the metal-line
+# coolants to these coolZ.dat metals (C,Si,Fe,O,S,C+,O+,Si+,Fe+; default:
+# all present)
+# default: []
+#metals = ["C", "C+", "O", "Si", "Fe"]
+
+# coolant files in the legacy coolZ.dat format (LAMDA / CHIANTI conversions,
+# e.g. data/coolO2.dat; legacy -coolFile), added to the embedded coolZ.dat;
+# select their coolants with thermal.cooling=<name> (CII, FeII for atoms and
+# ions, the species for molecules: O2) or thermal.cooling = ['FILE'] (all),
+# or with thermal.metals; each is its own cooling term
+# default: []
+#coolant_files = ["data/coolO2.dat"]
+
+# optical depth of the line coolants (the coolZ.dat metals and the
+# thermal.coolant_files coolants): LVG, the Sobolev escape probability (1 -
+# exp(-tau)) / tau per line, tau from the species column (radiation.num2col)
+# and the line width sqrt(2 kB T / m + vturb^2) (per-cell parameter vturb
+# [cm s^-1], default 0); default: optically thin
+# default: ""
+#escape = "LVG"
+
+# keep only levels 0..L of every metal / file coolant, with their lines
+# (legacy -coolLevels)
+# default: see the description
+#levels = 10
+
+# radiative pumping of the metal-line levels by the photon field (legacy
+# -usePhotoInduced; stimulated emission and absorption)
+# default: false
+#photo_pumping = true
+
+# the CMB (blackbody at the per-cell parameter Tcmb) in the metal-line level
+# balance: stimulated emission and absorption; the cooling floor is dropped
+# for the pumped lines (Z, Z_EXTENDED)
+# default: false
+#cmb_pumping = true
+
+# the dust photoelectric heating of PHOTODUST / PHOTODUSTNET: Bakes &
+# Tielens 1994 (default, legacy) or Weingartner & Draine 2001 eqs. 44-45
+# default: "BT94"
+#photoelectric = "WD01"
+
+# the WD01 Table 2/3 row for thermal.photoelectric = 'WD01' (default
+# 3.1,6.0,A,ISRF: R_V 3.1, b_C 6e-5, case A, the ISRF; field B0 = a 3e4 K
+# blackbody)
+# default: []
+#wd01 = ["3.1", "6.0", "A", "ISRF"]
+
+# ========================================================================
+# photon bins, shielding and column densities
+# ========================================================================
+[radiation]
+
+# co-evolve the photon field with the chemistry (as ln Phi, updated in
+# place); without it the field stays fixed at the caller's values
+# default: false
+#evolve = true
+
+# H2 self-shielding model behind the legacy krome_fshield() (legacy
+# -shielding): Wolcott-Green+ 2011 (default), Draine & Bertoldi 1996,
+# Richings+ 2014, or NONE (fshield = 1, legacy's default)
+# default: "WG11"
+#shielding = "DB96"
+
+# column density estimator N(n) of the molecular coolants, the H2 opacity,
+# the line escape probability and the shielding (legacy
+# -columnDensityMethod): default 1.87e21 (n/1e3)^(2/3), jeans / jeans40 half
+# a Jeans length, length n Lcol with the per-cell parameter Lcol [cm]
+# default: "default"
+#num2col = "jeans"
+
+# attenuate the photon-field Habing flux by dust, exp(-2e-21 (d2g/0.01)
+# 0.665 N_H) with num2col columns (legacy -shieldHabingDust)
+# default: false
+#habing_dust_shielding = true
+
+# comma-separated species receiving secondary ionization by fast
+# photoelectrons (SvS85 split), e.g. H,He
+# default: []
+#secondary_ionization = ["H", "He"]
+
+# ========================================================================
+# dust tables and the dust state
+# ========================================================================
+[dust]
+
+# embed the legacy dust tables (Tdust, dust cooling, and the rate of
+# krate_H2dust_table()): 2D for the HM2012 or MC radiation field, 3D with
+# the per-cell Av, or PHOTO3D with Av from the dust absorption of the
+# photon-bin field
+# default: ""
+#tables = "HM2012"
+
+# per-bin dust temperatures as solver state, following each grain's energy
+# equation (heat capacity of Draine & Li 2001; legacy -usedTdust tracked the
+# balance instead; needs thermal.cooling = ['DUSTBINS']); without it they
+# are the radiative-collisional balance of the state
+# default: false
+#evolve_Td = true
+
+# the grain radius of every dust bin as solver state (per cell,
+# CellsOpts::adust / the adust argument), changed by GROWTH (accretion of
+# the key element C / Si), SPUTTER (thermal sputtering, Nozawa et al. 2006
+# yields) and EVAP (sublimation, Grassi et al. 2017 sec. 2.3); the atoms go
+# to / from the gas-phase key element (legacy
+# -dustOptions=GROWTH,SPUTTER,EVAP); needs dust bins at runtime
+# default: []
+#evolve = ["GROWTH", "SPUTTER", "EVAP"]
+
+# gas+total representation: each gas<->surface pair's surface slot stores
+# TOTAL = gas + surface (stability option, removes the stiff
+# freezeout/evaporation exchange from it)
+# default: false
+#gas_total = true
+
+# ========================================================================
+# grain-surface chemistry
+# ========================================================================
+[surface]
+
+# surface binding energies: data/Ebare_ice.dat (E_diff = 2/3 E_bind) or the
+# OSU set of Semenov+10 (Ebare_ice_Semenov.dat, E_diff = 0.77 E_bind)
+# default: "KROME"
+#binding_energies = "SEMENOV"
+
+# surface vibration frequency: Hasegawa+92 sqrt(2 n_s E_b/(pi^2 m)) or
+# legacy 1e12 s^-1
+# default: "HASEGAWA"
+#nu = "LEGACY"
+
+# two-body surface rates with reaction-diffusion competition; false: without
+# it (legacy)
+# default: true
+#competition = false
+
+# two-body surface reactions with a barrier Ea by the faster of thermal
+# hopping and tunnelling through a 1 A rectangular barrier; false: thermal
+# hopping only, exp(-Ea/Tdust) (the legacy Semenov framework)
+# default: true
+#tunnelling = false
+
+# gas branch of the two-body surface reactions: as written (NONE), the
+# legacy database fractions (FIXED), or Minissale+16 (ice: /10)
+# default: "NONE"
+#reactive_desorption = "FIXED"
+
+# per-bin surface species (legacy @surface): every surface species and
+# reaction cloned for NB dust bins; the runtime DustBins must have NB bins
+# (nd x grain types). Default: one ice abundance per species, rates area-
+# weighted over the bins
+# default: 0
+#bins = 10
+
+# cosmic-ray spot-heating desorption (Hasegawa & Herbst 1993) driven by the
+# CR ionization-rate parameter PARAM (e.g. crate)
+# default: ""
+#cr_desorption = "crate"
+
+# ========================================================================
+# the project's default tolerances (the calling code can still change them at run time)
+# ========================================================================
+[solver]
+
+# the project's default relative tolerance (SolverOpts::rtol starts from it;
+# default 1e-8; legacy -RTOL); still changeable at runtime
+# default: see the description
+#rtol = 1e-06
+
+# the project's default absolute tolerance of the species [cm^-3]
+# (SolverOpts::atol_n; default 1e-20; legacy -ATOL); still changeable at
+# runtime
+# default: see the description
+#atol = 1e-30
+
+# per-species default absolute tolerances: a file of 'SPECIES ATOL' lines
+# (legacy -customATOL); the other species keep solver.atol. The starting
+# SolverOpts::atol_species, changeable at runtime
+# default: see the description
+#atol_file = "atol_species.txt"
+
+# per-species default relative tolerances: a file of 'SPECIES RTOL' lines
+# (legacy -customRTOL); the other species keep solver.rtol. The starting
+# SolverOpts::rtol_species, changeable at runtime
+# default: see the description
+#rtol_file = "rtol_species.txt"

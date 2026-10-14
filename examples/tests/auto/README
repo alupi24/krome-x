@@ -1,0 +1,33 @@
+!***************************************************************
+!This test shows how automatic reactions and bin-based
+! photochemistry work, with the three-reaction network
+! C+ + e -> C, C + e -> C+ + e + e, C + photon -> C+ + e.
+!The evolution is computed for three J21 values (1e-3, 1e-1, 1)
+! of a 1/E spectrum in 10 log-spaced bins between 10 and 100 eV,
+! at constant Tgas (1.2e4 K) and density. See networks/auto.knet.
+!***************************************************************
+
+KROME-X port (examples/tests/auto). Differences from legacy tests/auto:
+- the driver is C++ (test.cpp, krome.hpp);
+- the photon bins are runtime setup: legacy -photoBins=10 +
+  krome_set_photoBin_J21log(10, 100) + krome_photoBin_scale(j21)
+  become Radiation::log_bins(10, 10, 100) + PhotoModule::init and
+  spectra::j21(..., j21, alpha = 1) as SolverOpts::Phi;
+- KROME-X integrates each bin exactly; legacy took J and the cross section
+  at the bin midpoint, so the first bin (10-12.6 eV, midpoint 11.3 eV,
+  just above the C threshold 11.26 eV) counted in full: with 10 bins the
+  legacy C photoionization rate is 24% higher than the converged value
+  (KROME-X with 10 bins: 2% higher), and the final C fractions differ
+  (J21 = 1e-3, 0.1, 1: KROME-X 0.642, 0.153, 0.0218; legacy 0.633, 0.132,
+  0.0180); the collisional rates are identical;
+- the solver tolerances are the KROME-X defaults (rtol 1e-8; legacy 1e-4);
+- output columns follow the KROME-X alphabetical species order (C C+ e-),
+  as the header says; plot.py picks them by name.
+- 2.0.0: C+ + e- -> C is Badnell's radiative plus dielectronic
+  recombination (the auto database; legacy and v2.0.0-benchmark: the KIDA
+  fit 4.4e-12 (T/300)^-0.61, 1.6x lower at 1.2e4 K), and the Voronov
+  collisional ionization uses the CODATA kB (legacy 8.621738e-5 eV/K). The
+  final C fractions for J21 = 1e-3, 0.1, 1 are 0.744, 0.225, 0.0370
+  (v2.0.0-benchmark 0.642, 0.153, 0.0218); the legacy comparison above is
+  that of v2.0.0-benchmark.
+- output files (legacy name): abundances.dat (fort.66).

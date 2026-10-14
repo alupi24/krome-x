@@ -1,0 +1,61 @@
+krome_format 1
+# converted from legacy network 'react_nucleation' by convert_legacy.py
+
+# functions provided by runtime physics modules:
+extern cluster_destruction_rate
+extern cluster_growth_rate
+
+# This is test network for kinetic nucleation theory (KNT).
+# This KNT is based on cluster growth of molecules via monomer addition.
+# There is no assumption of chemical equilibrium (as compared to classical
+# or modified nucleation theory).
+# Theory is explained in chapter 13 of Gail and Sedlmayr 2013
+# (https://doi.org/10.1017/CBO9780511985607)
+species H2, He
+
+# Cluster growth reactions
+# cluster_growth_rate(index_of_monomer, cluster_size, temperature, sticking_coefficient)
+TiO2 + TiO2 -> Ti2O4      []  cluster_growth_rate(TiO2, 1)
+
+Ti2O4 + TiO2 -> Ti3O6     []  cluster_growth_rate(TiO2, 2)
+
+Ti3O6 + TiO2 -> Ti4O8     []  cluster_growth_rate(TiO2, 3)
+
+Ti4O8 + TiO2 -> Ti5O10    []  cluster_growth_rate(TiO2, 4)
+
+Ti5O10 + TiO2 -> Ti6O12   []  cluster_growth_rate(TiO2, 5)
+
+Ti6O12 + TiO2 -> Ti7O14   []  cluster_growth_rate(TiO2, 6)
+
+Ti7O14 + TiO2 -> Ti8O16   []  cluster_growth_rate(TiO2, 7)
+
+Ti8O16 + TiO2 -> Ti9O18   []  cluster_growth_rate(TiO2, 8)
+
+Ti9O18 + TiO2 -> Ti10O20  []  cluster_growth_rate(TiO2, 9)
+
+# Cluster destruction reactions
+# cluster_destruction_rate(index_of_monomer, number_density_of_monomer,
+# cluster_size, temperature, sticking_coefficient)
+Ti2O4 -> TiO2 + TiO2      []  cluster_destruction_rate(TiO2, 2)
+
+Ti3O6 -> Ti2O4 + TiO2     []  cluster_destruction_rate(TiO2, 3)
+
+Ti4O8 -> Ti3O6 + TiO2     []  cluster_destruction_rate(TiO2, 4)
+
+Ti5O10 -> Ti4O8 + TiO2    []  cluster_destruction_rate(TiO2, 5)
+
+Ti6O12 -> Ti5O10 + TiO2   []  cluster_destruction_rate(TiO2, 6)
+
+Ti7O14 -> Ti6O12 + TiO2   []  cluster_destruction_rate(TiO2, 7)
+
+Ti8O16 -> Ti7O14 + TiO2   []  cluster_destruction_rate(TiO2, 8)
+
+Ti9O18 -> Ti8O16 + TiO2   []  cluster_destruction_rate(TiO2, 9)
+
+Ti10O20 -> Ti9O18 + TiO2  []  cluster_destruction_rate(TiO2, 10)
+
+# non-nucleation reactions
+# Lian,L.+1994, NIST (experiment)
+# Ti + O2 -> TiO + O        []  2.81e-12
+
+# TiO + O2 -> TiO + O       []  2.81e-12

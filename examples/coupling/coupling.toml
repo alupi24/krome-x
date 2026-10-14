@@ -1,0 +1,14 @@
+# the KROME project of the coupling examples (examples/coupling/README.md):
+#   python3 -m kromex examples/coupling/coupling.toml --set project.outdir=build_coupling
+# primordial chemistry with its cooling; the compression (PdV) heating is
+# the hydro code's, so no COMPRESS heating; composition-dependent gamma
+# (the network path is relative to this file's folder)
+
+[project]
+network = "../../networks/primordial.knet"
+bindings = ["fortran", "python"]
+
+[thermal]
+cooling = ["ATOMIC", "H2", "CHEM", "CIE", "CONT"]
+heating = ["CHEM"]
+gamma = "EXACT"

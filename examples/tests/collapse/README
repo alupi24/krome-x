@@ -1,0 +1,18 @@
+!***************************************************************
+!This is a simple one-zone collapse test following
+! the chemical and thermal evolution of a primordial cloud.
+!The dynamics is described by the Larson-Penston-type
+! similar solution and includes cooling and heating processes.
+!For additional details look also to Omukai 2000 and
+! the KROME paper.
+!***************************************************************
+
+KROME-X notes:
+- output files (legacy name): abundances.dat (fort.22).
+- 2.0.0: thermal.gamma = "EXACT" (every diatomic with its exact rotation and
+  vibration); legacy -gamma=FULL (H2 always 7/5) was removed. Against the
+  v2.0.0-benchmark run (FULL, and the legacy physical constants, now
+  CODATA 2018): Tgas within 8e-6 (median), 0.74 % at most, at the highest
+  densities (3045 -> 3022 K at 1e18 cm^-3), where the H2 vibration lowers
+  gamma. The legacy comparison of this test is that of v2.0.0-benchmark
+  (bench/results/benchmark).

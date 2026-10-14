@@ -1,0 +1,102 @@
+krome_format 1
+# converted from legacy network 'react_primordial2' by convert_legacy.py
+
+# legacy shortcut symbols, now ordinary vars:
+var lnTe     = log(Tgas_eV)
+var invTe    = 1.0/Tgas_eV
+var logT     = log10(Tgas)
+var invT     = 1.0/Tgas
+var sqrTgas  = sqrt(Tgas)
+var invsqrT  = 1.0/sqrt(Tgas)
+var T32      = Tgas/300.0
+var invsqrT32 = sqrt(300.0/Tgas)
+
+#primordial rates from Omukai+2000
+#for single references please check the above paper
+
+var T = Tgas
+
+H + e- -> H+ + e- + e-      []          exp(-32.71396786e0+13.5365560e0*lnTe-5.73932875e0*(lnTe**2)+1.56315498e0*(lnTe**3)-0.28770560e0*(lnTe**4)+3.48255977e-2*(lnTe**5)-2.63197617e-3*(lnTe**6)+1.11954395e-4*(lnTe**7)-2.03914985e-6*(lnTe**8))
+
+H+ + e- -> H                []          exp(-28.61303380689232e0-0.7241125657826851e0*lnTe-0.02026044731984691e0*lnTe**2-0.002380861877349834e0*lnTe**3-0.0003212605213188796e0*lnTe**4-0.00001421502914054107e0*lnTe**5+4.989108920299513e-6*lnTe**6+5.755614137575758e-7*lnTe**7-1.856767039775261e-8*lnTe**8-3.071135243196595e-9*lnTe**9)
+
+He + e- -> He+ + e- + e-    []          exp(-44.09864886e0+23.91596563e0*lnTe-10.7532302e0*(lnTe**2)+3.05803875e0*(lnTe**3)-0.56851189e0*(lnTe**4)+6.79539123e-2*(lnTe**5)-5.00905610e-3*(lnTe**6)+2.06723616e-4*(lnTe**7)-3.64916141e-6*(lnTe**8))
+
+He+ + e- -> He              []          3.925e-13*invTe**0.6353+1.544e-9*invTe**1.5*(3e-1*exp(-48.596e0*invTe)+exp(-40.496e0*invTe))
+
+He+ + e- -> He++ + e- + e-  []          exp(-68.71040990212001e0+43.93347632635e0*lnTe-18.48066993568e0*lnTe**2+4.701626486759002e0*lnTe**3-0.7692466334492e0*lnTe**4+0.08113042097303e0*lnTe**5-0.005324020628287001e0*lnTe**6+0.0001975705312221e0*lnTe**7-3.165581065665e-6*lnTe**8)
+
+He++ + e- -> He+            []          3.36e-10/sqrTgas/(Tgas*1.e-3)**0.2/(1.e0+(Tgas*1.e-6)**0.7)
+
+H + e- -> H-                []          1.4e-18*Tgas**0.928*exp(-Tgas/1.62e4)
+
+H- + H -> H2 + e-           [0, 3e2]    1.5e-9
+H- + H -> H2 + e-           [3e2, inf]  4e-9*Tgas**(-.17)
+
+H + H+ -> H2+               []          1e1**(-19.38-1.523*logT+1.118*logT**2-0.1269*logT**3)
+
+H2+ + H -> H2 + H+          []          6.4e-10
+
+H2 + H+ -> H2+ + H          []          3e-10*exp(-2.1050e4*invT)
+
+H2 + e- -> H + H + e-       []          4.4e-10*Tgas**0.35*exp(-1.02e5*invT)
+
+var invT = 1e0/Tgas
+var invsqrT = 1e0/sqrt(Tgas)
+# [legacy 'var Hnuclei' dropped: builtin in KROME-X]
+var kl13 = 1.12e-10*exp(-7.035e4*invT)
+var kh13 = 6.5e-7*invsqrT*exp(-5.2e4*invT)*(1.e0-exp(-6e3*invT))
+var ncr13 = 1e1**(4.e0-0.416e0*log10(T*1e-4)-0.327e0*log10(T*1e-4)**2)
+var a13 = 1.e0/(1.e0+(Hnuclei/ncr13))
+# [legacy @noTabNext dropped: handled outside the network file in KROME-X]
+H2 + H -> H + H + H         []          kh13**(1.-a13)*kl13**a13
+
+H- + e- -> H + e- + e-      []          exp(-18.01849334273e0+2.360852208681e0*lnTe-0.2827443061704e0*lnTe**2+0.01623316639567e0*lnTe**3-0.03365012031362999e0*lnTe**4+0.01178329782711e0*lnTe**5-0.001656194699504e0*lnTe**6+0.0001068275202678e0*lnTe**7-2.631285809207e-6*lnTe**8)
+
+H- + H+ -> H + H            []          5.7e-6*invsqrT +6.3e-8 -9.2e-11*sqrTgas +4.4e-13*Tgas
+
+H- + H+ -> H2+ + e-         [0, 8e3]    6.9e-9*Tgas**(-0.35)
+H- + H+ -> H2+ + e-         [8e3, inf]  9.6e-7*Tgas**(-0.9)
+
+H2+ + e- -> H + H           []          2e-7*invsqrT
+
+H2+ + H- -> H + H2          []          2.3e-7/sqrt(T32)
+
+H + H + H -> H2 + H         []          5.5e-29*invT
+
+H2 + H + H -> H2 + H2       []          5.5e-29*invT*0.125e0
+
+
+var kl21 = 1.18e-10*exp(-6.95e4*invT)
+var kh21 = 8.125e-8*invsqrT*exp(-5.2e4*invT)*(1.e0-exp(-6e3*invT))
+var ncr21 = 1e1**(4.845e0-1.3e0*log10(T*1e-4)+1.62e0*log10(T*1e-4)**2)
+var a21 = 1.e0/(1.e0+(Hnuclei/ncr21))
+# [legacy @noTabNext dropped: handled outside the network file in KROME-X]
+H2 + H2 -> H + H + H2       []          kh21**(1.-a21)*kl21**a21
+
+
+H + H -> H+ + e- + H        []          1.7e-4*exp(-32.71396786e0+13.5365560e0*lnTe-5.73932875e0*(lnTe**2)+1.56315498e0*(lnTe**3)-0.28770560e0*(lnTe**4)+3.48255977e-2*(lnTe**5)-2.63197617e-3*(lnTe**6)+1.11954395e-4*(lnTe**7)-2.03914985e-6*(lnTe**8))
+
+He+ + H2 -> H+ + He + H     []          3.7e-14*exp(-35e0*invT)
+
+H2+ + He -> HeH+ + H        []          1.3e-10
+
+H2+ + H2 -> H3+ + H         []          2.08e-9
+
+H3+ + H- -> H2 + H2         []          2.3e-7*invsqrT32
+
+He+ + H -> H+ + He          []          1.9e-15
+
+He+ + H- -> H + He          []          2.3e-7*invsqrT32
+
+He+ + H2 -> H2+ + He        []          7.20e-15
+
+HeH+ + H -> H2+ + He        []          9.1e-10
+
+HeH+ + H2 -> H3+ + He       []          1.5e-9
+
+H3+ + e- -> H2 + H          []          1.5e-8*invsqrT32
+
+H3+ + e- -> H + H + H       []          1.5e-8*invsqrT32
+
+HeH+ + e- -> H + He         []          2e-7*invsqrT32

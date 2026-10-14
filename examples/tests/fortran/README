@@ -1,0 +1,17 @@
+!*************Tests the functionality of the Fortran interface************
+! (the KROME-X analogue of legacy tests/Cinterface; KROME-X is a C/C++ library and
+! the Fortran binding, runtime/interfaces/fortran/krome.f90, sits on its C interface
+! through iso_c_binding)
+!
+! The one-zone primordial collapse of tests/collapse, twice: test.f90
+! through the Fortran binding (modules krome, krome_net and the helpers
+! krome_test_utils.f90), test_cpp.cpp through the C++ API. Run
+!   make && ./test && ./test_cpp && python3 check_diffs.py
+! to check that the two outputs (abundances.dat, abundances_cpp.dat)
+! agree: to the printed digits (5e-8) with strict floating point,
+!   make CXXFLAGS="-O2 -std=c++17 -ffp-contract=off" \
+!     FFLAGS="-O2 -ffp-contract=off"
+! and to ~1e-6 with the default -O3 FMA build (the solver is compiled
+! twice, in libkrome and in test_cpp, with different contractions).
+!**************************************************************************
+- output files (legacy name): abundances.dat (fort.22).

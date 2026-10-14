@@ -1,0 +1,349 @@
+krome_format 1
+# converted from legacy network 'react_galaxy_ism_xray' by convert_legacy.py
+# (Fe_recombination_on_dust and the @format shield column come from
+# a newer KROME branch than the legacy/ copy)
+# Shielding factors (photo(..., shield=...)): they scale the rate, the
+# photoheating and the photon removal of each photo-process. They are the
+# right choice for photochemistry without a transported field; with photon
+# bins that the caller already attenuates by dust, do not also include the
+# dust opacity there, or the dust shielding is counted twice.
+
+param FBH      = 0.0    # runtime parameter (legacy @common:user_FBH); set default!
+param crate    = 0.0    # runtime parameter (legacy @common:user_crate); set default!
+param ext_heat = 0.0    # runtime parameter (legacy @common:user_ext_heat); set default!
+param myfluxLW = 0.0    # runtime parameter (legacy @common:user_myfluxLW); set default!
+
+# legacy shortcut symbols, now ordinary vars:
+var Te       = Tgas_eV
+var lnTe     = log(Tgas_eV)
+var invTe    = 1.0/Tgas_eV
+var invT     = 1.0/Tgas
+var T32      = Tgas/300.0
+var invsqrT32 = sqrt(300.0/Tgas)
+
+# functions provided by runtime physics modules:
+extern C_recombination_on_dust
+extern Fe_recombination_on_dust
+extern H2_sigmaLW
+extern H2_solomonLW
+extern H_recombination_on_dust
+extern He_recombination_on_dust
+extern O_recombination_on_dust
+extern Si_recombination_on_dust
+extern krome_fshield
+extern shield_dust
+
+#primordial network for galaxy simulations including photochemistry, 2016
+# Ref: Bovino+, A&A, 590, A15
+# Variables definition, user_crate, cosmic-rays rate, commonly 3e-17 1/s
+# user_myflyxUV is the LW flux at 12.87 eV needed to calculate the rate for the Solomon process.
+# it's a common because if you have a time-dependent flux this value will change
+# user_FBH is the BH total flux in erg/s/cm^3
+var T = Tgas
+heating custom_1 = ext_heat
+
+#Janev 1987
+H + e- -> H+ + e- + e-          []                exp(-32.71396786e0+13.5365560e0*lnTe-5.73932875e0*(lnTe**2)+1.56315498e0*(lnTe**3)-0.28770560e0*(lnTe**4)+3.48255977e-2*(lnTe**5)-2.63197617e-3*(lnTe**6)+1.11954395e-4*(lnTe**7)-2.03914985e-6*(lnTe**8))
+
+#Abel et al. 1997, fit by data from Ferland et al. 1992
+H+ + e- -> H                    [0, 5.5e3]        3.92e-13*invTe**0.6353
+H+ + e- -> H                    [5.5e3, inf]      exp(-28.61303380689232e0-0.7241125657826851e0*lnTe-0.02026044731984691e0*lnTe**2-0.002380861877349834e0*lnTe**3-0.0003212605213188796e0*lnTe**4-0.00001421502914054107e0*lnTe**5+4.989108920299513e-6*lnTe**6+5.755614137575758e-7*lnTe**7-1.856767039775261e-8*lnTe**8-3.071135243196595e-9*lnTe**9)
+
+#Janev 1987
+He + e- -> He+ + e- + e-        []                exp(-44.09864886e0+23.91596563e0*lnTe-10.7532302e0*(lnTe**2)+3.05803875e0*(lnTe**3)-0.56851189e0*(lnTe**4)+6.79539123e-2*(lnTe**5)-5.00905610e-3*(lnTe**6)+2.06723616e-4*(lnTe**7)-3.64916141e-6*(lnTe**8))
+
+#Radiative+dielectronic from Cen 1992, Aldrovandi & Pequignot 1973
+He+ + e- -> He                  [0, 9.284e3]      3.92e-13*invTe**0.6353
+He+ + e- -> He                  [9.284e3, inf]    1.54e-9*(1.e0+0.3e0/exp(8.099328789667e0*invTe))/(exp(40.49664394833662e0*invTe)*Te**1.5)+3.92e-13/Te**0.6353
+
+#Aladdin database 1989 (see Abel et al. 1997)
+He+ + e- -> He++ + e- + e-      []                exp(-68.71040990212001e0+43.93347632635e0*lnTe-18.48066993568e0*lnTe**2+4.701626486759002e0*lnTe**3-0.7692466334492e0*lnTe**4+0.08113042097303e0*lnTe**5-0.005324020628287001e0*lnTe**6+0.0001975705312221e0*lnTe**7-3.165581065665e-6*lnTe**8)
+
+#Verner & Ferland 1996
+He++ + e- -> He+                []                1.891e-10/(sqrt(Tgas/9.37)*(1.+sqrt(Tgas/9.37))**0.2476*(1.+sqrt(Tgas/2.774e6))**1.7524)
+
+#De Jong (1972)
+H + e- -> H-                    []                1.4e-18*Tgas**0.928*exp(-Tgas/16200.)
+
+# fit by Kreckel et al. 2010
+var a1 = 1.3500e-09
+var a2 = 9.8493e-02
+var a3 = 3.2852e-01
+var a4 = 5.5610e-01
+var a5 = 2.7710e-07
+var a6 = 2.1826e+00
+var a7 = 6.1910e-03
+var a8 = 1.0461e+00
+var a9 = 8.9712e-11
+var a10 = 3.0424e+00
+var a11 = 3.2576e-14
+var a12 = 3.7741e+00
+H- + H -> H2 + e-               []                a1*(Tgas**a2+a3*Tgas**a4+a5*Tgas**a6)/(1.+a7*Tgas**a8+a9*Tgas**a10+a11*Tgas**a12)
+
+# fit to Ramaker & Peek 1976, corrected by Coppola
+H + H+ -> H2+                   [0, 3e1]          2.10e-20*(Tgas/30.)**(-0.15)
+H + H+ -> H2+                   [3e1, inf]        10**(-18.20-3.194*log10(Tgas)+1.786*(log10(Tgas))**2-0.2072*(log10(Tgas))**3)
+
+#Karpas 1979
+H2+ + H -> H2 + H+              []                6.0e-10
+
+#fit by Savin et al. 2004, Krstic, see also Grassi et al. 2011
+var asav0 = -1.9153214e2
+var asav1 = 4.0129114e2
+var asav2 = -3.7446991e2
+var asav3 = 1.9078410e2
+var asav4 = -5.7263467e1
+var asav5 = 1.0133210e1
+var asav6 = -9.8012853e-1
+var asav7 = 4.0023414e-2
+var bsav0 = -8.8755774e3
+var bsav1 = 1.0081246e4
+var bsav2 = -4.8606622e3
+var bsav3 = 1.2889659e3
+var bsav4 = -2.0319575e2
+var bsav5 = 1.9057493e1
+var bsav6 = -9.8530668e-1
+var bsav7 = 2.1675387e-2
+var sumsav = asav0+asav1*log10(Tgas)+asav2*(log10(Tgas))**2+asav3*(log10(Tgas))**3+asav4*(log10(Tgas))**4+asav5*(log10(Tgas))**5+asav6*(log10(Tgas))**6+asav7*(log10(Tgas))**7
+var sumsbv = bsav0+bsav1*log10(Tgas)+bsav2*(log10(Tgas))**2+bsav3*(log10(Tgas))**3+bsav4*(log10(Tgas))**4+bsav5*(log10(Tgas))**5+bsav6*(log10(Tgas))**6+bsav7*(log10(Tgas))**7
+H2 + H+ -> H2+ + H              [1.e2, 1.e5]      10**sumsav
+H2 + H+ -> H2+ + H              [1.e5, 1.e8]      10**sumsbv
+
+#Capitelli et al. 2007
+H2 + e- -> H + H-               []                3.55e1*Tgas**(-2.28)*exp(-46707./Tgas)
+
+#fit by Mitchell & Deveau 1983 of data by Corrigan 1965
+H2 + e- -> H + H + e-           []                4.38e-10*exp(-102000./Tgas)*Tgas**(0.35)
+
+#Glover&Abel 2008, only the low-density contributions (H2 in the ground state)
+H2 + H -> H + H + H             []                6.67e-12*sqrt(Tgas)*exp(-(1+63593/Tgas))
+
+#Janev 1987
+H- + e- -> H + e- + e-          []                exp(-18.01849334273e0+2.360852208681e0*lnTe-0.2827443061704e0*lnTe**2+0.01623316639567e0*lnTe**3-0.03365012031362999e0*lnTe**4+0.01178329782711e0*lnTe**5-0.001656194699504e0*lnTe**6+0.0001068275202678e0*lnTe**7-2.631285809207e-6*lnTe**8)
+
+#Abel et al. 1997, based on Janev 1987
+H- + H -> H + H + e-            [0, 1.16e3]       2.56e-9*Te**1.78186
+H- + H -> H + H + e-            [1.16e3, inf]     exp(-20.37260896533324e0+1.139449335841631e0*lnTe-0.1421013521554148e0*lnTe**2+0.00846445538663e0*lnTe**3-0.0014327641212992e0*lnTe**4+0.0002012250284791e0*lnTe**5+0.0000866396324309e0*lnTe**6-0.00002585009680264e0*lnTe**7+2.4555011970392e-6*lnTe**8-8.06838246118e-8*lnTe**9)
+
+#Stenrup et al. 2009
+H- + H+ -> H + H                [1e1, 1e7]        (2.96e-6/sqrt(Tgas)-1.73e-9+2.50e-10*sqrt(Tgas)-7.77e-13)
+
+#Poulart 1978
+H- + H+ -> H2+ + e-             []                1.e-8*Tgas**(-0.4)
+
+#Abel et al. 1997, fit by data from Schneider 1994
+H2+ + e- -> H + H               [0, 6.17e2]       1.e-8
+H2+ + e- -> H + H               [6.17e2, inf]     1.32e-6*Tgas**(-0.76)
+
+#Dalgarno & Lepp 1987
+H2+ + H- -> H + H2              []                5.e-7*sqrt(1.e2*invT)
+
+#Glover & Abel 2008
+H2 + H2 -> H + H + H2           []                5.996e-30*Tgas**(4.1881)*(1e0+6.761e-6*Tgas)**(-5.6881)*exp(-54657.4*invT)
+
+#New reactions from Yoshida et al. 2006, helium charge-transfer
+He+ + H -> He + H+              []                1.20e-15*(Tgas/3e2)**0.25
+He + H+ -> He+ + H              [0, 1e4]          1.26e-9*Tgas**(-0.75)*exp(-1.275e5*invT)
+He + H+ -> He+ + H              [1e4, inf]        4.e-37*Tgas**(4.74)
+
+#Additional reactions for completness
+H2 + He+ -> He + H + H+         []                3.7e-14*exp(-35.e0/Tgas)
+H2 + He -> H + H + He           []                10**(-27.029 + 3.801*log10(Tgas)-29487e0/Tgas)
+H2 + He+ -> H2+ + He            []                7.2e-15
+
+#New reactions from Glover 2015
+H + H -> H + H+ + e-            []                1.2e-17*Tgas**(1.2)*exp(-157800*invT)
+H + He -> He + H+ + e-          []                1.75e-17*Tgas**(1.3)*exp(-157800*invT)
+
+#PHOTOCHEMISTRY AND SHIELDING DEFINITIONS
+var krome_fshieldH2 = krome_fshield()*shield_dust(3.74e0)
+var krome_fshieldHM = shield_dust(0.5e0)
+var krome_fshieldH2j = shield_dust(1.9e0)
+var krome_fshieldC = shield_dust(3.0e0)
+
+H -> H+ + e-                    []                photo(xsec=auto)
+He -> He+ + e-                  []                photo(xsec=auto)
+He+ -> He++ + e-                []                photo(xsec=auto)
+H- -> H + e-                    []                photo(xsec="swri", shield=krome_fshieldHM, Emin=0.755e0)
+H2 -> H2+ + e-                  []                photo(xsec="swri", shield=krome_fshieldH2, Emin=15.4e0)
+H2+ -> H+ + H                   []                photo(xsec="leiden", shield=krome_fshieldH2j, Emin=2.65e0)
+#Shapiro & Kang 1987
+H2+ -> H+ + H+ + e-             []                photo(xsec=10**(-16.926-4.528e-2*E_eV+2.238e-4*E_eV**2+4.245e-7*E_eV**3), shield=krome_fshieldH2j, Emin=3.e1, Emax=9.e1)
+#Abel et al. 1997, fit from data by Allison&Dalgarno 1969, direct photodissociation
+H2 -> H + H                     []                photo(xsec=H2_sigmaLW(E_eV), shield=krome_fshieldH2, Emin=14.159e0, Emax=17.7e0)
+
+# [legacy @noTabNext dropped: handled outside the network file in KROME-X]
+# [legacy @next_solomon: KROME-X recognizes the Solomon reaction itself (Solomon heating of CHEM)]
+H2 -> H + H                     []                H2_solomonLW(myfluxLW)*krome_fshieldH2
+
+#Recombination on dust, Weingartner&Draine 2001, see also Glover&Jappsen 2007, and Richings et al. 2015
+#Internally evaluated by KROME
+# [legacy @noTab_start dropped: handled outside the network file in KROME-X]
+H+ + e- -> H                    []                H_recombination_on_dust()
+He+ + e- -> He                  []                He_recombination_on_dust()
+O+ + e- -> O                    []                O_recombination_on_dust()
+Si+ + e- -> Si                  []                Si_recombination_on_dust()
+C+ + e- -> C                    []                C_recombination_on_dust()
+Fe+ + e- -> Fe                  []                Fe_recombination_on_dust()
+# [legacy @noTab_stop dropped: handled outside the network file in KROME-X]
+
+####ADDING METALS FROM Glover&Jappsen 2010 from #30
+###Photoreactions for metals
+C -> C+ + e-                    []                photo(xsec=auto, shield=krome_fshieldC)
+O -> O+ + e-                    []                photo(xsec=auto)
+Si -> Si+ + e-                  []                photo(xsec=auto)
+Si+ -> Si++ + e-                []                photo(xsec=auto)
+
+C+ + e- -> C                    [0, 7950e0]       4.67e-12*(T32)**(-0.6)
+C+ + e- -> C                    [7950e0, 2.114e4]  1.23e-17*(T32)**(2.49)*exp(2.18456e4*invT)
+C+ + e- -> C                    [2.114e4, inf]    9.62e-8*(T32)**(-1.37)*exp(-115786.2*invT)
+#
+Si+ + e- -> Si                  [0, 2.e3]         7.5e-12*(T32)**(-0.55e0)
+Si+ + e- -> Si                  [2.e3, 1.e4]      4.86e-12*(T32)**(-0.32e0)
+Si+ + e- -> Si                  [1e4, inf]        9.08e-14*(T32)**(0.818)
+Si++ + e- -> Si+                []                1.75e-12*(Tgas/1e4)**(-0.6346e0) + 2.2552e-11*invTe**1.5*exp(-2.76*invTe) + 5.6058e-9*invTe**1.5*exp(-10.13*invTe)
+#
+O+ + e- -> O                    [0, 4.e2]         1.30e-10*(Tgas)**(-0.64e0)
+O+ + e- -> O                    [4.e2, inf]       1.41e-10*(Tgas)**(-0.66e0) + 7.4e-4*(Tgas)**(-1.5e0)*exp(-1.75e5*invT)*(1.0e0+0.062e0*exp(-1.45e5*invT))
+#
+
+var u1 = 11.26e0*invTe
+var u2 = 8.2e0*invTe
+var u3 = 13.6*invTe
+C + e- -> C+ + e- + e-          []                6.85e-8*u1**0.25*exp(-u1)/(0.193e0+u1)
+Si + e- -> Si+ + e- + e-        []                1.88e-7*(1e0+u2**0.5)*u2**0.25*exp(-u2)/(0.376e0+u2)
+O + e- -> O+ + e- + e-          []                3.59e-8*u3**0.34*exp(-u3)/(0.073e0+u3)
+
+#
+#Charge transfer (Glover and Jappsen 07)
+C + H+ -> C+ + H                []                3.9e-16*Tgas**(0.213e0)
+C+ + H -> C + H+                []                6.08e-14*(Tgas/1e4)**(1.96e0)*exp(-1.7e5*invT)
+O+ + H -> O + H+                []                4.99e-11*Tgas**0.405e0 + 7.54e-10*invT**(0.458e0)
+O + H+ -> O+ + H                []                (1.08e-11*Tgas**0.517e0 + 4.0e-10*Tgas**(0.00669e0))*exp(-2.27e2*invT)
+O + He+ -> O+ + He              []                4.991e-15*(min(Tgas,1e6)/1e4)**0.3794e0*exp(-min(Tgas,1e6)/1.121e6)+2.78e-15*(min(Tgas,1e6)/1e4)**(-0.2163e0)*exp(min(Tgas,1e6)/8.158e5)
+
+
+C + He+ -> C+ + He              [0, 2e2]          8.58e-17*Tgas**(0.757e0)
+C + He+ -> C+ + He              [2e2, 2e3]        3.25e-17*Tgas**(0.968e0)
+C + He+ -> C+ + He              [2e3, inf]        2.77e-19*Tgas**(1.597e0)
+Si + H+ -> Si+ + H              [0, 1e4]          5.88e-13*Tgas**(0.848e0)
+Si + H+ -> Si+ + H              [1.e4, inf]       1.45e-13*Tgas
+Si + He+ -> Si+ + He            []                3.3e-9
+C+ + Si -> C + Si+              []                (1.8679e8+5.091022e10*Tgas**(-0.526561e0))**(-1e0) #Satta, Grassi & Gianturco 2013
+
+#Trange from original Kingdon+Ferland1996
+Si+ + H+ -> Si++ + H            []                4.10e-10*(Tgas/1e4)**(0.24e0)*(1.0e0+3.17e0*exp(-Tgas/2.39e6))*exp(-3.178e0*invTe)
+Si++ + H -> Si+ + H+            []                1.23e-9*(Tgas/1e4)**(0.24e0)*(1.0e0+3.17e0*exp(-Tgas/2.39e6))
+
+#adding cosmic rays processes from OSU
+# [legacy @CR_start marker removed: these are ordinary reactions in KROME-X]
+# H -> H+ + e-                    []                4.6e-1*crate
+# He -> He+ + e-                  []                5.e-1*crate
+# H2 -> H + H                     []                1e-1*crate
+# H2 -> H+ + H-                   []                3e-4*crate
+# H2 -> H2+ + e-                  []                9.3e-1*crate
+# H2 -> H + H+ + e-               []                9.3e-1*crate
+# [legacy @CR_stop marker removed: these are ordinary reactions in KROME-X]
+
+#some few new reactions for completness
+H- + He -> He + H + e-          []                4.1e-17*Tgas**2*exp(-1.987e4/Tgas)
+H2+ + H -> H + H+ + H           []                1.54e-12*Tgas**0.45*exp(-3.1e4/Tgas)
+#Forrey 2013 !NEW!
+H + H + H -> H2 + H             []                6.e-32*Tgas**(-0.25)+2.e-31*Tgas**(-0.5)
+#Glover&Abel 2008
+H2 + H + H -> H2 + H2           []                (6.e-32*Tgas**(-0.25)+2.e-31*Tgas**(-0.5))/8.e0
+
+##Here we put the additional reactions for high-ionisation states
+#Collisional ionisation
+C+ + e- -> C++ + e- + e-        []                auto
+C++ + e- -> C+++ + e- + e-      []                auto
+N + e- -> N+ + e- + e-          []                auto
+N+ + e- -> N++ + e- + e-        []                auto
+N++ + e- -> N+++ + e- + e-      []                auto
+N+++ + e- -> N++++ + e- + e-    []                auto
+O+ + e- -> O++ + e- + e-        []                auto
+O++ + e- -> O+++ + e- + e-      []                auto
+O+++ + e- -> O++++ + e- + e-    []                auto
+O++++ + e- -> O+++++ + e- + e-  []                auto
+
+#Collisional recombination
+C++ + e- -> C+                  []                auto
+C+++ + e- -> C++                []                auto
+N+ + e- -> N                    []                auto
+N++ + e- -> N+                  []                auto
+N+++ + e- -> N++                []                auto
+N++++ + e- -> N+++              []                auto
+O++ + e- -> O+                  []                auto
+O+++ + e- -> O++                []                auto
+O++++ + e- -> O+++              []                auto
+O+++++ + e- -> O++++            []                auto
+
+C+ -> C++ + e-                  []                photo(xsec=auto)
+C++ -> C+++ + e-                []                photo(xsec=auto)
+N -> N+ + e-                    []                photo(xsec=auto)
+N+ -> N++ + e-                  []                photo(xsec=auto)
+N++ -> N+++ + e-                []                photo(xsec=auto)
+N+++ -> N++++ + e-              []                photo(xsec=auto)
+O+ -> O++ + e-                  []                photo(xsec=auto)
+O++ -> O+++ + e-                []                photo(xsec=auto)
+O+++ -> O++++ + e-              []                photo(xsec=auto)
+O++++ -> O+++++ + e-            []                photo(xsec=auto)
+Fe -> Fe+ + e-                  []                photo(xsec=auto)
+
+
+#Additional charge transfers from original Kingdon+Ferland1996 (recombinations)
+C++ + H -> C+ + H+              [5e3, 5e4]        1.67e-13*(Tgas/1e4)**(2.79e0)*(1.0e0 + 304.72e0*exp(-4.07*(Tgas/1.e4)))
+C+++ + H -> C++ + H+            [1e3, 1e5]        3.25e-9*(Tgas/1e4)**(0.21e0)*(1.0e0 + 0.19e0*exp(-3.29*(Tgas/1.e4)))
+N+ + H -> N + H+                [1e2, 5e4]        1.01e-12*(Tgas/1e4)**(-0.29e0)*(1.0e0-0.92e0*exp(-8.38e0*Tgas/1.e4))
+N++ + H -> N+ + H+              [1e3, 1e5]        3.05e-10*(Tgas/1e4)**(0.6e0)*(1.0e0+2.65e0*exp(-0.93e0*Tgas/1.e4))
+N+++ + H -> N++ + H+            [1e1, 1e5]        4.54e-9*(Tgas/1e4)**(0.57e0)*(1.0e0-0.65e0*exp(-0.89e0*Tgas/1.e4))
+N++++ + H -> N+++ + H+          [1e3, 1e6]        2.95e-9*(Tgas/1e4)**(0.55e0)*(1.0e0-0.39e0*exp(-1.07e0*Tgas/1.e4))
+O++ + H -> O+ + H+              [1e4, 1e5]        1.04e-9*(Tgas/1e4)**(0.27e0)*(1.0e0+2.02e0*exp(-5.92e0*Tgas/1.e4))
+O+++ + H -> O++ + H+            [1e3, 5e4]        3.98e-9*(Tgas/1e4)**(0.26e0)*(1.0e0+0.56e0*exp(-2.62e0*Tgas/1.e4))
+O++++ + H -> O+++ + H+          [1e3, 3e4]        2.52e-10*(Tgas/1e4)**(0.63e0)*(1.0e0+2.08e0*exp(-4.16e0*Tgas/1.e4))
+#
+#Ionizations
+N + H+ -> N+ + H                [1e2, 5e4]        4.55e-12*(Tgas/1e4)**(-0.29e0)*(1.0e0-0.92e0*exp(-8.38e0*Tgas/1.e4))*exp(-10860./Tgas)
+
+#Recombinations on He
+C+++ + He -> C++ + He+          [1e3, 1e7]        1.12e-9*(Tgas/1e4)**(0.42e0)*(1.0e0-0.69e0*exp(-0.34e0*Tgas/1.e4))
+N++ + He -> N+ + He+            [1e3, 4e4]        4.84e-10*(Tgas/1e4)**(0.92e0)*(1.0e0+2.37e0*exp(-1.02e1*Tgas/1.e4))
+N++ + He -> N+ + He+            [4e4, 1e7]        3.17e-9*(Tgas/1e4)**(0.20e0)*(1.0e0-0.72e0*exp(-4.81e-2*Tgas/1.e4))
+N+++ + He -> N++ + He+          [1e3, 1e7]        2.05e-9*(Tgas/1e4)**(0.23e0)*(1.0e0-0.72e0*exp(-0.19e0*Tgas/1.e4))
+N++++ + He -> N+++ + He+        [1e3, 9e4]        1.26e-11*(Tgas/1e4)**(1.55e0)*(1.0e0+1.12e1*exp(-7.82e0*Tgas/1.e4))
+N++++ + He -> N+++ + He+        [9e4, 1e7]        3.75e-10*(Tgas/1e4)**(0.54e0)*(1.0e0-0.82e0*exp(-2.07e-2*Tgas/1.e4))
+O++ + He -> O+ + He+            [1e3, 5e4]        7.10e-12*(Tgas/1e4)**(2.6e0)*(1.0e0+8.99e0*exp(-0.78e0*Tgas/1.e4))
+O++ + He -> O+ + He+            [5e4, 1e7]        6.21e-10*(Tgas/1e4)**(0.53e0)*(1.0e0-0.66e0*exp(-2.22e-2*Tgas/1.e4))
+O+++ + He -> O++ + He+          [1e3, 1e7]        1.12e-9*(Tgas/1e4)**(0.42e0)*(1.0e0-0.71e0*exp(-1.98e-2*Tgas/1.e4))
+O++++ + He -> O+++ + He+        [1e3, 1e7]        9.97e-10*(Tgas/1e4)**(0.40e0)*(1.0e0-0.46e0*exp(-0.35e0*Tgas/1.e4))
+
+#Now Dalgarno's high ionisation levels recombinations (final excess>3)
+O+++++ + H -> O++++ + H+        []                1.92e-9*5e0
+O+++++ + He -> O++++ + He+      []                0.54e-9*5e0
+
+
+var sqrtT32 = sqrt(Tgas/3e2)
+var invsqrT32 = 1e0/sqrt(Tgas/3e2)
+
+C+ + Fe -> Fe+ + C              []                2.60e-09
+H+ + Fe -> Fe+ + H              []                7.40e-09
+N+ + Fe -> Fe+ + N              []                1.50e-09
+O+ + Fe -> Fe+ + O              []                2.90e-09
+Si+ + Fe -> Fe+ + Si            []                1.90e-09
+Fe+ + e- -> Fe                  []                3.70e-12*T32**(-6.50e-01)
+Fe+ + H- -> Fe + H              []                2.30e-07*invsqrT32
+
+
+#X-rays
+#Photoionization of H, He by Xrays, Shull+1985, Inayoshi+2012
+# [legacy @XRAY block: converted to photo() -- KROME-X does X-ray chemistry through the photo machinery with bins extending to X-ray energies; tabulated X-ray rates are retired]
+# [legacy XRAY duplicate of photo reaction dropped: H -> H+ + e-]
+# [legacy XRAY duplicate of photo reaction dropped: He -> He+ + e-]
+# [legacy XRAY duplicate of photo reaction dropped: C -> C+ + e-]
+# [legacy XRAY duplicate of photo reaction dropped: O -> O+ + e-]
+# [legacy XRAY duplicate of photo reaction dropped: Si -> Si+ + e-]
+# [legacy XRAY duplicate of photo reaction dropped: N -> N+ + e-]
+# [legacy XRAY duplicate of photo reaction dropped: Fe -> Fe+ + e-]
+# [legacy XRAY duplicate of photo reaction dropped: C+ -> C++ + e-]
+# [legacy XRAY duplicate of photo reaction dropped: O+ -> O++ + e-]
+# [legacy XRAY duplicate of photo reaction dropped: N+ -> N++ + e-]

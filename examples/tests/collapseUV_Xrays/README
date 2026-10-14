@@ -1,0 +1,68 @@
+!***************************************************************************
+!This is a simple one-zone collapse test following
+! the chemical and thermal evolution of a primordial cloud irradiated
+! by both a UV flux below the Lyman limit (13.6 eV) and a X-ray flux
+! between 2-10 keV. 
+!For further details we remind to Inayoshi, MNRAS, 416, 2748-2759, 2011.
+!Note that the results are different compared to Inayoshi+, 2011 as
+! the cross-sections employed here for H and He photoionization are
+! from Verner+ 1996, while Inayoshi+ adopted older outdated cross-sections.
+!The dynamics is described by the Larson-Penston-type similar solution.
+!The test produce results for four different values of the UV flux
+! expressed in terms of J21 (erg/cm2/s/Hz/sr) ranging from 0 to 3000.
+!The X-rays flux also expressed in terms of J21_xr is fixed to 0.1.
+!The following cooling/heating processes are included in the test:
+! H2 cooling from Glover&Abel 2008, atomic cooling from Cen 1992, 
+! compton cooling, chemical heating, and heating coming from x-rays.
+!The test reprpoduces the results reported in Latif+, 2014
+!***************************************************************************
+
+KROME-X port (examples/tests/collapseUV_Xrays, driver test.cpp on the
+C++ API):
+- network networks/xrays.knet: the legacy common user_J21 is the network
+  parameter J21 (p.J21); the @XRAY block (tabulated "auto" rates) is the
+  photo reactions H, He -> ion + e- with photo(xsec=auto);
+- legacy -heating=XRAY (tables data/ratexH.dat, ratexHe.dat, heatxH.dat,
+  heatxHe.dat, J21xray) does not exist in KROME-X: X-rays are photon bins. The
+  legacy tables were the H and He photoionization rates and photoelectron
+  energy of J = J21_X 1e-21 (E/1 keV)^-1.5 erg/s/cm2/Hz/sr between 2 and
+  10 keV (Verner cross sections), attenuated by the H and He Jeans columns
+  (num2col). The driver builds 100 log bins over 2-10 keV with that
+  spectrum (J21_X = 0.1) and attenuates it before each step by exp(-tau)
+  of the same columns (get_opacity); the KROME-X photo rates reproduce the
+  legacy tables within 0.01 dex from N_H = 1e16 to 1e25 cm^-2.
+  thermal.heating = ["PHOTO"] is the photoheating and radiation.secondary_ionization = ["H", "He"] the
+  fast-photoelectron ionization and heating efficiency;
+- secondary ionization: legacy multiplied the primary rates by
+  phi = 0.3908 (1 - x_e^0.4092)^1.7592 E/13.6 (H) and
+  0.0554 (1 - x_e^0.4614)^1.666 E/24.6 (He) with a fixed E = 4.46 keV;
+  KROME-X (Quadri+25 fits of Dalgarno+99) uses the actual energy of each
+  absorbed photon, whose absorption-weighted mean for this spectrum is
+  2.5 keV. The KROME-X secondary ionization is therefore about half the legacy
+  one (3.1e-18 vs 5.9e-18 s^-1 per H at x_e = 1e-3 in the thin limit) and
+  the heating efficiency differs by -11% (x_e = 1e-3) to +16% (1e-4).
+  Fewer electrons form less H2, so KROME-X is 5-15% warmer than legacy along
+  the J21 = 0 and 10 tracks and the J21 = 1e3 track cools at n ~ 870 cm^-3
+  instead of ~450 cm^-3. With the legacy mean energy set to 2.5 keV the
+  legacy run agrees with KROME-X to ~1% (median);
+- legacy -conserve is the runtime option SolverOpts::conserve = 2;
+  -columnDensityMethod=JEANS is radiation.num2col = "jeans" (translated);
+- legacy krome_set_zredshift(15) set only the redshift (Compton cooling);
+  the CMB temperature (CIE cooling, lower temperature cap) stayed at the
+  legacy default 2.73 K: the driver sets p.Tcmb = 2.73;
+- KROME-X keeps its default tolerances (rtol 1e-8; legacy 1e-4);
+- abundances.dat as legacy (a " #j21 ntot Tgas" header per J21 block);
+- plot: python3 plot.py (plot.png).
+- 2.0.0: thermal.gamma = "EXACT" (every diatomic with its exact rotation and
+  vibration); legacy -gamma=FULL (H2 always 7/5) was removed. Against the
+  v2.0.0-benchmark run (FULL, and the legacy physical constants, now
+  CODATA 2018): Tgas within 9e-6 (median); 0.65 % at most, in 5 rows of
+  the steep transition near 3600 K at J21 = 1e3 (the transition shifts
+  slightly). The legacy comparison of this test is that of
+  v2.0.0-benchmark (bench/results/benchmark).
+- 2.0.0: the recombination cooling of -cooling=ATOMIC comes from the
+  network's own recombination rates, n_e n_X kB T (3/2 k + T dk/dT)
+  (legacy: the Cen 1992 fits). Against v2.0.0-benchmark, with all the
+  2.0.0 changes: Tgas within 1.2e-5 (median), 1.1 % at most (the steep
+  transition near 3600 K at J21 = 1e3).
+- output files (legacy name): abundances.dat (fort.22).

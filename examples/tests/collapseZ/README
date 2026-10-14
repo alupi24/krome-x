@@ -1,0 +1,41 @@
+!***************************************************************
+!This is a simple one-zone collapse test following
+! the chemical and thermal evolution of a metal-enriched cloud.
+!The dynamics is described by the Larson-Penston-type
+! similar solution and includes cooling and heating processes.
+!For additional details look also to Omukai 2005.
+!***************************************************************
+
+KROME-X port (examples/tests/collapseZ, driver test.cpp on the C++ API):
+- the legacy CI,CII,OI,OII line cooling is the KROME-X Z cooling restricted to
+  C, C+, O, O+ (thermal.cooling = ["Z"] thermal.metals = ["C", "C+", "O", "O+"], translated
+  automatically from the legacy option file);
+- -noSinkCheck and -maxord=1 have no KROME-X equivalent (dropped);
+- legacy RTOL was 1e-4: KROME-X keeps its default rtol 1e-8 (-ATOL=1d-40 is the
+  project's default atol_n of the species; the Tgas tolerance is atol_T);
+- legacy krome_set_zredshift(15) set only the redshift (Compton cooling):
+  the CMB temperature, which is also the lower temperature cap of the
+  rates and coolers, stayed at the legacy default 2.73 K, so the driver
+  sets p.Tcmb = 2.73. At Z = 1e-2 and 1e-1 Zsun the gas cools below
+  2.73 (1+z) = 43.7 K (to ~4 K), as in legacy; with Tcmb = 43.7 K the
+  cooling would be evaluated at the cap and Tgas would run to zero;
+- the legacy OpenMP loop over metallicities is serial here and abundances.dat
+  is written while running (same columns and blocks: Z rho Tgas n_i/ntot);
+  legacy's empty fort.55 is not written;
+- plot: python3 plot.py (plot.png).
+- 2.0.0: thermal.gamma = "EXACT" (every diatomic with its exact rotation and
+  vibration); legacy -gamma=FULL (H2 always 7/5) was removed. Against the
+  v2.0.0-benchmark run (FULL, and the legacy physical constants, now
+  CODATA 2018): Tgas within 3.5e-5 (median), 0.6 % at most, at the highest
+  densities (3055 -> 3036 K), where the H2 vibration lowers gamma. The
+  legacy comparison of this test is that of v2.0.0-benchmark
+  (bench/results/benchmark).
+- 2.0.0: the C, C+ and O line cooling of coolZ.dat uses current collision
+  data (O + H, He, H2: Lique et al. 2018 corrected; C+ + H2: Klos et al.
+  2021, + H: Barinovs et al. 2005; C + H: Yan & Babb 2023; the legacy file
+  had no H2 collisions for C+ and O). The extra cooling at 100-300 K
+  lowers Tgas along the low-density part of the tracks: by up to 43 % (151
+  -> 86 K at rho = 5, Z = 1e-2 Z_sun), 26 % (Z = 0.1), 23 % (Z = 1e-3), 14
+  % (Z = 1e-4), with median changes < 0.6 %; the primordial track moves by
+  1 %.
+- output files (legacy name): abundances.dat (fort.22).

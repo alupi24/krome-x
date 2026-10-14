@@ -1,0 +1,149 @@
+krome_format 1
+# converted from legacy network 'react_ions' by convert_legacy.py
+
+################
+################
+#ions for mocassin: S,C,Mg,H,N,Si,Ne,O,He
+#up to ionization stage: 6
+
+
+
+H+ + e- -> H                        []  auto
+He+ + e- -> He                      []  auto
+He++ + e- -> He+                    []  auto
+C+ + e- -> C                        []  auto
+C++ + e- -> C+                      []  auto
+C+++ + e- -> C++                    []  auto
+C++++ + e- -> C+++                  []  auto
+C+++++ + e- -> C++++                []  auto
+C++++++ + e- -> C+++++              []  auto
+N+ + e- -> N                        []  auto
+N++ + e- -> N+                      []  auto
+N+++ + e- -> N++                    []  auto
+N++++ + e- -> N+++                  []  auto
+N+++++ + e- -> N++++                []  auto
+N++++++ + e- -> N+++++              []  auto
+O+ + e- -> O                        []  auto
+O++ + e- -> O+                      []  auto
+O+++ + e- -> O++                    []  auto
+O++++ + e- -> O+++                  []  auto
+O+++++ + e- -> O++++                []  auto
+O++++++ + e- -> O+++++              []  auto
+Ne+ + e- -> Ne                      []  auto
+Ne++ + e- -> Ne+                    []  auto
+Ne+++ + e- -> Ne++                  []  auto
+Ne++++ + e- -> Ne+++                []  auto
+Ne+++++ + e- -> Ne++++              []  auto
+Ne++++++ + e- -> Ne+++++            []  auto
+Mg+ + e- -> Mg                      []  auto
+Mg++ + e- -> Mg+                    []  auto
+Mg+++ + e- -> Mg++                  []  auto
+Mg++++ + e- -> Mg+++                []  auto
+Mg+++++ + e- -> Mg++++              []  auto
+Mg++++++ + e- -> Mg+++++            []  auto
+Si+ + e- -> Si                      []  auto
+Si++ + e- -> Si+                    []  auto
+Si+++ + e- -> Si++                  []  auto
+Si++++ + e- -> Si+++                []  auto
+Si+++++ + e- -> Si++++              []  auto
+Si++++++ + e- -> Si+++++            []  auto
+S+ + e- -> S                        []  auto
+S++ + e- -> S+                      []  auto
+S+++ + e- -> S++                    []  auto
+S++++ + e- -> S+++                  []  auto
+S+++++ + e- -> S++++                []  auto
+S++++++ + e- -> S+++++              []  auto
+
+
+H + e- -> H+ + e- + e-              []  auto
+He + e- -> He+ + e- + e-            []  auto
+He+ + e- -> He++ + e- + e-          []  auto
+C + e- -> C+ + e- + e-              []  auto
+C+ + e- -> C++ + e- + e-            []  auto
+C++ + e- -> C+++ + e- + e-          []  auto
+C+++ + e- -> C++++ + e- + e-        []  auto
+C++++ + e- -> C+++++ + e- + e-      []  auto
+C+++++ + e- -> C++++++ + e- + e-    []  auto
+N + e- -> N+ + e- + e-              []  auto
+N+ + e- -> N++ + e- + e-            []  auto
+N++ + e- -> N+++ + e- + e-          []  auto
+N+++ + e- -> N++++ + e- + e-        []  auto
+N++++ + e- -> N+++++ + e- + e-      []  auto
+N+++++ + e- -> N++++++ + e- + e-    []  auto
+O + e- -> O+ + e- + e-              []  auto
+O+ + e- -> O++ + e- + e-            []  auto
+O++ + e- -> O+++ + e- + e-          []  auto
+O+++ + e- -> O++++ + e- + e-        []  auto
+O++++ + e- -> O+++++ + e- + e-      []  auto
+O+++++ + e- -> O++++++ + e- + e-    []  auto
+Ne + e- -> Ne+ + e- + e-            []  auto
+Ne+ + e- -> Ne++ + e- + e-          []  auto
+Ne++ + e- -> Ne+++ + e- + e-        []  auto
+Ne+++ + e- -> Ne++++ + e- + e-      []  auto
+Ne++++ + e- -> Ne+++++ + e- + e-    []  auto
+Ne+++++ + e- -> Ne++++++ + e- + e-  []  auto
+Mg + e- -> Mg+ + e- + e-            []  auto
+Mg+ + e- -> Mg++ + e- + e-          []  auto
+Mg++ + e- -> Mg+++ + e- + e-        []  auto
+Mg+++ + e- -> Mg++++ + e- + e-      []  auto
+Mg++++ + e- -> Mg+++++ + e- + e-    []  auto
+Mg+++++ + e- -> Mg++++++ + e- + e-  []  auto
+Si + e- -> Si+ + e- + e-            []  auto
+Si+ + e- -> Si++ + e- + e-          []  auto
+Si++ + e- -> Si+++ + e- + e-        []  auto
+Si+++ + e- -> Si++++ + e- + e-      []  auto
+Si++++ + e- -> Si+++++ + e- + e-    []  auto
+Si+++++ + e- -> Si++++++ + e- + e-  []  auto
+S + e- -> S+ + e- + e-              []  auto
+S+ + e- -> S++ + e- + e-            []  auto
+S++ + e- -> S+++ + e- + e-          []  auto
+S+++ + e- -> S++++ + e- + e-        []  auto
+S++++ + e- -> S+++++ + e- + e-      []  auto
+S+++++ + e- -> S++++++ + e- + e-    []  auto
+
+
+H -> H+ + e-                        []  photo(xsec=auto)
+He -> He+ + e-                      []  photo(xsec=auto)
+He+ -> He++ + e-                    []  photo(xsec=auto)
+C -> C+ + e-                        []  photo(xsec=auto)
+C+ -> C++ + e-                      []  photo(xsec=auto)
+C++ -> C+++ + e-                    []  photo(xsec=auto)
+C+++ -> C++++ + e-                  []  photo(xsec=auto)
+C++++ -> C+++++ + e-                []  photo(xsec=auto)
+C+++++ -> C++++++ + e-              []  photo(xsec=auto)
+N -> N+ + e-                        []  photo(xsec=auto)
+N+ -> N++ + e-                      []  photo(xsec=auto)
+N++ -> N+++ + e-                    []  photo(xsec=auto)
+N+++ -> N++++ + e-                  []  photo(xsec=auto)
+N++++ -> N+++++ + e-                []  photo(xsec=auto)
+N+++++ -> N++++++ + e-              []  photo(xsec=auto)
+O -> O+ + e-                        []  photo(xsec=auto)
+O+ -> O++ + e-                      []  photo(xsec=auto)
+O++ -> O+++ + e-                    []  photo(xsec=auto)
+O+++ -> O++++ + e-                  []  photo(xsec=auto)
+O++++ -> O+++++ + e-                []  photo(xsec=auto)
+O+++++ -> O++++++ + e-              []  photo(xsec=auto)
+Ne -> Ne+ + e-                      []  photo(xsec=auto)
+Ne+ -> Ne++ + e-                    []  photo(xsec=auto)
+Ne++ -> Ne+++ + e-                  []  photo(xsec=auto)
+Ne+++ -> Ne++++ + e-                []  photo(xsec=auto)
+Ne++++ -> Ne+++++ + e-              []  photo(xsec=auto)
+Ne+++++ -> Ne++++++ + e-            []  photo(xsec=auto)
+Mg -> Mg+ + e-                      []  photo(xsec=auto)
+Mg+ -> Mg++ + e-                    []  photo(xsec=auto)
+Mg++ -> Mg+++ + e-                  []  photo(xsec=auto)
+Mg+++ -> Mg++++ + e-                []  photo(xsec=auto)
+Mg++++ -> Mg+++++ + e-              []  photo(xsec=auto)
+Mg+++++ -> Mg++++++ + e-            []  photo(xsec=auto)
+Si -> Si+ + e-                      []  photo(xsec=auto)
+Si+ -> Si++ + e-                    []  photo(xsec=auto)
+Si++ -> Si+++ + e-                  []  photo(xsec=auto)
+Si+++ -> Si++++ + e-                []  photo(xsec=auto)
+Si++++ -> Si+++++ + e-              []  photo(xsec=auto)
+Si+++++ -> Si++++++ + e-            []  photo(xsec=auto)
+S -> S+ + e-                        []  photo(xsec=auto)
+S+ -> S++ + e-                      []  photo(xsec=auto)
+S++ -> S+++ + e-                    []  photo(xsec=auto)
+S+++ -> S++++ + e-                  []  photo(xsec=auto)
+S++++ -> S+++++ + e-                []  photo(xsec=auto)
+S+++++ -> S++++++ + e-              []  photo(xsec=auto)

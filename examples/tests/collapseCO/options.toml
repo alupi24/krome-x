@@ -1,0 +1,30 @@
+# legacy tests/collapseCO: one-zone free-fall collapse of a Z = Zsun cloud
+# with CO and H2O freeze-out and evaporation on dust (COthin_ice network)
+# the KROME-X network COthin_ice plus the tabulated H2 formation on dust
+# (legacy -dustTabs=H2), local to this test
+# legacy CI,CII,OI line cooling = the KROME-X Z cooling with the metals
+# C, C+, O; DUSTTAB is the legacy -dustTabs=COOL table
+# 2.0.0: -gamma=EXACT (legacy -gamma=REDUCED, H2 and CO without
+# vibration, was removed)
+# legacy -dustTabs=H2,COOL,MC: the MC dust tables (Tdust, the dust
+# cooling DUSTTAB above, the H2-on-dust rate krate_H2dust_table())
+# dropped (no KROME-X equivalent or runtime settings): -maxord=1 (CVODE's BDF
+# order), -photoDustVarAv=user_av (Av is the per-cell parameter Av),
+# -useTabs (rate tables retired)
+# (the network path is relative to the KROME-X folder)
+
+[project]
+network = "examples/tests/collapseCO/COthin_ice_dustH2.knet"
+
+[thermal]
+cooling = ["H2", "COMPTON", "CONT", "CHEM", "CO", "DUSTTAB", "Z"]
+heating = ["COMPRESS", "CHEM", "CR", "PHOTOAV", "PHOTODUST"]
+gamma = "EXACT"
+h2_opacity = "RIPAMONTI"
+metals = ["C", "C+", "O"]
+
+[dust]
+tables = "MC"
+
+[solver]
+atol = 1e-40

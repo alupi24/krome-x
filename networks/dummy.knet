@@ -1,0 +1,6 @@
+krome_format 1
+# converted from legacy network 'react_dummy' by convert_legacy.py
+
+#this is a dummy reaction network that can be employed
+# for pure ODE solving. See LOTKA-VOLTERRA test.
+# [legacy dummy reaction dropped: KROME-X allows empty networks]

@@ -1,0 +1,69 @@
+!***************************************************************
+!This is a simple one-zone collapse test following
+! the chemical and thermal evolution of a metal-enriched cloud
+! (solar metallicity) with CO and H2O freeze-out and evaporation
+! on dust, the tabulated dust temperature, dust cooling and H2
+! formation on dust (legacy dust tables, MC field).
+!The dynamics is described by the Larson-Penston-type
+! similar solution and includes cooling and heating processes.
+!For additional details look also to Omukai 2005.
+!(legacy tests/collapseCO had no README; text from its test.f90)
+!***************************************************************
+
+KROME-X port (examples/tests/collapseCO, driver test.cpp on the C++ API):
+- network: COthin_ice_dustH2.knet in this directory = networks/
+  COthin_ice.knet plus H + {H} -> H2 with krate_H2dust_table(). Legacy
+  -dustTabs=H2 added that H2 formation on dust to the ODEs; in KROME-X it is a
+  network reaction (the legacy option stops with that message);
+- legacy -dustTabs=H2,COOL,MC = dust.tables = "MC" (Tdust, the H2 table) +
+  thermal.cooling = ["...", "DUSTTAB"] (the COOL table);
+- CI,CII,OI line cooling = thermal.cooling = ["Z"] thermal.metals = ["C", "C+", "O"] (translated);
+- dropped: -maxord=1 (CVODE's BDF order), -photoDustVarAv=user_av (Av is
+  the per-cell parameter Av, set by the driver at each step as legacy),
+  -useTabs (rate tables retired);
+- parameters: legacy user_crate / user_Av are p.crate / p.Av; the legacy
+  PHOTODUST heating hardcoded the Draine field G = 1.69 exp(-2.5 Av): the
+  driver sets p.G0 = 1.69; the legacy CMB temperature 2.73 K is p.Tcmb
+  (KROME-X default 2.725);
+- the tabulated Tdust written in abundances.dat (legacy krome_get_table_Tdust)
+  is the network's table_Tdust(Tgas, n, p), which is not a public query;
+- abundances.dat now has a header line (#ntot Tgas Tdust <species>, for
+  plot.py); the ices are species of their own (CO_ice, H2O_ice) where legacy
+  wrote the totals CO_total, H2O_total (ice = total - gas); plot.py plots them;
+- numerics: KROME-X default tolerances (rtol 1e-8; legacy 1e-4, -ATOL=1d-40 is
+  the species atol_n); at n ~ 1e12 the gas cools from ~1e9 K to ~12 K
+  within one step: CVODE fails there once, and its restart continues from
+  a smaller first step;
+- physics, as legacy: with cosmic-ray heating and no ATOMIC cooling the
+  gas runs away to ~1e10 K up to n ~ 1e11 cm^-3, then the dust cooling
+  brings it to Tdust (~12-29 K). KROME-X follows legacy within ~1% (median)
+  in Tgas along the whole track, and in Tdust wherever Tgas < 1e9 K
+  (1e-4 in the cold phase). Above 1e9 K the written Tdust differs (up to
+  x2.6): KROME-X's get_Tdust reports the dust temperature the rates see, at
+  the rate temperature capped at 1e9 K (both codes' rates are capped
+  there), while legacy's krome_get_table_Tdust evaluates the table at the
+  raw Tgas, extrapolating it far beyond its grid. It is a difference of
+  the diagnostic only;
+- differences: legacy kept only the last "CO_ice -> CO" rate of the
+  network (the non-thermal evaporation) and dropped the thermal
+  evaporation 1e12 exp(-1100/Tdust); KROME-X keeps both, so gas-phase CO
+  evaporates once Tdust > ~20 K (n > 1e14: CO/ntot 2.7e-8 at 1e16 cm^-3
+  vs legacy 6e-17). The KROME-X PHOTOAV heating is not generated for this
+  network (codegen: "heating_photoAv stubbed: needs a Solomon-process
+  H2 -> H + H reaction"; legacy used the first H2 -> H + H rate, the
+  5.6e-11 exp(-3.74 Av) fshield photodissociation); it is negligible
+  along this track;
+- plot: python3 plot.py (plot.png).
+- 2.0.0: thermal.gamma = "EXACT" (every diatomic with its exact rotation and
+  vibration); legacy -gamma=REDUCED (H2 and CO only, no vibration) was
+  removed. Against the v2.0.0-benchmark run (REDUCED, and the legacy
+  physical constants, now CODATA 2018): Tgas within 6e-6 (median); 2.6 %
+  at most, in 7 rows of the steep rise to 1e7 K at 4e11 cm^-3 (the rise
+  shifts slightly). The legacy comparison of this test is that of
+  v2.0.0-benchmark (bench/results/benchmark).
+- 2.0.0: the C, C+ and O line cooling of coolZ.dat uses current collision
+  data (Lique et al. 2018 corrected for O; Klos et al. 2021 and Barinovs
+  et al. 2005 for C+; Yan & Babb 2023 for C + H). Tgas moves by 7e-4
+  (median); 67 of the 3933 rows change by more than 5 %, at the start and
+  in the steep transitions of the track.
+- output files (legacy name): abundances.dat (fort.22).

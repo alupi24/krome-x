@@ -1,0 +1,201 @@
+###################################
+###################################
+
+@type: hydroHe
+@reacts: H,E
+@prods: H+,E,E
+@rate: exp(-32.71396786d0+13.5365560d0*lnTe-5.73932875d0*(lnTe**2)+1.56315498d0*(lnTe**3)-0.28770560d0*(lnTe**4)+3.48255977d-2*(lnTe**5)-2.63197617d-3*(lnTe**6)+1.11954395d-4*(lnTe**7)-2.03914985d-6*(lnTe**8))
+
+@type: hydroHe
+@reacts: H+,E
+@prods: H
+@limits: 2.73d0, 5.5d3
+@rate: 3.92d-13*invTe**0.6353
+
+@type: hydroHe
+@reacts: H+,E
+@prods: H
+@limits: 5.5d3, 1d8
+@rate: exp(-28.61303380689232d0-0.7241125657826851d0*lnTe-0.02026044731984691d0*lnTe**2-0.002380861877349834d0*lnTe**3-0.0003212605213188796d0*lnTe**4-0.00001421502914054107d0*lnTe**5+4.989108920299513d-6*lnTe**6+5.755614137575758d-7*lnTe**7-1.856767039775261d-8*lnTe**8-3.071135243196595d-9*lnTe**9)
+
+@type: hydroHe
+@reacts: He,E
+@prods: He+,E,E
+@rate: exp(-44.09864886d0+23.91596563d0*lnTe-10.7532302d0*(lnTe**2)+3.05803875d0*(lnTe**3)-0.56851189d0*(lnTe**4)+6.79539123d-2*(lnTe**5)-5.00905610d-3*(lnTe**6)+2.06723616d-4*(lnTe**7)-3.64916141d-6*(lnTe**8))
+
+@type: hydroHe
+@reacts: He+,E
+@prods: He
+@limits: 2.73d0,.LE.9.28e3
+@rate: 3.92d-13*invTe**0.6353
+
+@type: hydroHe
+@reacts: He+,E
+@prods: He
+@limits: >9.28d3, 1d8
+@rate: 1.54d-9*(1.d0+0.3d0/exp(8.099328789667d0*invTe))/(exp(40.49664394833662d0*invTe)*Te**1.5)+3.92d-13/Te**0.6353
+
+@type: hydroHe
+@reacts: He+,E
+@prods: He++,E,E
+@rate: exp(-68.71040990212001d0+43.93347632635d0*lnTe-18.48066993568d0*lnTe**2+4.701626486759002d0*lnTe**3-0.7692466334492d0*lnTe**4+0.08113042097303d0*lnTe**5-0.005324020628287001d0*lnTe**6+0.0001975705312221d0*lnTe**7-3.165581065665d-6*lnTe**8)
+
+@type: hydroHe
+@reacts: He+,H
+@prods: He,H+
+@rate: 1.25d-15*(T32)*.25
+
+@type: hydroHe
+@reacts: He,H+
+@prods: He+,H
+@limits: 1d0,1d4
+@rate: 1.26d-9*Tgas**(-.75)*exp(-127500d0*invT)
+
+@type: hydroHe
+@reacts: He,H+
+@prods: He+,H
+@limits: 1d4,1d8
+@rate: 4d-37*Tgas**4.74
+
+@type: hydroHe
+@reacts: H2,He+
+@prods: He,H2+
+@rate: 7.2d-15
+
+@type: hydroHe
+@reacts: H2,He+
+@prods: He,H,H+
+@rate: 3.7d-14*exp(35d0*invT)
+
+@type: hydroHe
+@reacts: H2,He+
+@prods: He+,H,H
+@rate: 3d-11*sqrt(T32)*exp(-5.2d4*invT)
+
+@type: hydroHe
+@reacts: He++,E
+@prods: He+
+@rate: 3.36d-10/sqrTgas/(Tgas*1.d-3)**0.2/(1d0+(Tgas*1.d-6)**0.7)
+
+@type: hydroHe
+@reacts: H,E
+@prods: H-
+@rate: 6.77d-15*Te**0.8779
+
+@type: hydroHe
+@reacts: H-,H
+@prods: H2,E
+@limits:2.73d0,1160d0
+@rate: 1.43d-9
+
+@type: hydroHe
+@reacts: H-,H
+@prods: H2,E
+@limits:1160d0,1d8
+@rate: exp(-20.06913897587003d0+0.2289800603272916d0*lnTe+0.03599837721023835d0*lnTe**2-0.004555120027032095d0*lnTe**3-0.0003105115447124016d0*lnTe**4+0.0001073294010367247d0*lnTe**5-8.36671960467864d-6*lnTe**6+2.238306228891639d-7*lnTe**7)
+
+@type: hydroHe
+@reacts: H,H+
+@prods: H2+
+@limits:2.73d0,.LE.6.7d3
+@rate: 1.85d-23*Tgas**1.8
+
+@type: hydroHe
+@reacts: H-,H
+@prods: H2,E
+@limits:6.7d3,1d8
+@rate: 5.81d-16*(Tgas/5.62d4)**(-0.6657d0*log10(Tgas/5.62d4))
+
+@type: hydroHe
+@reacts: H2+,H
+@prods: H2,H+
+@rate: 6d-10
+
+@type: hydroHe
+@reacts: H2,H+
+@prods: H2+,H
+@limits:>3.48d3,1d8
+@rate: exp(-24.24914687731536d0+3.400824447095291d0*lnTe-3.898003964650152d0*lnTe**2+2.045587822403071d0*lnTe**3-0.5416182856220388d0*lnTe**4+0.0841077503763412d0*lnTe**5-0.007879026154483455d0*lnTe**6+0.0004138398421504563d0*lnTe**7-9.36345888928611d-6*lnTe**8)
+
+@type: hydroHe
+@reacts: H2,E
+@prods: H,H,E
+@rate: 5.6d-11*exp(-102124.d0*invT)*Tgas**0.5
+
+@type: hydroHe
+@reacts: H2,H
+@prods: H,H,H
+@rate: 1.0670825d-10*Te**2.012*exp(-4.463d0*invTe)/(1.d0+0.2472d0*Te)**3.512
+
+@type: hydroHe
+@reacts: H-,E
+@prods: H,E,E
+@rate: exp(-18.01849334273d0+2.360852208681d0*lnTe-0.2827443061704d0*lnTe**2+0.01623316639567d0*lnTe**3-0.03365012031362999d0*lnTe**4+0.01178329782711d0*lnTe**5-0.001656194699504d0*lnTe**6+0.0001068275202678d0*lnTe**7-2.631285809207d-6*lnTe**8)
+
+@type: hydroHe
+@reacts: H-,H
+@prods: H,H,E
+@limits: 2.73d0, .LE.1.16e3
+@rate: 2.56d-9*Te**1.78186
+
+@type: hydroHe
+@reacts: H-,H
+@prods: H,H,E
+@limits: >1.16e3, 1d8
+@rate: exp(-20.37260896533324d0+1.139449335841631d0*lnTe-0.1421013521554148d0*lnTe**2+0.00846445538663d0*lnTe**3-0.0014327641212992d0*lnTe**4+0.0002012250284791d0*lnTe**5+0.0000866396324309d0*lnTe**6-0.00002585009680264d0*lnTe**7+2.4555011970392d-6*lnTe**8-8.06838246118d-8*lnTe**9)
+
+@type: hydroHe
+@reacts: H-,H+
+@prods: H,H
+@rate: 6.5d-9/sqrt(Te)
+
+@type: hydroHe
+@reacts: H-,H+
+@prods: H2+,E
+@rate: 1.d-8*Tgas**(-0.4)
+
+@type: hydroHe
+@reacts: H2+,E
+@prods: H,H
+@limits: 2.73d0, .LE.6.17e2
+@rate: 1.d-8
+
+@type: hydroHe
+@reacts: H2+,E
+@prods: H,H
+@limits: >6.17e2, 1d8
+@rate: 1.32d-6*Tgas**(-0.76)
+
+@type: hydroHe
+@reacts: H2+,H-
+@prods: H,H2
+@rate: 5.d-7*sqrt(1.d2*invT)
+
+@type: hydroHe
+@reacts: H,H,He
+@prods: H2,He
+@rate: 6.9d-32*Tgas**(-.4)
+
+@type: hydroHe
+@reacts: H,H,H
+@prods: H,H2
+@limits: 2.73d0, .LE.3e2
+@rate: 1.3d-32*(T32)**(-0.38)
+
+@type: hydroHe
+@reacts: H,H,H
+@prods: H,H2
+@limits: >3e2, 1d8
+@rate: .3d-32/(T32)
+
+@type: hydroHe
+@reacts: H2,H,H
+@prods: H2,H2
+@limits: 2.73d0, .LE.3e2
+@rate: 1.3d-32*(T32)**(-0.38) / 8d0
+
+@type: hydroHe
+@reacts: H2,H,H
+@prods: H2,H2
+@limits: >3e2, 1d8
+@rate: .3d-32/(T32) / 8d0

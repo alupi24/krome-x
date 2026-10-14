@@ -1,0 +1,20 @@
+# legacy tests/collapseUV: one-zone primordial free-fall collapse under a
+# UV background, J21 = 0, 1, 1e2, 1e5 (T5 spectrum, H2 photodissociation
+# 9e-13 J21 fshield, Shang+10 / Latif+14)
+# 2.0.0: -gamma=EXACT (legacy -gamma=FULL, H2 always 7/5, was removed)
+# legacy -columnDensityMethod=JEANS: radiation.num2col = "jeans"
+# legacy -conserve is a runtime option in KROME-X: the driver sets
+# krome_set(h, "conserve", 2) (elements and charge)
+# (the network path is relative to the KROME-X folder)
+
+[project]
+network = "networks/primordial_UV.knet"
+
+[thermal]
+cooling = ["H2", "COMPTON", "CIE", "FF", "DISS", "ATOMIC"]
+heating = ["COMPRESS", "CHEM"]
+gamma = "EXACT"
+h2_opacity = "OMUKAI"
+
+[radiation]
+num2col = "jeans"

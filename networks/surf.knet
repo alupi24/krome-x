@@ -1,0 +1,79 @@
+krome_format 1
+# converted from legacy network 'react_surf' by convert_legacy.py
+
+# HO2 is in neither binding-energy set (Ebare_ice.dat, OSU): 3650 K,
+# Bosman, Walsh & van Dishoeck 2018, A&A 618, A182, Table 2.8 (O2H; the
+# Penteado et al. 2017 recommended value), used on bare and ice surfaces.
+# Earlier value: 4000 K on silicate, Dulieu et al. 2013, Sci. Rep. 3, 1338
+ebind HO2 = 3650.0, 3650.0
+
+#THIS IS A TEST NETWORK: DO NOT USE!
+
+species H
+
+H -> H_dust                                 []  surface(auto)
+H2 -> H2_dust                               []  surface(auto)
+O -> O_dust                                 []  surface(auto)
+OH -> OH_dust                               []  surface(auto)
+H2O -> H2O_dust                             []  surface(auto)
+CO -> CO_dust                               []  surface(auto)
+HCO -> HCO_dust                             []  surface(auto)
+H2CO -> H2CO_dust                           []  surface(auto)
+CH3O -> CH3O_dust                           []  surface(auto)
+CH3OH -> CH3OH_dust                         []  surface(auto)
+O2 -> O2_dust                               []  surface(auto)
+HO2 -> HO2_dust                             []  surface(auto)
+H2O2 -> H2O2_dust                           []  surface(auto)
+CO2 -> CO2_dust                             []  surface(auto)
+O3 -> O3_dust                               []  surface(auto)
+
+H_dust -> H                                 []  surface(auto)
+H2_dust -> H2                               []  surface(auto)
+O_dust -> O                                 []  surface(auto)
+OH_dust -> OH                               []  surface(auto)
+H2O_dust -> H2O                             []  surface(auto)
+CO_dust -> CO                               []  surface(auto)
+HCO_dust -> HCO                             []  surface(auto)
+H2CO_dust -> H2CO                           []  surface(auto)
+CH3O_dust -> CH3O                           []  surface(auto)
+CH3OH_dust -> CH3OH                         []  surface(auto)
+O2_dust -> O2                               []  surface(auto)
+HO2_dust -> HO2                             []  surface(auto)
+H2O2_dust -> H2O2                           []  surface(auto)
+CO2_dust -> CO2                             []  surface(auto)
+O3_dust -> O3                               []  surface(auto)
+
+H_dust + H_dust -> H2_dust                  []  surface(auto)
+H_dust + O_dust -> OH_dust                  []  surface(auto)
+H_dust + OH_dust -> H2O_dust                []  surface(auto)
+H_dust + O2_dust -> HO2_dust                []  surface(auto)
+H_dust + CO_dust -> HCO_dust                []  surface(auto)
+H_dust + HCO_dust -> H2CO_dust              []  surface(auto)
+H_dust + H2CO_dust -> CH3O_dust             []  surface(auto)
+H_dust + CH3O_dust -> CH3OH_dust            []  surface(auto)
+O_dust + O_dust -> O2_dust                  []  surface(auto)
+O_dust + O2_dust -> O3_dust                 []  surface(auto)
+O_dust + CO_dust -> CO2_dust                []  surface(auto)
+OH_dust + OH_dust -> H2O2_dust              []  surface(auto)
+
+H_dust + O3_dust -> OH_dust + O2_dust       []  surface(auto)
+H_dust + H2O2_dust -> OH_dust + H2O_dust    []  surface(auto)
+H_dust + H2O_dust -> OH_dust + H2_dust      []  surface(auto)
+H_dust + HO2_dust -> OH_dust + OH_dust      []  surface(auto)
+H_dust + HCO_dust -> CO_dust + H2_dust      []  surface(auto)
+H_dust + H2CO_dust -> HCO_dust + H2_dust    []  surface(auto)
+H_dust + CH3O_dust -> H2CO_dust + H2_dust   []  surface(auto)
+H_dust + CH3OH_dust -> CH3O_dust + H2_dust  []  surface(auto)
+H_dust + CO2_dust -> CO_dust + OH_dust      []  surface(auto)
+O_dust + O3_dust -> O2_dust + O2_dust       []  surface(auto)
+O_dust + H2_dust -> H_dust + OH_dust        []  surface(auto)
+O_dust + HO2_dust -> O2_dust + OH_dust      []  surface(auto)
+O_dust + OH_dust -> O2_dust + H_dust        []  surface(auto)
+O_dust + HCO_dust -> CO2_dust + H_dust      []  surface(auto)
+O_dust + H2CO_dust -> CO2_dust + H2_dust    []  surface(auto)
+OH_dust + H2_dust -> H_dust + H2O_dust      []  surface(auto)
+OH_dust + CO_dust -> CO2_dust + H_dust      []  surface(auto)
+OH_dust + HCO_dust -> CO2_dust + H2_dust    []  surface(auto)
+HO2_dust + H2_dust -> H_dust + H2O2_dust    []  surface(auto)
+
+

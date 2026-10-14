@@ -1,0 +1,33 @@
+!****************SEDOV-LIKE SHOCK 1D LAGRANGIAN TEST***************
+! REFER TO: Bodenheimer P., Laughlin G., Rozyczka M., Yorke H.    
+!           2006, Numerical Methods in Astrophysics:         
+!           An Introduction. Series in Astronomy and Astrophysics, 
+!                             Taylor&Francis 
+! shock + chemistry (primordial)
+!*******************************************************************
+
+KROME-X port (legacy tests/shock1D)
+- same hydro scheme, initial conditions and outputs: initial.dat initial
+  profiles, hydro.dat / chemistry.dat every 10 steps (hydro / mass fractions),
+  hydro_final.dat / chemistry_final.dat final profiles, written with 8 digits
+  (legacy 3); every file now starts with a names header, chemistry.dat /
+  chemistry_final.dat list the species in the KROME-X (alphabetical) order.
+- C++ driver (test.cpp, the krome.hpp API; shells 0-based). The chemistry
+  of all the 100 shells is solved in ONE solve_cells_x call per hydro step
+  (mass fractions + density, legacy -useX), instead of the legacy
+  per-shell loop of krome() calls. SolverOpts::renormalize_x rescales
+  each shell's fractions to their input sum, as the legacy krome() did.
+- no cooling: the chemistry runs at fixed Tgas (KROME-X default evolve_T = 0,
+  legacy dT/dt = 0), Tgas comes from the hydro internal energy (mu = 1).
+- solver tolerances are the KROME-X defaults (rtol 1e-8, atol 1e-20; legacy
+  1e-4, 1e-20).
+- Run: python3 -m kromex --test shock1D; cd build_shock1D;
+  make; ./test; then python3 plot.py
+- KROME-X vs legacy (final profiles): hydro and the main species agree to the
+  legacy output's 3 digits; the unshocked ambient H+ (and He+, D+) are
+  1.5 % (1-3 %) lower in KROME-X. The ambient H+ only recombines at fixed
+  6.7 K (analytic x = x0 exp(-k ne t)): KROME-X matches the analytic value to
+  0.1 %, legacy is 1.3 % high (its rtol 1e-4 integration error: legacy
+  rebuilt with rtol 1e-8 agrees with KROME-X everywhere within its 3-digit
+  output, 0.5 %).
+- output files (legacy name): initial.dat (fort.22), hydro.dat (fort.23), chemistry.dat (fort.33), hydro_final.dat (fort.24), chemistry_final.dat (fort.34).

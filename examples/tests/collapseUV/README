@@ -1,0 +1,37 @@
+!******************************************************************************
+!This is a simple one-zone collapse test following
+! the chemical and thermal evolution of a primordial cloud 
+! irradiated by Far-UV photons.
+!The dynamics is described by the Larson-Penston-type
+! similar solution and includes cooling, heating processes
+! and photochemistry. 
+!The test employes different values of the UV flux in terms of
+! J21 (erg/cm2/s/Hz/sr) ranging from 0 to 1d5.
+!A T5 (1e5 K) black-body spectrum is assumed for the photodissociation of H2.
+!******************************************************************************
+
+KROME-X port (examples/tests/collapseUV, driver test.cpp on the C++ API):
+- network networks/primordial_UV.knet: the legacy common user_J21 is the
+  network parameter J21 (p.J21);
+- legacy -conserve is the runtime option SolverOpts::conserve = 2
+  (elements and charge), set in the driver;
+- -columnDensityMethod=JEANS is radiation.num2col = "jeans" (translated);
+- legacy krome_set_zredshift(15) set only the redshift (Compton cooling);
+  the CMB temperature (CIE cooling, lower temperature cap) stayed at the
+  legacy default 2.73 K: the driver sets p.Tcmb = 2.73;
+- legacy RTOL/ATOL defaults were 1e-4/1e-20: KROME-X keeps its defaults
+  (rtol 1e-8);
+- the legacy OpenMP loop over J21 is serial here and abundances.dat is written
+  while running (same columns and blocks: J21 ntot Tgas xH2 xH);
+- plot: python3 plot.py (plot.png).
+- 2.0.0: thermal.gamma = "EXACT" (every diatomic with its exact rotation and
+  vibration); legacy -gamma=FULL (H2 always 7/5) was removed. Against the
+  v2.0.0-benchmark run (FULL, and the legacy physical constants, now
+  CODATA 2018): Tgas within 3e-6 (median), 0.35 % at most (H2 vibration
+  near 2300 K). The legacy comparison of this test is that of
+  v2.0.0-benchmark (bench/results/benchmark).
+- 2.0.0: the recombination cooling of -cooling=ATOMIC comes from the
+  network's own recombination rates, n_e n_X kB T (3/2 k + T dk/dT)
+  (legacy: the Cen 1992 fits). Against v2.0.0-benchmark, with all the
+  2.0.0 changes: Tgas within 5e-6 (median), 0.35 % at most.
+- output files (legacy name): abundances.dat (fort.22).

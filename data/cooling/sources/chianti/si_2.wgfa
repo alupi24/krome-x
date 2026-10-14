@@ -1,0 +1,19 @@
+    1    2      348140.93      0.000e+00      2.170e-04   3s2.3p 2P1/2 - 3s2.3p 2P3/2
+ -1
+%filename: si_2.wgfa
+%observed energies: v.3 of the NIST Atomic Database
+%theoretical energies: Tayal, 2008, ApJS, 179, 534
+%A-values: Tayal, S.S., 2007, J.Phys.B, 40, 2551
+%A-values: Nahar, S.N., 1998, ADNDT 68, 183
+%A-values: Nussbaumer, H. 1977, A&A, 58, 291
+%Comment: Both Nahar (1998) and Tayal (2007) give f-values so these have been converted to
+    A-values using the observed energies.
+    All data from Tayal (2007) have been used and these have been supplemented with
+    Nahar (1998) for all remaining allowed transitions, and Nussbaumer (1977) for the
+    ground transition.
+% produced as part of the Arcetri/Cambridge/NRL 'CHIANTI' atomic data base collaboration
+%
+%  Peter Young, Jan-2009
+%File processed with wgfa_tidy by pryoung on  6-Mar-2019
+%File processed with wgfa_tidy by pryoung on 31-May-2023
+ -1

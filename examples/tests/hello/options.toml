@@ -1,0 +1,5 @@
+# legacy tests/hello: the welcome test, FK1 -> FK2 -> FK3 (fake species)
+# (the network path is relative to the KROME-X folder)
+
+[project]
+network = "networks/hello.knet"

@@ -1,0 +1,45 @@
+!**********************************************
+! This test uses the data from the LAMDA database
+! to compute the cooling from the O2 molecule.
+! It consists in a set of runs with different
+! densities and temperatures. The chemistry is
+! solved to the equilibrium, then the cooling
+! is computed. The cooling function is not
+! a table, but is computed on the fly using
+! the atomic data provided by LAMDA.
+! http://home.strw.leidenuniv.nl/~moldata/
+!**********************************************
+
+KROME-X port (examples/tests/lamda, driver test.cpp on the C++ API):
+- network networks/COthin.knet (legacy react_COthin); the legacy commons
+  user_crate and user_Av are the network parameters crate and Av
+  (p.crate = 1.3e-17, p.Av = (ntot/1e3)^(2/3));
+- legacy -coolFile=data/coolO2.dat is thermal.coolant_files = ["data/cooling/coolO2.dat"]:
+  the LAMDA O2 file re-converted (tools/lamda2krome.py) with the correct
+  cm^-1 -> K factor, so the level energies are 0.7 % higher than in the
+  legacy file; levels 36-47 have no radiative line to the ground and are
+  dropped (zero population);
+- -cooling=O2 selects the file coolant: legacy krome_coolingO2 is the "O2"
+  term of get_thermal (cooling_name); cooling.dat holds it per ntot;
+- -useThermoToggle dropped: Tgas is constant (SolverOpts::evolve_T =
+  false, legacy krome_thermo_OFF);
+- equilibrium.dat (#Tgas <species>) and abundances.dat (#time Tgas <species>)
+  start with a names header; the species are in KROME-X (alphabetical) order;
+- legacy RTOL/ATOL defaults were 1e-4/1e-20: KROME-X keeps its defaults
+  (rtol 1e-8);
+- plot: python3 plot.py (plot.png, the O2 cooling map; gnuplot dropped).
+
+Comparison with legacy (the 10 x 10 grid, n = 1e3-1e9 cm^-3,
+T = 10-1e4 K; cooling.dat, the O2 cooling per ntot):
+- against legacy run with -RTOL=1d-8: -0.7 % to +1.3 % on every point;
+  the O2 cooling per O2 molecule -0.6 % (T <= 100 K) to +0.7 %
+  (T >= 215 K), the same at every density. KROME-X with the legacy
+  data/coolO2.dat instead: -0.16 % to +0.32 % per O2 (legacy's 100-point
+  log-T table of the collisional rates; KROME-X evaluates them directly), so
+  the corrected level energies account for the rest;
+- against legacy at its default tolerances (RTOL 1e-4): the same below
+  1e7 cm^-3, but up to a factor 2.3 above (n = 4.6e8, T = 1e4 K): there
+  legacy loses charge conservation (at 1e8 yr, n = 4.6e7, T = 464 K, a
+  net charge of -4.4 cm^-3 for 4.5 cm^-3 electrons), which moves its O2
+  abundance.
+- output files (legacy name): cooling.dat (fort.44), equilibrium.dat (fort.55), abundances.dat (fort.66).

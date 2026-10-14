@@ -1,0 +1,6 @@
+# legacy tests/slowmanifold: slow-manifold trajectories of the H2/O2
+# network of Reinhardt et al. 2008 (unchanged: the legacy options work)
+# (the network path is relative to the KROME-X folder)
+
+[project]
+network = "networks/SM.knet"

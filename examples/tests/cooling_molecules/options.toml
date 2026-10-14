@@ -1,0 +1,12 @@
+# legacy tests/cooling_molecules: CO, OH, H2O and HCN cooling (Neufeld &
+# Kaufman tables) and cosmic-ray heating on a small test network.
+# KROME-X changes: none in the physics; -noSinkCheck is a no-op (no sink
+# check); legacy user_crate is the network parameter crate
+# (the network path is relative to the KROME-X folder)
+
+[project]
+network = "networks/coolHCN.knet"
+
+[thermal]
+cooling = ["CO", "OH", "H2O", "HCN"]
+heating = ["CR"]

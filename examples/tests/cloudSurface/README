@@ -1,0 +1,31 @@
+!*********************************************************************
+!The following test provides a benchmark for 
+! molecular clouds environments and it is useful
+! to test the capability of the solver to handle
+! with very large network. 
+!It is based on the EA2 model of Wakelam&Herbst 2008.
+!*********************************************************************
+
+KROME-X notes:
+- output files (legacy name): abundances.dat (fort.66).
+- the network is networks/Semenov.knet (react_Semenov converted), with
+  legacy's single grain size written as `surface_grains single(n =
+  xdust, a2 = gsize2)`.
+- -useSemenov translates to surface.binding_energies = "SEMENOV"
+  surface.nu = "LEGACY" surface.competition = false surface.tunnelling = false;
+  options.toml adds surface.cr_desorption = "crflux", the cosmic-ray desorption
+  that legacy's Semenov evaporation included (user_crflux).
+- the legacy krome_set_user_* values (Av, crflux, Tdust, gsize, gsize2,
+  xdust) are parameters of the cell (p.Av, ...).
+- -RTOL=1e-6 is the project's default rtol (atol 1e-20, as legacy);
+  max_steps is raised to 1e6 for the long late steps.
+- species in KROME-X (alphabetical) order; plot.py picks the columns by
+  name.
+- building: compiling the 655-species network takes ~3 minutes. Build
+  with the LAPACK dense LU (recommended for this size): make
+  LAPACK="-framework Accelerate" (macOS) or LAPACK=-lopenblas; the run
+  then takes ~6 s (legacy: 30 s).
+- KROME-X vs legacy (74 outputs, 1 yr - 1.3e9 yr): CO, H2O, HCO+, H2S, e-, CO
+  and H2O ices agree to <= 1 % over the whole run, HCN to 4 %; at the end
+  the 52 species above 1e-12 per H agree to <= 0.7 %, and at 1e6 yr the
+  235 above 1e-12 to <= 1.9 %. (legacy writes 3 digits.)

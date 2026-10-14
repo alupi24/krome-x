@@ -1,0 +1,9 @@
+krome_format 1
+# converted from legacy network 'react_hello' by convert_legacy.py
+
+species FK1, FK2, FK3  ; opaque   # legacy fake species
+
+#this is a simple network to show the a three-species evolution
+# which employs fake species (FK1, FK2, and FK3)
+FK1 -> FK2  []  1e0
+FK2 -> FK3  []  0.5e0

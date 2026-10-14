@@ -1,0 +1,12 @@
+krome_format 1
+# legacy tests/reverse: networks/NO.knet (the Zel'dovich NO mechanism,
+# react_NO, Baulch et al. 1994) with legacy -reverse, i.e. each reaction
+# written as <-> (kromex/convert_legacy.py networks/react_NO --reverse):
+# the reverse rate is k_fwd / K_c from the NASA polynomials (thermo30.dat)
+
+# legacy shortcut symbols, now ordinary vars:
+var invT     = 1.0/Tgas
+
+#reactions for Zel'dovich nitric oxyde (NO) mechanism (Baulch et al. 1994)
+N2 + O <-> NO + N  []  3e-10*exp(-38300.*invT)
+O2 + N <-> NO + O  []  1.5e-14*Tgas*exp(-3270.*invT)

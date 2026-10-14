@@ -1,0 +1,7 @@
+# legacy tests/customCooling: a custom cooling function written in the
+# network (react_customCool -> networks/customCool.knet, `cooling custom_1
+# = ...`); the legacy file listed the network twice
+# (the network path is relative to the KROME-X folder)
+
+[project]
+network = "networks/customCool.knet"
