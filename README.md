@@ -207,17 +207,29 @@ regenerates it (`python3 -m kromex myproj/krome.toml`); `NETWORK.md`
 lists the options together with this network's species, parameters and
 reactions.
 
+## Documenting a network
+
+```sh
+python3 -m kromex doc primordial -o doc_primordial    # then open doc_primordial/index.html
+```
+
+writes the documentation of a network from its `.knet` file, with no
+build: a page per species and per reaction (the rate as a formula, k
+against T), the jumps of piecewise rates at their bounds, the missing
+reactions and branches, a graph per element, and the reaction table for
+a paper in LaTeX (docs/manual.md section 2).
+
 ## Layout
 
 | path | contents |
 |---|---|
-| `kromex/` | the code generator, used from this folder: `Preprocessor` (`preprocessor.py`, the configuration and the generation), the option definitions (`config.py`), the command line (`python3 -m kromex`, `__main__.py`), the generator (`codegen.py`: network -> project), the `.knet` parser (`knet.py`), the converter of legacy `react_*` files (`convert_legacy.py`), the physical constants (`constants.py`) |
+| `kromex/` | the code generator, used from this folder: `Preprocessor` (`preprocessor.py`, the configuration and the generation), the option definitions (`config.py`), the command line (`python3 -m kromex`, `__main__.py`), the generator (`codegen.py`: network -> project), the `.knet` parser (`knet.py`), the converter of legacy `react_*` files (`convert_legacy.py`), the physical constants (`constants.py`), the network documentation (`doc/`, `python3 -m kromex doc`) |
 | `options_template.toml` | every generation option, commented out, with its description, default and an example |
 | `runtime/` | the library, copied into each generated project |
 | `networks/` | the legacy networks converted to `.knet` |
 | `data/` | the databases and tables KROME reads; `data/cooling/` the coolant files for `thermal.coolant_files` |
 | `examples/` | `examples/tests/`: the legacy tests ported to KROME-X (`python3 -m kromex --test NAME`); `examples/coupling/`: hydro-coupling drivers (Fortran/RAMSES, C/ENZO, C++/GIZMO, Python) |
-| `tools/` | user tools: `lamda2krome.py` and `chianti2krome.py` (coolant files from LAMDA and CHIANTI) |
+| `tools/` | user tools: `lamda2krome.py` and `chianti2krome.py` (coolant files from LAMDA and CHIANTI), `kida2krome.py` and `umist2krome.py` (networks from KIDA and the UMIST database) |
 | `docs/` | the manual and the network format |
 
 The runtime:

@@ -21,7 +21,7 @@ classifiers = [
 kromex = "kromex.__main__:main"
 
 [tool.setuptools]
-packages = ["kromex", "kromex._vendor", "kromex._vendor.tomli"]
+packages = ["kromex", "kromex.doc", "kromex._vendor", "kromex._vendor.tomli"]
 
 [tool.setuptools.package-data]
 "kromex._vendor" = ["README.md"]

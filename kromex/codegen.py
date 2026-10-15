@@ -522,6 +522,143 @@ def load_photo_db(path):
     return entries
 
 
+# photo cross sections from data files (the generator and kromex.doc)
+
+# h c [eV Angstrom]: Angstrom -> eV (SWRI files); the Leiden files give
+# the wavelength in nm (their headers; legacy kromelib LEIDEN2KROME)
+HC_EV_AA = constants.clight * constants.planck_eV / 1e-8
+HC_EV_NM = constants.clight * constants.planck_eV / 1e-7
+
+def leiden_table(folder, rx):
+    """Leiden database file <R>__<P1>_<P2>.dat -> (E[eV], sigma[cm^2]),
+    ascending in E. Column: photoionisation if e- among the products,
+    photodissociation otherwise."""
+    rea = rx["reactants"][0]["sp"]
+    prods = sorted(p["sp"] for p in rx["products"])
+    folder = folder / "leiden_xsecs"
+    fname = None
+    for f in sorted(folder.glob("%s__*.dat" % rea)):
+        toks = f.stem.split("__", 1)[1].split("_")
+        fp = sorted("e-" if t.upper() == "E" else t for t in toks)
+        if fp == prods:
+            fname = f
+            break
+    if fname is None:
+        raise FileNotFoundError(
+            "no Leiden file %s__*.dat matching products %s in %s "
+            "(download from the Leiden photodissociation database)"
+            % (rea, "+".join(prods), folder))
+    col = 3 if "e-" in prods else 2
+    E, S = [], []
+    for line in fname.read_text().splitlines():
+        s = line.strip()
+        if not s or s.startswith("#"):
+            continue
+        v = s.split()
+        E.append(HC_EV_NM / float(v[0]))  # lambda [nm] -> eV
+        S.append(float(v[col]))
+    pairs = sorted(zip(E, S))
+    return ([e for e, _ in pairs], [s for _, s in pairs])
+
+def swri_table(folder, rx, warnings):
+    """SWRI (phidrates) file <R>.dat -> (E[eV], sigma[cm^2]) for the
+    branch matching the reaction products. Branch header tokens use '/'
+    between products and '+' for 'ion + e-'; excited-state labels are
+    merged onto the ground state (columns summed), as legacy KROME did.
+    Spectral lines (1e-35 sentinel brackets) become boxes, see below."""
+    rea = rx["reactants"][0]["sp"]
+    prods = sorted(p["sp"] for p in rx["products"])
+    fname = folder / "swri_xsecs" / ("%s.dat" % rea)
+    if not fname.exists():
+        raise FileNotFoundError(
+            "no SWRI file %s (download from phidrates.space.swri.edu)"
+            % fname)
+    header, rows = [], []
+    for line in fname.read_text().splitlines():
+        toks = line.split()
+        if not toks:
+            continue
+        if toks[0] == "Lambda":
+            header, rows = toks, []
+            continue
+        try:
+            rows.append([float(x) for x in toks])
+        except ValueError:
+            continue
+    for state in ("1D", "1S", "3P"):
+        header = [h.replace(state, "") for h in header]
+    # merge duplicate branches (excited states folded to ground)
+    drop = set()
+    for i in range(1, len(header)):
+        for j in range(i + 1, len(header)):
+            if header[i] == header[j] and j not in drop:
+                drop.add(j)
+                for row in rows:
+                    row[i] += row[j]
+    branch_prods = []
+    for h in header:
+        ps = [x for x in h.replace("+", "+/E/").split("/") if x]
+        branch_prods.append(sorted("e-" if x.upper() == "E" else x
+                                   for x in ps))
+    if prods not in branch_prods:
+        raise FileNotFoundError(
+            "products %s not among SWRI branches %s in %s"
+            % ("+".join(prods),
+               branch_prods[2:] if len(branch_prods) > 2 else [], fname))
+    col = branch_prods.index(prods)
+    # 1e-35 rows are SWRI's spectral-line sentinels. A line is a run
+    # of values bracketed by sentinel runs on both sides (H2: the
+    # Lyman-Werner lines, "1e-35 v 1e-35" triplets): a box of that
+    # height over the bracketing sentinel energies, zero outside (as
+    # legacy SWRI2KROME; the value mean where a line has several). Any
+    # other sentinel (C2: 1436 A; CO, OH, H2O: the last two rows; H2:
+    # the outer edges of the line block) marks the edge of the
+    # tabulated range and is dropped. Unlike legacy, a continuum in
+    # the same branch is kept (legacy replaced it by the lines).
+    asc = [r for r in rows[::-1] if r[0] > 0.0]  # ascending energy
+    pts = [(HC_EV_AA / r[0], r[col]) for r in asc]
+    sent = [v == 1e-35 for _, v in pts]
+    pairs, n_lines, q = [], 0, 0
+    while q < len(pts):
+        if sent[q]:
+            q += 1
+            continue
+        e = q
+        while e < len(pts) and not sent[e]:
+            e += 1
+        vals = pts[q:e]
+        if q > 0 and e < len(pts):  # bracketed: a line box
+            lo, hi = pts[q - 1][0], pts[e][0]
+            vv = sum(v for _, v in vals) / len(vals)
+            pairs += [(lo * (1.0 - 1e-9), 0.0), (lo, vv), (hi, vv),
+                      (hi * (1.0 + 1e-9), 0.0)]
+            n_lines += 1
+        else:
+            pairs += vals
+        q = e
+    if n_lines:
+        warnings.append("SWRI %s: %d spectral lines embedded as "
+                             "finite-width boxes" % (fname.name, n_lines))
+    # exact duplicate energies (a continuum point on a box edge) would
+    # make a zero-width interpolation interval: keep the first
+    pairs.sort()
+    dedup = []
+    for e, v in pairs:
+        if dedup and e == dedup[-1][0]:
+            continue
+        dedup.append((e, v))
+    pairs = dedup
+    # the table spans its first to last nonzero point (legacy xmin /
+    # xmax): a threshold is a step, not a linear ramp from the last
+    # tabulated zero (OH -> OH+: zeros below 19.8 eV); xsec_interp is
+    # zero outside the range
+    while pairs and pairs[0][1] == 0.0:
+        pairs.pop(0)
+    while pairs and pairs[-1][1] == 0.0:
+        pairs.pop()
+    return ([e for e, _ in pairs], [s for _, s in pairs])
+
+
 # legacy rate-database helper functions (src/krome_subs.f90), emitted
 # verbatim into the generated header when a resolved auto rate uses them.
 # All are pure functions of Tgas and constants.
@@ -7148,139 +7285,11 @@ class Codegen:
                                      "yet (%s)" % (x.get("ref"), rx["eq"]))
         return out
 
-    # h c [eV Angstrom]: Angstrom -> eV (SWRI files); the Leiden files give
-    # the wavelength in nm (their headers; legacy kromelib LEIDEN2KROME)
-    HC_EV_AA = constants.clight * constants.planck_eV / 1e-8
-    HC_EV_NM = constants.clight * constants.planck_eV / 1e-7
-
     def load_leiden(self, rx):
-        """Leiden database file <R>__<P1>_<P2>.dat -> (E[eV], sigma[cm^2]),
-        ascending in E. Column: photoionisation if e- among the products,
-        photodissociation otherwise."""
-        rea = rx["reactants"][0]["sp"]
-        prods = sorted(p["sp"] for p in rx["products"])
-        folder = self.data_dir / "leiden_xsecs"
-        fname = None
-        for f in sorted(folder.glob("%s__*.dat" % rea)):
-            toks = f.stem.split("__", 1)[1].split("_")
-            fp = sorted("e-" if t.upper() == "E" else t for t in toks)
-            if fp == prods:
-                fname = f
-                break
-        if fname is None:
-            raise FileNotFoundError(
-                "no Leiden file %s__*.dat matching products %s in %s "
-                "(download from the Leiden photodissociation database)"
-                % (rea, "+".join(prods), folder))
-        col = 3 if "e-" in prods else 2
-        E, S = [], []
-        for line in fname.read_text().splitlines():
-            s = line.strip()
-            if not s or s.startswith("#"):
-                continue
-            v = s.split()
-            E.append(self.HC_EV_NM / float(v[0]))  # lambda [nm] -> eV
-            S.append(float(v[col]))
-        pairs = sorted(zip(E, S))
-        return ([e for e, _ in pairs], [s for _, s in pairs])
+        return leiden_table(self.data_dir, rx)
 
     def load_swri(self, rx):
-        """SWRI (phidrates) file <R>.dat -> (E[eV], sigma[cm^2]) for the
-        branch matching the reaction products. Branch header tokens use '/'
-        between products and '+' for 'ion + e-'; excited-state labels are
-        merged onto the ground state (columns summed), as legacy KROME did.
-        Spectral lines (1e-35 sentinel brackets) become boxes, see below."""
-        rea = rx["reactants"][0]["sp"]
-        prods = sorted(p["sp"] for p in rx["products"])
-        fname = self.data_dir / "swri_xsecs" / ("%s.dat" % rea)
-        if not fname.exists():
-            raise FileNotFoundError(
-                "no SWRI file %s (download from phidrates.space.swri.edu)"
-                % fname)
-        header, rows = [], []
-        for line in fname.read_text().splitlines():
-            toks = line.split()
-            if not toks:
-                continue
-            if toks[0] == "Lambda":
-                header, rows = toks, []
-                continue
-            try:
-                rows.append([float(x) for x in toks])
-            except ValueError:
-                continue
-        for state in ("1D", "1S", "3P"):
-            header = [h.replace(state, "") for h in header]
-        # merge duplicate branches (excited states folded to ground)
-        drop = set()
-        for i in range(1, len(header)):
-            for j in range(i + 1, len(header)):
-                if header[i] == header[j] and j not in drop:
-                    drop.add(j)
-                    for row in rows:
-                        row[i] += row[j]
-        branch_prods = []
-        for h in header:
-            ps = [x for x in h.replace("+", "+/E/").split("/") if x]
-            branch_prods.append(sorted("e-" if x.upper() == "E" else x
-                                       for x in ps))
-        if prods not in branch_prods:
-            raise FileNotFoundError(
-                "products %s not among SWRI branches %s in %s"
-                % ("+".join(prods),
-                   branch_prods[2:] if len(branch_prods) > 2 else [], fname))
-        col = branch_prods.index(prods)
-        # 1e-35 rows are SWRI's spectral-line sentinels. A line is a run
-        # of values bracketed by sentinel runs on both sides (H2: the
-        # Lyman-Werner lines, "1e-35 v 1e-35" triplets): a box of that
-        # height over the bracketing sentinel energies, zero outside (as
-        # legacy SWRI2KROME; the value mean where a line has several). Any
-        # other sentinel (C2: 1436 A; CO, OH, H2O: the last two rows; H2:
-        # the outer edges of the line block) marks the edge of the
-        # tabulated range and is dropped. Unlike legacy, a continuum in
-        # the same branch is kept (legacy replaced it by the lines).
-        asc = [r for r in rows[::-1] if r[0] > 0.0]  # ascending energy
-        pts = [(self.HC_EV_AA / r[0], r[col]) for r in asc]
-        sent = [v == 1e-35 for _, v in pts]
-        pairs, n_lines, q = [], 0, 0
-        while q < len(pts):
-            if sent[q]:
-                q += 1
-                continue
-            e = q
-            while e < len(pts) and not sent[e]:
-                e += 1
-            vals = pts[q:e]
-            if q > 0 and e < len(pts):  # bracketed: a line box
-                lo, hi = pts[q - 1][0], pts[e][0]
-                vv = sum(v for _, v in vals) / len(vals)
-                pairs += [(lo * (1.0 - 1e-9), 0.0), (lo, vv), (hi, vv),
-                          (hi * (1.0 + 1e-9), 0.0)]
-                n_lines += 1
-            else:
-                pairs += vals
-            q = e
-        if n_lines:
-            self.warnings.append("SWRI %s: %d spectral lines embedded as "
-                                 "finite-width boxes" % (fname.name, n_lines))
-        # exact duplicate energies (a continuum point on a box edge) would
-        # make a zero-width interpolation interval: keep the first
-        pairs.sort()
-        dedup = []
-        for e, v in pairs:
-            if dedup and e == dedup[-1][0]:
-                continue
-            dedup.append((e, v))
-        pairs = dedup
-        # the table spans its first to last nonzero point (legacy xmin /
-        # xmax): a threshold is a step, not a linear ramp from the last
-        # tabulated zero (OH -> OH+: zeros below 19.8 eV); xsec_interp is
-        # zero outside the range
-        while pairs and pairs[0][1] == 0.0:
-            pairs.pop(0)
-        while pairs and pairs[-1][1] == 0.0:
-            pairs.pop()
-        return ([e for e, _ in pairs], [s for _, s in pairs])
+        return swri_table(self.data_dir, rx, self.warnings)
 
     def emit_photo(self, w, photo):
         if photo:

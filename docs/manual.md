@@ -198,6 +198,101 @@ with a rate that depends on a parameter is a warning only. The exit
 status is 1 on a failure, so the check can run in a script; `kp.check()`
 returns False.
 
+### Documenting a network
+
+```sh
+python3 -m kromex doc NETWORK [-o DIR] [--range Av=0.1,20] [--set crflux=1.3e-17]
+```
+
+(`kromex doc` once installed; in Python `from kromex.doc import
+document`) writes the documentation of a network from its `.knet` file
+alone, without generating or building it (legacy `docmake`). NETWORK is
+a file or a shipped network by name; DIR defaults to `doc_<network>`.
+Open `DIR/index.html` in a browser:
+
+- **Species:** mass, charge, composition, phase, the formation enthalpy
+  at 298.15 K when the thermochemical tables have it, and the reactions
+  forming and destroying each.
+- **Reactions:** the rate as a formula, its line in the network file, its
+  T range and reference, and k against T (and against the `--range`
+  quantities), with the other pieces of a piecewise rate. The plot also
+  shows KROME-X's rate outside the range (`--outside`, as the generation
+  option `rates.outside`; default: zero below, the bound's value above)
+  and, faint, the formula extrapolated.
+- **Photo reactions:** the cross section sigma(E) from the source the
+  generator reads (the `xsec` expression, the Verner et al. 1996 fits of
+  `xsec=auto`, the Leiden and SWRI files in `data/database`), its energy
+  window, the shielding factor, and the unshielded rate in the Draine
+  (1978) field. A missing data file is flagged: the generated code gives
+  that reaction a zero rate.
+- **Piecewise rates:** the jump of each piecewise rate at its bounds, in
+  red above 0.1%: pieces that do not meet are usually fits joined at the
+  wrong temperature, or a typo.
+- **Missing reactions and branches:** reactant sets the network never
+  uses, and products its reactant sets could give but do not (same
+  elements and charge, one or two species of the same phase), each with
+  its reaction enthalpy (negative: exothermic) when the tables have
+  every species. A lead for the author, not a verdict. Above
+  `--max-missing` species per phase (150) only the branches are listed.
+- **Graphs:** one per element, from each reactant to each product with
+  it (`graphs/*.dot`; rendered by Graphviz when installed, else in the
+  browser).
+- **LaTeX:** `latex/<network>_table.tex`, the reaction table for a paper
+  (longtable: number, reaction, rate coefficient, T range, the `ref`
+  citation), and `latex/<network>_reactions.tex`, a document around it
+  with the definitions of the vars written by name. Run LaTeX two or
+  three times: longtable settles its column widths over the runs.
+
+The rates are evaluated in Python from the network's expressions, at the
+parameters' defaults unless `--set` gives a value (a rate proportional to
+a parameter whose default is 0, such as a cosmic-ray rate, is zero until
+set). Surface rates, rates from the database, tables and extern
+functions are computed by the generated code only: their reactions are
+documented without plots (the photo reactions: their cross sections). The formulas and the graphs
+without Graphviz are drawn by MathJax and viz.js, loaded from a CDN: the
+site needs an internet connection for them.
+
+### Networks from KIDA and UMIST
+
+```sh
+python3 tools/kida2krome.py gas_reactions_kida.uva.2024.in kida2024.knet
+python3 tools/umist2krome.py rate22_final.rates rate22.knet
+```
+
+convert a KIDA network (the kida.uva files) or a UMIST Database for
+Astrochemistry ratefile (RATE22, RATE12) to a `.knet`, with the
+databases' rate formulas (the docstring of each tool cites them):
+
+- **Two-body rates:** Kooij, alpha (T/300)^beta exp(-gamma/T); KIDA's
+  ion-polar formulas (ionpol1, ionpol2) as written in KIDA.
+- **Cosmic rays:** alpha times the parameter `crflux`, the ionisation
+  rate in the database's convention (KIDA: zeta of H2, default 1.3e-17
+  s^-1; UMIST: CP alpha zeta/zeta0 and CR alpha (T/300)^beta gamma /
+  (1 - omega) zeta/zeta0, zeta0 = 1.36e-17 s^-1, omega 0.5 with
+  `--albedo`; default zeta0).
+- **UV photorates:** alpha exp(-gamma Av) times `uv_scale`, the field in
+  units of the database's (Draine 1978 for KIDA), with `Av` the implicit
+  parameter.
+- **Temperature ranges:** as in the database. A rate given over several
+  ranges is a piecewise rate, its gaps closed at the start of the next
+  range; a rate measured at one temperature has no range. With the
+  default `rates.outside = "asym"` a rate is zero below its range:
+  `rates.outside = "clamp"` keeps it for colder gas.
+- **Duplicates:** KIDA lists alternative values for the same reaction
+  and range (the user chooses one): the best recommended is kept. UMIST
+  lists sums of fits as separate lines, kept (summed); the same rate
+  written twice is kept once. The others are comments in the output.
+- **Species:** isomer prefixes become labels (`l-C3H` is `C3H_l`); the
+  pseudo-species (cosmic rays, photons) leave the reaction. Formulas the
+  network cannot express (KIDA's grain charging and surface H) are
+  comments.
+
+Each reaction carries a comment with its database number (UMIST: its
+DOI as `ref`). The tools flag entries whose parameters do not fit their
+formula (KIDA 2024 has a few, e.g. ionpol parameters under the Kooij
+formula, giving k = 1 cm^3 s^-1): check them before use.
+`kromex --check` then tests the network; `kromex doc` documents it.
+
 ### The project directory
 
 | file | what | regenerated |
@@ -1400,6 +1495,12 @@ Options:
 | `-useDustH2const` | the Jura rate is the network reaction krate_H2dust_Jura() (parameter clump) |
 | `-useODEConstant` | not ported (rate_scale = expr in the network scales every rate) |
 | `-xsecKernelFunction` | not ported |
+
+#### The legacy tools
+
+| legacy | KROME-X |
+|---|---|
+| `tools/docmake` | `python3 -m kromex doc NETWORK` (§2, "Documenting a network"): the species and reaction pages, the rate plots, the joints of piecewise rates, the missing reactions and branches, the graphs per element and the LaTeX table, from the `.knet` (KIDA and UMIST files: `tools/kida2krome.py`, `tools/umist2krome.py`, §2). Not ported: the Langevin rates (the polarizability table had no documented source) and the subnetwork filter |
 
 #### The legacy `krome_user` functions
 
