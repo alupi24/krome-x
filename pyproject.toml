@@ -19,9 +19,15 @@ classifiers = [
 
 [project.scripts]
 kromex = "kromex.__main__:main"
+kromex-doc = "kromex_doc:main"
+kida2krome = "kromex_convert.kida2krome:main"
+umist2krome = "kromex_convert.umist2krome:main"
+lamda2krome = "kromex_convert.lamda2krome:main"
+chianti2krome = "kromex_convert.chianti2krome:main"
 
 [tool.setuptools]
-packages = ["kromex", "kromex.doc", "kromex._vendor", "kromex._vendor.tomli"]
+packages = ["kromex", "kromex._vendor", "kromex._vendor.tomli", "kromex_doc",
+            "kromex_convert"]
 
 [tool.setuptools.package-data]
 "kromex._vendor" = ["README.md"]

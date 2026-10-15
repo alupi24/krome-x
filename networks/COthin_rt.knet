@@ -477,6 +477,9 @@ H + H -> H2                 []                2.121e-17
 H -> H+ + e-                []                photo(xsec=auto)
 C -> C+ + e-                []                photo(xsec="swri")
 O -> O+ + e-                []                photo(xsec=auto)
+# CO: legacy's SWRI table, kept so that rtchem compares with legacy; it
+# misses most of CO's predissociating lines (7.5e-11 s^-1 unshielded in the
+# Draine field): xsec="leiden" gives the standard 2.4e-10 (network-format.md)
 CO -> C + O                 []                photo(xsec="swri")
 H2 -> H + H                 []                photo(xsec="swri")
 H2 -> H2+ + e-              []                photo(xsec="swri")

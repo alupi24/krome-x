@@ -2,7 +2,7 @@
 """LAMDA molecular data file -> KROME coolant file (the coolZ.dat format
 read by codegen thermal.coolant_files), a port of legacy tools/lamda2.py.
 
-    python3 tools/lamda2krome.py o2.dat coolO2.dat [--name O2]
+    lamda2krome o2.dat coolO2.dat [--name O2]
 
 Levels (energies [K], degeneracies), radiative transitions (up -> low,
 Aij) and, per collision partner, the de-excitation rates as cubic-spline
@@ -19,9 +19,8 @@ LAMDA partner ids: 1 H2, 2 para-H2, 3 ortho-H2, 4 e-, 5 H, 6 He, 7 H+.
 
 import argparse
 import sys
-from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "kromex"))  # constants
+import kromex  # noqa: E402,F401 (puts kromex/ on the path)
 
 import constants  # noqa: E402
 
@@ -73,7 +72,7 @@ def convert(src, name=None):
     nrad = int(nxt("NUMBER", "RADIATIVE")[0])
     rads = [ln.split() for ln in nxt("TRANS", without=("NUMBER",))][:nrad]
     npart = int(nxt("NUMBER", "PARTNER")[0])
-    out = ["# converted from LAMDA %s by tools/lamda2krome.py" % src,
+    out = ["# converted from LAMDA %s by lamda2krome (KROME-X)" % src,
            "metal:%s" % mol,
            "# level n: energy (K), degeneracy g"]
     for lv in levels:
@@ -106,7 +105,7 @@ def convert(src, name=None):
 
 
 def main():
-    ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    ap = argparse.ArgumentParser(prog="lamda2krome", description=__doc__.split("\n")[0])
     ap.add_argument("input")
     ap.add_argument("output")
     ap.add_argument("--name", help="the coolant species (default: the "

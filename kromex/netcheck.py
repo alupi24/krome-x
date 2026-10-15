@@ -78,7 +78,7 @@ def reverse_tfuncs(gen):
     nasa, nist = gen.thermo_all()
 
     def gRT(sp, T):
-        c = nasa.get(sp.upper())
+        c = nasa.get(sp)
         if c is not None:
             T = min(max(T, c[0]), c[2])
             a = c[10:17] if T <= c[1] else c[3:10]

@@ -15,7 +15,7 @@ KROME-X port (examples/tests/lamda, driver test.cpp on the C++ API):
   user_crate and user_Av are the network parameters crate and Av
   (p.crate = 1.3e-17, p.Av = (ntot/1e3)^(2/3));
 - legacy -coolFile=data/coolO2.dat is thermal.coolant_files = ["data/cooling/coolO2.dat"]:
-  the LAMDA O2 file re-converted (tools/lamda2krome.py) with the correct
+  the LAMDA O2 file re-converted (lamda2krome, kromex_convert/) with the correct
   cm^-1 -> K factor, so the level energies are 0.7 % higher than in the
   legacy file; levels 36-47 have no radiative line to the ground and are
   dropped (zero population);

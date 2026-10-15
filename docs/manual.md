@@ -201,11 +201,12 @@ returns False.
 ### Documenting a network
 
 ```sh
-python3 -m kromex doc NETWORK [-o DIR] [--range Av=0.1,20] [--set crflux=1.3e-17]
+python3 -m kromex_doc NETWORK [-o DIR] [--range Av=0.1,20] [--set crflux=1.3e-17]
 ```
 
-(`kromex doc` once installed; in Python `from kromex.doc import
-document`) writes the documentation of a network from its `.knet` file
+(`kromex-doc` once installed with pip; in Python `from kromex_doc import
+document`), a tool next to the generator (`kromex_doc/`, it only reads
+the network), writes the documentation of a network from its `.knet` file
 alone, without generating or building it (legacy `docmake`). NETWORK is
 a file or a shipped network by name; DIR defaults to `doc_<network>`.
 Open `DIR/index.html` in a browser:
@@ -215,7 +216,9 @@ Open `DIR/index.html` in a browser:
   forming and destroying each.
 - **Reactions:** the rate as a formula, its line in the network file, its
   T range and reference, and k against T (and against the `--range`
-  quantities), with the other pieces of a piecewise rate. The plot also
+  quantities), with the other pieces of a piecewise rate. The plots are
+  interactive (zoom, values on hover; plotly.js), and static SVG offline
+  or with `--static`. The plot also
   shows KROME-X's rate outside the range (`--outside`, as the generation
   option `rates.outside`; default: zero below, the bound's value above)
   and, faint, the formula extrapolated.
@@ -248,18 +251,21 @@ parameters' defaults unless `--set` gives a value (a rate proportional to
 a parameter whose default is 0, such as a cosmic-ray rate, is zero until
 set). Surface rates, rates from the database, tables and extern
 functions are computed by the generated code only: their reactions are
-documented without plots (the photo reactions: their cross sections). The formulas and the graphs
-without Graphviz are drawn by MathJax and viz.js, loaded from a CDN: the
-site needs an internet connection for them.
+documented without plots (the photo reactions: their cross sections). The formulas, the graphs
+without Graphviz and the interactive plots are drawn by MathJax, viz.js
+and plotly.js, loaded from a CDN: the
+site needs an internet connection for them (the plots then fall back to
+their SVG).
 
 ### Networks from KIDA and UMIST
 
 ```sh
-python3 tools/kida2krome.py gas_reactions_kida.uva.2024.in kida2024.knet
-python3 tools/umist2krome.py rate22_final.rates rate22.knet
+kida2krome gas_reactions_kida.uva.2024.in kida2024.knet
+umist2krome rate22_final.rates rate22.knet
 ```
 
-convert a KIDA network (the kida.uva files) or a UMIST Database for
+(commands of the KROME-X install; from a checkout, `python3 -m
+kromex_convert.kida2krome` and `.umist2krome`) convert a KIDA network (the kida.uva files) or a UMIST Database for
 Astrochemistry ratefile (RATE22, RATE12) to a `.knet`, with the
 databases' rate formulas (the docstring of each tool cites them):
 
@@ -291,7 +297,7 @@ Each reaction carries a comment with its database number (UMIST: its
 DOI as `ref`). The tools flag entries whose parameters do not fit their
 formula (KIDA 2024 has a few, e.g. ionpol parameters under the Kooij
 formula, giving k = 1 cm^3 s^-1): check them before use.
-`kromex --check` then tests the network; `kromex doc` documents it.
+`kromex --check` then tests the network; `kromex-doc` documents it.
 
 ### The project directory
 
@@ -454,7 +460,7 @@ generation.
 | `DUST` | gas-dust thermal exchange with the effective grain population (d2g, Tdust) |
 | `DUSTTAB` | tabulated dust cooling (`dust.tables`) |
 | `DUSTBINS` | gas-dust exchange of the binned dust (section 9) |
-| `DH` | reaction enthalpies at Tgas from the thermo30 NASA polynomials (alternative to CHEM) |
+| `DH` | reaction enthalpies at Tgas from Burcat's NASA polynomials (`data/thermo_burcat.toml`; alternative to CHEM) |
 
 | heating | process |
 |---|---|
@@ -481,7 +487,7 @@ generation.
 | `metals` | the metals of `Z` / `Z_EXTENDED` (C, Si, Fe, O, S, C+, O+, Si+, Fe+; default all present) |
 | `photo_pumping` | `true`: radiative pumping of the metal-line levels by the photon field (legacy `-usePhotoInduced`) |
 | `cmb_pumping` | `true`: the CMB (Tcmb) in the metal-line level balance |
-| `coolant_files` | coolant files in the coolZ.dat format (legacy `-coolFile`: LAMDA conversions by `tools/lamda2krome.py`, e.g. `data/cooling/coolO2.dat`; CHIANTI conversions by `tools/chianti2krome.py`), added to the embedded coolZ.dat. Select their coolants by name in `cooling` (the legacy names: Roman numerals for atoms and ions, e.g. `FeII`; the species for molecules, e.g. `O2`), with `FILE` (all), or with `metals` (a metal a file defines comes from the file). Each is its own cooling term (`get_thermal` names it), optically thin, with the pumping and floor options of `Z` |
+| `coolant_files` | coolant files in the coolZ.dat format (legacy `-coolFile`: LAMDA conversions by `lamda2krome`, e.g. `data/cooling/coolO2.dat`; CHIANTI conversions by `chianti2krome`), added to the embedded coolZ.dat. Select their coolants by name in `cooling` (the legacy names: Roman numerals for atoms and ions, e.g. `FeII`; the species for molecules, e.g. `O2`), with `FILE` (all), or with `metals` (a metal a file defines comes from the file). Each is its own cooling term (`get_thermal` names it), optically thin, with the pumping and floor options of `Z` |
 | `levels` | keep levels 0..L of every metal / file coolant, with their lines (legacy `-coolLevels`) |
 | `escape` | the optical depth of the line coolants (the coolZ.dat metals and the `coolant_files` coolants): `"LVG"`, each line's radiative rates times its Sobolev escape probability (below); default optically thin |
 
@@ -496,10 +502,11 @@ Shipped coolant files (data/cooling/):
   It matters above ~2000 K (x1.26 at 4000 K in a test cell) and costs
   ~2.1 us per call against 0.17 us.
 
-Converters (both write the coolZ.dat format):
-- `python3 tools/lamda2krome.py o2.dat coolO2.dat`: a LAMDA molecular data
+Converters (both write the coolZ.dat format; commands of the KROME-X
+install, or `python3 -m kromex_convert.NAME` from a checkout):
+- `lamda2krome o2.dat coolO2.dat`: a LAMDA molecular data
   file.
-- `python3 tools/chianti2krome.py $XUVTOP coolC.dat c o_3 [--max-level 20]
+- `chianti2krome $XUVTOP coolC.dat c o_3 [--max-level 20]
   [--tmin 10 --tmax 1e9 --per-decade 4]`: ions (`o_3` = O++) or whole
   elements (`c`) of a CHIANTI v8+ database (the directory with the element
   directories). It writes the levels (`.elvlc`), the lines (`.wgfa`), and
@@ -1500,7 +1507,7 @@ Options:
 
 | legacy | KROME-X |
 |---|---|
-| `tools/docmake` | `python3 -m kromex doc NETWORK` (§2, "Documenting a network"): the species and reaction pages, the rate plots, the joints of piecewise rates, the missing reactions and branches, the graphs per element and the LaTeX table, from the `.knet` (KIDA and UMIST files: `tools/kida2krome.py`, `tools/umist2krome.py`, §2). Not ported: the Langevin rates (the polarizability table had no documented source) and the subnetwork filter |
+| `tools/docmake` | `python3 -m kromex_doc NETWORK` (§2, "Documenting a network"): the species and reaction pages, the rate plots, the joints of piecewise rates, the missing reactions and branches, the graphs per element and the LaTeX table, from the `.knet` (KIDA and UMIST files: `kida2krome`, `umist2krome`, §2). Not ported: the Langevin rates (the polarizability table had no documented source) and the subnetwork filter |
 
 #### The legacy `krome_user` functions
 

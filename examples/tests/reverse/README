@@ -16,7 +16,8 @@ KROME-X notes:
   <->. NO_reverse.knet is networks/NO.knet with both reactions written
   as <-> (what kromex/convert_legacy.py networks/react_NO --reverse
   writes). The reverse rate is k_fwd / K_c, K_c from the NASA
-  polynomials of data/thermo30.dat, as in legacy.
+  polynomials of data/thermo_burcat.toml (Burcat's database; for these
+  five species the same polynomials as legacy's thermo30.dat).
 - the species columns of abundances.dat are in KROME-X (alphabetical) order:
   N N2 NO O O2 (legacy: order of appearance N2 O NO N O2); plot.py picks
   them by name.

@@ -1,6 +1,7 @@
 """pip install . (or pip install -e .): the package kromex, and, in a
 regular install, the files it generates projects from (runtime/, data/,
-networks/, examples/, VERSION, options_template.toml) copied into
+networks/, examples/, VERSION, options_template.toml) and the user
+documentation (docs/manual.md, docs/network-format.md) copied into
 kromex/_share (kromex/paths.py finds them there; an editable install uses
 the repository's own). The metadata is in pyproject.toml."""
 
@@ -13,7 +14,7 @@ from setuptools.command.build_py import build_py
 
 HERE = Path(__file__).resolve().parent
 SHARE = ["runtime", "data", "networks", "examples", "VERSION",
-         "options_template.toml"]
+         "options_template.toml", "docs/manual.md", "docs/network-format.md"]
 # never shipped: build products, and the ZCIE tables extracted from
 # data/coolZ_CIE.tar.xz on first use (77 MB)
 SKIP_PARTS = {"__pycache__", ".git"}

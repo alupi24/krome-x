@@ -198,8 +198,9 @@ reverse, right after it, from detailed balance:
 
 with P° = 1 bar, and dG° and dn = n_products - n_reactants those of the
 forward reaction. The Gibbs energies come from the NASA 7-coefficient
-polynomials of `data/thermo30.dat`, or else the NIST-JANAF Shomate fits
-of `data/thermoNIST.dat`. Outside a species' tabulated range its G is
+polynomials of `data/thermo_burcat.toml` (Burcat's database, Goos,
+Burcat & Ruscic, for the species of the shipped networks, by name), or
+else the NIST-JANAF Shomate fits of `data/thermoNIST.dat`. Outside a species' tabulated range its G is
 taken at the nearest limit. A species without data is a generation error
 (e.g. `e-`, which has no entry).
 
@@ -415,6 +416,14 @@ H2 -> H + H           []    photo(xsec = H2_sigmaLW(E_eV), Emin=14.159, Emax=17.
   reactants/products), a quoted database/file reference (`"swri"`,
   `"leiden"`, `"xsecs/myfile.dat"`, `"verner96"`), or an inline expression of
   the reserved symbol `E_eV` (photon energy, eV) returning cm^2.
+- CO: use `xsec="leiden"` (`data/database/leiden_xsecs/CO__C_O.dat`,
+  Heays et al. 2017 from the line data of Visser et al. 2009, resampled
+  to 0.1 nm keeping the integrated cross section): 2.4e-10 s^-1 in the
+  unshielded Draine field, the standard rate. The SWRI table misses most
+  of CO's predissociating lines (7.5e-11 s^-1). The lines saturate at
+  columns where a binned cross section does not: give the self-shielding
+  as `shield=`, e.g. the Visser et al. (2009) functions of
+  `data/shield_CO_unigrid.dat` (a network `table`).
 - `Emin`/`Emax` (eV) bound the integration window for **any** source,
   `auto` included; `Emin` defaults to the database threshold when available.
 - The `[]` range field on photo lines refers to `Tgas` as usual (photo rates

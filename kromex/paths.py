@@ -25,7 +25,9 @@ def find(value, *subdirs, suffix=""):
     subdirs, with or without suffix (a shipped network by name:
     find("primordial", "networks", suffix=".knet"))"""
     p = Path(value)
-    if p.is_absolute() or p.exists():
+    # a file as given; not a folder of the same name (a project generated
+    # in the working directory, ./primordial, is not the network)
+    if p.is_absolute() or p.is_file():
         return p
     for base in (ROOT,) + tuple(ROOT / s for s in subdirs):
         for q in (base / value,) + ((base / (str(value) + suffix),)

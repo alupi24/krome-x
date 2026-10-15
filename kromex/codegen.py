@@ -522,7 +522,7 @@ def load_photo_db(path):
     return entries
 
 
-# photo cross sections from data files (the generator and kromex.doc)
+# photo cross sections from data files (the generator and kromex_doc)
 
 # h c [eV Angstrom]: Angstrom -> eV (SWRI files); the Leiden files give
 # the wavelength in nm (their headers; legacy kromelib LEIDEN2KROME)
@@ -2195,23 +2195,23 @@ class Codegen:
 
     def thermo_all(self):
         if not hasattr(self, "_thermo_all"):
-            self._thermo_all = (self.load_thermo30(), self.load_thermo_nist())
+            self._thermo_all = (self.load_thermo(), self.load_thermo_nist())
         return self._thermo_all
 
     def emit_gRT(self, w, species):
         """G/RT = H/RT - S/R of a species at T (standard state 1 bar):
-        NASA 7-coefficient polynomials (thermo30.dat) when present, else
-        NIST Shomate (thermoNIST.dat), as legacy revHS. Outside the data
+        NASA 7-coefficient polynomials (Burcat, thermo_burcat.toml) when
+        present, else NIST Shomate (thermoNIST.dat). Outside the data
         the temperature is clamped to the nearest limit (legacy used
         H = S = 0 there)."""
         nasa, nist = self.thermo_all()
         key = species.upper()
         name = "gRT_%s" % self.cid(species)
-        w("// G/RT of %s (%s)" % (species, "NASA thermo30" if key in nasa
+        w("// G/RT of %s (%s)" % (species, "NASA, Burcat" if species in nasa
                                    else "NIST-JANAF Shomate"))
         w("static inline double %s(double T) {" % name)
-        if key in nasa:
-            c = nasa[key]
+        if species in nasa:
+            c = nasa[species]
             lo, mid, hi = c[0], c[1], c[2]
             w("  T = std::fmin(std::fmax(T, %s), %s);"
               % (self.cnum(lo), self.cnum(hi)))
@@ -2269,7 +2269,7 @@ class Codegen:
             sps = [r["sp"] for r in rx["reactants"]] + \
                   [p0["sp"] for p0 in rx["products"]]
             for sp in sps:
-                if sp.upper() not in nasa and sp.upper() not in nist:
+                if sp not in nasa and sp.upper() not in nist:
                     missing.add(sp)
             q = len(self._reverse)
             self._reverse.append(rx)
@@ -2296,7 +2296,7 @@ class Codegen:
             out.append(rev)
         if missing:
             raise ValueError("<-> reactions need thermochemical data "
-                             "(thermo30.dat / thermoNIST.dat) for: %s"
+                             "(thermo_burcat.toml / thermoNIST.dat) for: %s"
                              % ", ".join(sorted(missing)))
         net.reactions = out
         for i, rx in enumerate(net.reactions):
@@ -2346,7 +2346,7 @@ class Codegen:
         nasa, nist = self.thermo_all()
 
         def h_RT(sp, T=300.0):
-            c = nasa.get(sp.upper())
+            c = nasa.get(sp)
             if c is not None:
                 a = c[10:17] if T <= c[1] else c[3:10]
                 return (a[0] + a[1] * T / 2 + a[2] * T * T / 3
@@ -2781,7 +2781,7 @@ class Codegen:
         reaction, Minissale et al. 2016 (A&A 585, A24): exp(-E_b N /
         (eps dH_R)), eps = ((M - m)/(M + m))^2, m = 120 amu, N = 3 atoms;
         on water ice their suggested reduction, /10. dH_R [K]: the
-        exothermicity from the thermo30 enthalpies at 300 K."""
+        exothermicity from Burcat's enthalpies at 300 K."""
         rx = s["rx"]
         prods = [self.surf_base(q["sp"]) for q in rx["products"]]
         if len(prods) != 1:
@@ -2791,7 +2791,7 @@ class Codegen:
         nasa, _ = self.thermo_all()
 
         def h(sp):
-            c = nasa.get(sp.upper())
+            c = nasa.get(sp)
             if c is None:
                 return None
             a = c[10:17] if 300.0 <= c[1] else c[3:10]
@@ -2801,7 +2801,7 @@ class Codegen:
         hs = [h(x) for x in [self.surf_base(q["sp"]) for q in
                              rx["reactants"]] + prods]
         if None in hs:
-            self.warnings.append("%s: no thermo30 enthalpy, no reactive "
+            self.warnings.append("%s: no thermochemical data, no reactive "
                                  "desorption" % rx["eq"])
             return None
         exo = sum(hs[:-1]) - hs[-1]
@@ -6559,50 +6559,25 @@ class Codegen:
 
     # -- enthalpy heating/cooling (legacy -cooling=DH / -heating=DH) -----------
 
-    def load_thermo30(self):
-        """data/thermo30.dat (NASA 7-coefficient polynomials): NAME ->
-        the 17 numbers [Tlow, Tcommon, Thigh, 7 upper-range, 7
-        lower-range coefficients], parsed exactly as legacy."""
-        for base in (self.data_dir.parent, self.data_dir,
-                     self.data_dir.parent.parent):
-            path = base / "thermo30.dat"
-            if path.exists():
-                break
-        else:
-            raise FileNotFoundError("thermo30.dat not found")
-
-        def isnum(x):
-            try:
-                float(x)
-                return True
-            except ValueError:
-                return False
-
-        thermo, mypoly, spec, nskip = {}, None, None, 0
-        for row in path.read_text().splitlines():
-            s = row.strip()
-            if not s:
-                continue
-            a = s.split()
-            if a[0] == "END":
-                break
-            if a[0] == "THERMO":
-                nskip = 1
-                continue
-            if nskip > 0 or s[0] == "!":
-                nskip -= 1
-                continue
-            if not isnum(row[:15]):
-                spec = a[0].strip().upper()
-                mypoly = [a[-4], a[-2], a[-3]]  # Tlow, Tcommon, Thigh
+    def load_thermo(self):
+        """data/thermo_burcat.toml (Burcat's NASA 7-coefficient polynomials
+        of the networks' species, tools/maintainer/tables/
+        gen_thermo_burcat.py): species name (as in the networks) -> the 17
+        numbers [Tlow, Tcommon, Thigh, 7 upper-range, 7 lower-range
+        coefficients]"""
+        if not hasattr(self, "_thermo"):
+            import tomlio
+            for base in (self.data_dir.parent, self.data_dir,
+                         self.data_dir.parent.parent):
+                path = base / "thermo_burcat.toml"
+                if path.exists():
+                    break
             else:
-                mypoly += [row[i * 15:(i + 1) * 15] for i in range(5)]
-                if int(row[5 * 15:].strip()) == 4:
-                    coef = [float(x) for x in mypoly[:17]
-                            if x.strip() != ""]
-                    if len(coef) == 17:
-                        thermo[spec] = coef
-        return thermo
+                raise FileNotFoundError("thermo_burcat.toml not found")
+            sp = tomlio.load(path).get("species", {})
+            self._thermo = {k: list(v["T"]) + list(v["high"]) + list(v["low"])
+                            for k, v in sp.items()}
+        return self._thermo
 
     def recomb_reactions(self):
         """the electron recombinations of atomic ions, X^q+ + e- ->
@@ -6713,7 +6688,7 @@ class Codegen:
     def emit_dh_thermal(self, w):
         """cooling_dH()/heating_dH(): legacy -cooling=DH / -heating=DH, the
         reaction enthalpies at the gas temperature: dH(T) = sum H_reac -
-        sum H_prod, H = kB T (H/RT) of the thermo30.dat NASA polynomials
+        sum H_prod, H = kB T (H/RT) of Burcat's NASA polynomials
         (the lower block below Tcommon, the upper above, T clamped to the
         data range; electrons 0). Each reaction contributes
         k * prod(n_reactants) * |dH(T)| to the cooling (dH < 0) or to the
@@ -6724,15 +6699,15 @@ class Codegen:
         warning (legacy silently used H = 0)."""
         rxs, species = [], set()
         if self.dh:
-            thermo = self.load_thermo30()
+            thermo = self.load_thermo()
             for rx in self.net.reactions:
                 if rx["rate"]["kind"] != "expr":
                     continue
                 sps = [q["sp"] for q in rx["reactants"] + rx["products"]]
                 miss = [x for x in sps
-                        if x != "e-" and x.upper() not in thermo]
+                        if x != "e-" and x not in thermo]
                 if miss:
-                    self.warnings.append("dH: no thermo30 data for %s in "
+                    self.warnings.append("dH: no thermochemical data for %s in "
                                          "'%s', skipped"
                                          % (", ".join(sorted(set(miss))),
                                             rx["eq"]))
@@ -6740,8 +6715,8 @@ class Codegen:
                 rxs.append(rx)
                 species.update(x for x in sps if x != "e-")
             for sp in sorted(species):
-                c = thermo[sp.upper()]
-                w("// H/k [K] of %s (NASA thermo30; T clamped to the data)"
+                c = thermo[sp]
+                w("// H/k [K] of %s (NASA, Burcat; T clamped to the data)"
                   % sp)
                 w("static inline double hK_%s(double T) {" % self.cid(sp))
                 w("  T = std::fmin(std::fmax(T, %s), %s);"

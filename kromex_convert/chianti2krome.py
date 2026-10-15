@@ -3,8 +3,8 @@
 by codegen thermal.coolant_files), a port of legacy tools/chianti.py to Python 3 and
 to the current CHIANTI formats (v8 and later).
 
-    python3 tools/chianti2krome.py $XUVTOP coolChianti.dat c o ne fe
-    python3 tools/chianti2krome.py $XUVTOP coolC.dat c_2 c_3 --max-level 10
+    chianti2krome $XUVTOP coolChianti.dat c o ne fe
+    chianti2krome $XUVTOP coolC.dat c_2 c_3 --max-level 10
 
 The ions are CHIANTI names (c_2 = C+) or elements (c = every ion of C in
 the database). Per ion:
@@ -59,7 +59,7 @@ import re
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "kromex"))  # constants
+import kromex  # noqa: E402,F401 (puts kromex/ on the path)
 import constants  # noqa: E402
 
 RY_K = constants.ry_to_eV / constants.boltzmann_eV  # K per Rydberg
@@ -342,7 +342,7 @@ def ion_dirs(root, names):
 
 
 def main():
-    ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    ap = argparse.ArgumentParser(prog="chianti2krome", description=__doc__.split("\n")[0])
     ap.add_argument("database", type=Path,
                     help="the CHIANTI database root (XUVTOP: the "
                     "directory with the element directories)")
@@ -363,7 +363,7 @@ def main():
     n = int(round(math.log10(a.tmax / a.tmin) * a.per_decade)) + 1
     temps = [a.tmin * (a.tmax / a.tmin) ** (k / (n - 1.0)) for k in range(n)]
     ver = a.database / "VERSION"
-    head = ["# converted from CHIANTI%s by tools/chianti2krome.py" % (
+    head = ["# converted from CHIANTI%s by chianti2krome (KROME-X)" % (
         " " + ver.read_text().split()[0] if ver.exists() else ""),
         "# rates: log10 q on %d log10 T points, %g - %g K" % (n, a.tmin,
                                                              a.tmax)]

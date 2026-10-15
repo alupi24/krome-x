@@ -7,7 +7,6 @@
     python3 -m kromex --template FILE                the commented template
     python3 -m kromex --check run.toml               check the network only
     python3 -m kromex --version
-    python3 -m kromex doc NETWORK [...]              the network's documentation
 
 --set SECTION.KEY=VALUE: VALUE in TOML syntax (1e-6, true, ["H2", "Z"]);
 a bare word is a string (--set thermal.gamma=EXACT)."""
@@ -37,10 +36,6 @@ def parse_set(item):
 
 
 def main(argv=None):
-    argv = sys.argv[1:] if argv is None else list(argv)
-    if argv[:1] == ["doc"]:     # python3 -m kromex doc NETWORK ...
-        from kromex.doc import main as doc_main
-        return doc_main(argv[1:])
     ap = argparse.ArgumentParser(
         prog="kromex", description="KROME-X: generate a project from a "
         "configuration file (TOML); docs/manual.md section 2",

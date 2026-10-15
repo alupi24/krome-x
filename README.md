@@ -32,7 +32,7 @@ Documentation:
 ## Installation
 
 ```sh
-pip install .            # in the KROME-X folder: the package and the `kromex` command
+pip install .            # in the KROME-X folder: the package and its commands
 pip install -e .         # the same, editable: it reads this folder (for development)
 ```
 
@@ -162,7 +162,7 @@ The other entry points, all described in the manual:
 - queries, photon bins and binned dust, with evolving grain sizes
   (`dust.evolve`: growth, sputtering, evaporation);
 - line cooling from user coolant files (`thermal.coolant_files`: LAMDA and CHIANTI
-  conversions, `tools/lamda2krome.py` and `tools/chianti2krome.py`);
+  conversions, `lamda2krome` and `chianti2krome`);
 - `KROME_ERROR_REPORT`, written when a solve fails;
 - the legacy tests ported to KROME-X (`python3 -m kromex --test NAME`)
   and hydro coupling examples (`examples/coupling`).
@@ -210,7 +210,7 @@ reactions.
 ## Documenting a network
 
 ```sh
-python3 -m kromex doc primordial -o doc_primordial    # then open doc_primordial/index.html
+python3 -m kromex_doc primordial -o doc_primordial    # then open doc_primordial/index.html
 ```
 
 writes the documentation of a network from its `.knet` file, with no
@@ -223,13 +223,14 @@ a paper in LaTeX (docs/manual.md section 2).
 
 | path | contents |
 |---|---|
-| `kromex/` | the code generator, used from this folder: `Preprocessor` (`preprocessor.py`, the configuration and the generation), the option definitions (`config.py`), the command line (`python3 -m kromex`, `__main__.py`), the generator (`codegen.py`: network -> project), the `.knet` parser (`knet.py`), the converter of legacy `react_*` files (`convert_legacy.py`), the physical constants (`constants.py`), the network documentation (`doc/`, `python3 -m kromex doc`) |
+| `kromex/` | the code generator, used from this folder: `Preprocessor` (`preprocessor.py`, the configuration and the generation), the option definitions (`config.py`), the command line (`python3 -m kromex`, `__main__.py`), the generator (`codegen.py`: network -> project), the `.knet` parser (`knet.py`), the converter of legacy `react_*` files (`convert_legacy.py`), the physical constants (`constants.py`) |
+| `kromex_doc/` | the documentation of a network (`python3 -m kromex_doc`; legacy docmake): HTML site and LaTeX table, from the `.knet` |
 | `options_template.toml` | every generation option, commented out, with its description, default and an example |
 | `runtime/` | the library, copied into each generated project |
 | `networks/` | the legacy networks converted to `.knet` |
 | `data/` | the databases and tables KROME reads; `data/cooling/` the coolant files for `thermal.coolant_files` |
 | `examples/` | `examples/tests/`: the legacy tests ported to KROME-X (`python3 -m kromex --test NAME`); `examples/coupling/`: hydro-coupling drivers (Fortran/RAMSES, C/ENZO, C++/GIZMO, Python) |
-| `tools/` | user tools: `lamda2krome.py` and `chianti2krome.py` (coolant files from LAMDA and CHIANTI), `kida2krome.py` and `umist2krome.py` (networks from KIDA and the UMIST database) |
+| `kromex_convert/` | the converters of external data (commands, or `python3 -m kromex_convert.NAME`): `kida2krome` and `umist2krome` (networks from KIDA and the UMIST database), `lamda2krome` and `chianti2krome` (coolant files from LAMDA and CHIANTI) |
 | `docs/` | the manual and the network format |
 
 The runtime:
