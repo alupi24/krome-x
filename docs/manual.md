@@ -209,7 +209,10 @@ document`), a tool next to the generator (`kromex_doc/`, it only reads
 the network), writes the documentation of a network from its `.knet` file
 alone, without generating or building it (legacy `docmake`). NETWORK is
 a file or a shipped network by name; DIR defaults to `doc_<network>`.
-Open `DIR/index.html` in a browser:
+In a terminal it then serves the site on `http://127.0.0.1:8080/` (the
+next free port if 8080 is taken; `--port`) until Ctrl-C: open that
+address in a browser. `--no-serve` only writes it (the default in a
+script; `--serve` forces serving); `DIR/index.html` also opens as a file:
 
 - **Species:** mass, charge, composition, phase, the formation enthalpy
   at 298.15 K when the thermochemical tables have it, and the reactions

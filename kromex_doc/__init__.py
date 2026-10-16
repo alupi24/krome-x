@@ -13,6 +13,9 @@ KROME-X (its .knet parser and data), independent of the code generation:
     python3 -m kromex_doc NETWORK [-o DIR] [--range Av=0.1,20] [--set crflux=1.3e-17]
     kromex-doc NETWORK ...                     (installed with pip)
 
+In a terminal it then serves the site on http://127.0.0.1:8080/ until
+Ctrl-C (--no-serve, --port).
+
     from kromex_doc import document
     document("primordial", "doc_primordial", ranges={"Tgas": (10, 1e5)})
 
@@ -23,6 +26,7 @@ documented without plots."""
 
 import math
 import re
+import sys
 from pathlib import Path
 
 import kromex  # noqa: F401 (puts the kromex modules on the path)
@@ -98,6 +102,36 @@ def document(network, outdir=None, ranges=None, values=None, tref=100.0,
     return out / "index.html"
 
 
+def make_server(outdir, port=8080, tries=10):
+    """an HTTP server of outdir on 127.0.0.1 (this computer only, unlike
+    python -m http.server, which listens on every interface): port, or the
+    next free one of the following tries; returns (server, url)"""
+    import functools
+    import http.server
+    handler = functools.partial(http.server.SimpleHTTPRequestHandler,
+                                directory=str(outdir))
+    handler.log_message = lambda *args: None      # quiet
+    for p in range(port, port + max(1, tries)):
+        try:
+            srv = http.server.ThreadingHTTPServer(("127.0.0.1", p), handler)
+        except OSError:
+            continue
+        return srv, "http://127.0.0.1:%d/" % srv.server_address[1]
+    raise OSError("no free port in %d-%d" % (port, port + tries - 1))
+
+
+def serve(outdir, port=8080):
+    """serve outdir (index.html) until Ctrl-C"""
+    srv, url = make_server(outdir, port)
+    print("serving %s at %s (Ctrl-C to stop)" % (outdir, url), flush=True)
+    try:
+        srv.serve_forever()
+    except KeyboardInterrupt:
+        print()
+    finally:
+        srv.server_close()
+
+
 def parse_assign(item, what):
     """NAME=VALUE (or NAME=LO,HI for a range)"""
     m = re.match(r"^\s*([^=\s]+)\s*=\s*(.+)$", item)
@@ -153,14 +187,28 @@ def main(argv=None):
     ap.add_argument("--max-missing", type=int, default=missing.MAX_SPECIES,
                     help="list the missing reactions up to this many "
                     "species per phase (default %d)" % missing.MAX_SPECIES)
+    sv = ap.add_mutually_exclusive_group()
+    sv.add_argument("--serve", dest="serve", action="store_true",
+                    default=None, help="serve the site afterwards on "
+                    "http://127.0.0.1:PORT (the default in an interactive "
+                    "terminal)")
+    sv.add_argument("--no-serve", dest="serve", action="store_false",
+                    help="do not serve it (the default in scripts)")
+    ap.add_argument("--port", type=int, default=8080,
+                    help="the port to serve on, or the next free one "
+                    "(default 8080)")
     a = ap.parse_args(argv)
     try:
         ranges = dict(parse_assign(x, "range") for x in a.range)
         values = dict(parse_assign(x, "set") for x in a.set)
-        document(a.network, a.outdir, ranges, values, a.tref,
-                 plots=not a.no_plots, max_graph=a.max_graph,
-                 max_missing=a.max_missing, outside=a.outside,
-                 static=a.static)
+        index = document(a.network, a.outdir, ranges, values, a.tref,
+                         plots=not a.no_plots, max_graph=a.max_graph,
+                         max_missing=a.max_missing, outside=a.outside,
+                         static=a.static)
+        # serving blocks until Ctrl-C: by default only in a terminal
+        if a.serve if a.serve is not None else \
+                (sys.stdin.isatty() and sys.stdout.isatty()):
+            serve(index.parent, a.port)
     except (ValueError, OSError) as e:
         print("ERROR: %s" % e)
         return 1

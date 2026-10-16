@@ -72,6 +72,12 @@ print(r.Tgas, r.n[net.idx("H2")])            # the final state, r.flags
 `tff` is required here because of the COMPRESS heating (NETWORK.md, in
 the project, lists every parameter).
 
+These examples are also Jupyter notebooks, with their outputs, in
+`examples/notebooks/`: `quickstart.ipynb` (this section, and a cell
+followed in time), `collapse.ipynb` (the collapse below, with and
+without the continuum cooling) and `networks.ipynb` (documenting and
+converting networks).
+
 ## Example: a primordial collapse
 
 A one-zone free-fall collapse of primordial gas, from 1 to 10^16 cm^-3:
@@ -229,7 +235,7 @@ a paper in LaTeX (docs/manual.md section 2).
 | `runtime/` | the library, copied into each generated project |
 | `networks/` | the legacy networks converted to `.knet` |
 | `data/` | the databases and tables KROME reads; `data/cooling/` the coolant files for `thermal.coolant_files` |
-| `examples/` | `examples/tests/`: the legacy tests ported to KROME-X (`python3 -m kromex --test NAME`); `examples/coupling/`: hydro-coupling drivers (Fortran/RAMSES, C/ENZO, C++/GIZMO, Python) |
+| `examples/` | `examples/tests/`: the legacy tests ported to KROME-X (`python3 -m kromex --test NAME`); `examples/coupling/`: hydro-coupling drivers (Fortran/RAMSES, C/ENZO, C++/GIZMO, Python); `examples/notebooks/`: the README's examples as Jupyter notebooks |
 | `kromex_convert/` | the converters of external data (commands, or `python3 -m kromex_convert.NAME`): `kida2krome` and `umist2krome` (networks from KIDA and the UMIST database), `lamda2krome` and `chianti2krome` (coolant files from LAMDA and CHIANTI) |
 | `docs/` | the manual and the network format |
 

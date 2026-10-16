@@ -126,7 +126,9 @@ class Preprocessor:
     def from_file(cls, path, base=None):
         """a Preprocessor from a TOML file. Relative paths in it (the
         network, coolant and tolerance files) are relative to base, by
-        default the file's folder. A project record (krome.toml, with
+        default the file's folder, when the file is there; else they are
+        kept as written (a shipped network by name, network =
+        "primordial"). A project record (krome.toml, with
         [meta]) regenerates its own project: its folder is the default
         outdir, and its test is set up again"""
         path = Path(path)
@@ -142,14 +144,24 @@ class Preprocessor:
         except ConfigError as exc:
             raise ConfigError("%s: %s" % (path, exc)) from exc
         base = Path(base) if base is not None else path.resolve().parent
+
+        def near(f, suffix=""):
+            """a relative path: relative to base when the file is there;
+            else as written (a shipped network or data file by name,
+            network = "primordial", found when generating)"""
+            if not f or Path(f).is_absolute():
+                return f
+            for q in (base / f,) + ((base / (f + suffix),) if suffix
+                                    else ()):
+                if q.exists():
+                    return str(q)
+            return f
         v = kp._values
-        for sec, key in (("project", "network"), ("solver", "atol_file"),
-                         ("solver", "rtol_file")):
-            if v[sec][key] and not Path(v[sec][key]).is_absolute():
-                v[sec][key] = str(base / v[sec][key])
+        v["project"]["network"] = near(v["project"]["network"], ".knet")
+        for key in ("atol_file", "rtol_file"):
+            v["solver"][key] = near(v["solver"][key])
         v["thermal"]["coolant_files"] = [
-            f if Path(f).is_absolute() else str(base / f)
-            for f in v["thermal"]["coolant_files"]]
+            near(f) for f in v["thermal"]["coolant_files"]]
         if meta is not None:
             if v["project"]["outdir"] is None:
                 v["project"]["outdir"] = str(path.resolve().parent)
