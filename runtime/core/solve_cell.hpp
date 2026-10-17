@@ -71,6 +71,7 @@ inline const char* flag_message(int flag) {
     case FLAG_NO_LAPACK: return "LINSOL_LAPACK in a build without LAPACK (KROME_USE_LAPACK)";
     case FLAG_NO_KOKKOS: return "device path used before Kokkos::initialize()";
     case FLAG_NONPOSITIVE_T: return "the integration ended at a non-positive or non-finite Tgas (input untouched)";
+    case FLAG_DEVICE_MEMORY: return "device path: not even one cell fits in the device memory (CellsOpts::device_memory)";
     case FLAG_TOO_MUCH_WORK: return "max_steps exhausted before t_end (FLAG_TOO_MUCH_WORK)";
     case FLAG_TOO_MUCH_ACC: return "tolerances too small for machine precision (FLAG_TOO_MUCH_ACC)";
     case FLAG_ERR_FAILURE: return "repeated error-test failures (FLAG_ERR_FAILURE)";
@@ -104,6 +105,7 @@ inline const char* flag_name(int flag) {
     case FLAG_NO_LAPACK: return "FLAG_NO_LAPACK";
     case FLAG_NO_KOKKOS: return "FLAG_NO_KOKKOS";
     case FLAG_NONPOSITIVE_T: return "FLAG_NONPOSITIVE_T";
+    case FLAG_DEVICE_MEMORY: return "FLAG_DEVICE_MEMORY";
     case FLAG_TOO_MUCH_WORK: return "FLAG_TOO_MUCH_WORK";
     case FLAG_TOO_MUCH_ACC: return "FLAG_TOO_MUCH_ACC";
     case FLAG_ERR_FAILURE: return "FLAG_ERR_FAILURE";

@@ -83,6 +83,7 @@
 #define KROME_FLAG_NO_LAPACK (-108)     /* linsol LAPACK not built */
 #define KROME_FLAG_NO_KOKKOS (-109)     /* device before initialization */
 #define KROME_FLAG_NONPOSITIVE_T (-110) /* ended at Tgas <= 0: untouched */
+#define KROME_FLAG_DEVICE_MEMORY (-111) /* device: no cell fits in memory */
 
 #ifdef __cplusplus
 extern "C" {
@@ -147,8 +148,12 @@ const char* krome_param_required_by(int i);
  *                                it)
  *   device_cache                 keep the device buffers between calls
  *                                (1, default; 0: allocate in every call)
- *   max_device_cells             the device path integrates at most this
- *                                many cells at a time (0: all at once)
+ *   device_memory                the device memory a call may use
+ *                                [bytes]: larger calls run in chunks
+ *                                that fit (0, default: 80 % of the free
+ *                                memory on CUDA / HIP; < 0 unbounded);
+ *                                when no cell fits, path auto runs on
+ *                                the host, path device returns -111
  *   min_device                   auto with a device backend: calls from
  *                                this many cells go to the device (1e4)
  *   min_interleave               the device layout: interleaved across

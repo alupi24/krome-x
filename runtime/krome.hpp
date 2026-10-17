@@ -132,6 +132,8 @@ constexpr int FLAG_NO_KOKKOS = -109;       // device path before
 constexpr int FLAG_NONPOSITIVE_T = -110;   // the integration reached a
                                            // non-positive (or non-finite)
                                            // Tgas: inputs untouched
+constexpr int FLAG_DEVICE_MEMORY = -111;   // PATH_DEVICE: not even one cell
+                                           // fits in the device memory
 
 // a one-line description of a flag, never nullptr
 inline const char* flag_message(int flag);
@@ -266,10 +268,14 @@ struct CellsOpts {
   // and freed in every call. kk::release_device_cache() frees them;
   // Kokkos::finalize does
   bool device_cache = true;
-  // the device path integrates at most this many cells at a time (larger
-  // calls in chunks, on the same buffers): bounds the device memory; 0 =
-  // all cells at once
-  int max_device_cells = 0;
+  // the device memory a call may use [bytes]: calls of more cells are
+  // integrated in chunks that fit (on the same buffers). 0: 80 % of the
+  // device's free memory (the cached buffers the call reuses included),
+  // on CUDA and HIP (elsewhere unbounded); < 0: unbounded. An allocation
+  // that fails anyway halves the chunk; when not even one cell fits,
+  // PATH_AUTO runs the cells on the host and PATH_DEVICE returns
+  // FLAG_DEVICE_MEMORY
+  long long device_memory = 0;
   // the device path's memory layout: interleaved across cells (element i
   // of cell c at c + i ncell: coalesced on a GPU) for calls (or chunks)
   // of at least this many cells, contiguous per cell below; < 0:

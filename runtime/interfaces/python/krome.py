@@ -50,7 +50,8 @@ _ENUMS = {"jac": ("auto", "analytic", "fd"),
           "path": ("auto", "percell", "device")}
 _BOOLS = ("evolve_T", "clip_negative", "error_report", "renormalize_x",
           "device_cache")
-_INTS = ("max_steps", "min_device", "max_device_cells", "min_interleave",
+_INTS = ("max_steps", "min_device", "device_memory",
+         "min_interleave",
          "max_restarts",
          "max_err_fails",
          "max_conv_fails", "conserve")
@@ -58,7 +59,7 @@ _KEYS = ("evolve_T", "jac", "linsol", "rtol", "atol_n", "atol_T", "atol_u",
 
          "max_steps", "max_err_fails", "max_conv_fails", "max_restarts",
          "clip_negative", "error_report", "renormalize_x", "conserve",
-         "path", "device_cache", "max_device_cells",
+         "path", "device_cache", "device_memory",
          "min_device", "min_interleave",
          "eq_t0",
          "eq_tmax", "eq_factor", "eq_rtol", "eq_atol")
@@ -535,7 +536,7 @@ class Network:
 
     def flag_message(self, flag):
         """a one-line description of a solver flag (0, a KROME flag
-        -100..-109, or a negative CVODE flag)"""
+        -100..-111, or a negative CVODE flag)"""
         return self._lib.krome_flag_message(int(flag)).decode()
 
     def equilibrium(self, n, Tgas, par=None, Phi=None, opts=None,
@@ -1200,7 +1201,8 @@ class Options:
     ("auto" / "percell" / "device"); rtol, atol_n, atol_T, atol_u;
     max_steps, max_err_fails, max_conv_fails, max_restarts; conserve (0
     off, 1 charge, 2 elements + charge, 3 electrons for neutrality);
-    device_cache, max_device_cells, min_device, min_interleave;
+    device_cache, device_memory, min_device,
+    min_interleave;
     eq_t0, eq_tmax, eq_factor, eq_rtol, eq_atol (the
     equilibrium solver); error_file (a string: the error-report file)."""
 

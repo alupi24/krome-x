@@ -658,7 +658,7 @@ These are runtime numerics.
 | `SolverOpts::dust` | `krome_opts_set_dustbins` | none | binned dust (section 9) |
 | `CellsOpts::path` | `path` | `PATH_AUTO` (0) | many cells on the CPU or the device (section 6.5): `PATH_AUTO`, `PATH_PERCELL` (1, the CPU), `PATH_DEVICE` (2, the Kokkos backend) |
 | `CellsOpts::device_cache` | `device_cache` | true | keep the device buffers between calls (sized for the largest call so far; memory only, every call writes its own inputs); `kk::release_device_cache()` frees them, `Kokkos::finalize` does |
-| `CellsOpts::max_device_cells` | `max_device_cells` | 0 | the device path integrates at most this many cells at a time (larger calls in chunks on the same buffers); 0: all at once |
+| `CellsOpts::device_memory` | `device_memory` | 0 | the device memory a call may use [bytes]; larger calls run in chunks that fit. 0: 80 % of the device's free memory (CUDA, HIP; elsewhere unbounded); < 0: unbounded. An allocation that fails anyway halves the chunk; when not even one cell fits, `PATH_AUTO` runs the cells on the host and `PATH_DEVICE` returns `FLAG_DEVICE_MEMORY` (section 6.5) |
 | `CellsOpts::min_interleave` | `min_interleave` | -1 | the device path's memory layout: interleaved across cells (coalesced on a GPU) for calls of at least this many cells, contiguous per cell below; -1: contiguous, and on CUDA interleaved above the cells the device holds resident at once (SMs x 256; 27 648 on an A100), with the launch bounds measured best for each (contiguous 32,1, interleaved 128,8). The results agree to roundoff (bitwise when built without FMA contraction) |
 | `CellsOpts::min_device` | `min_device` | 10000 | `PATH_AUTO`: calls from this many cells go to the device, when the build has one (section 6.5) |
 | `CellsOpts::Phi` | `krome_cells::Phi` (C), `phi=` / `Phi=` | none | per-cell fields `Phi[ncell][nbins]`, read (and with `radiation.evolve` updated). Without them every cell starts from `SolverOpts::Phi`; with `radiation.evolve` a single-cell call updates it, a call of several cells does not return the evolved fields |
@@ -958,8 +958,20 @@ net.device_finalize()                  # before exiting
   factors (the nonzeros of L + U, `SPARSE_NNZ` in the Jacobian header)
   and the dense border. The memory, not the speed, limits the cells of
   one call on a large network: DarkCloud (655 species, sparse LU) needs
-  about 4 MB per cell, so an A100 (64 GB) holds about 1.5x10^4 cells, and
-  `max_device_cells` splits larger calls into chunks. The interleaved kernel (large calls on a GPU) sizes its
+  about 4 MB per cell, so an A100 (64 GB) holds about 1.5x10^4 cells.
+  Larger calls are split into chunks that fit, integrated one after the
+  other on the same buffers: by default a chunk takes at most 80 % of the
+  device's free memory (CUDA and HIP; the buffers the call reuses
+  included; `device_memory` sets the budget in bytes). An allocation
+  that fails anyway
+  (out of memory) frees the buffers and halves the chunk; when not even
+  one cell fits, `PATH_AUTO` integrates the remaining cells on the host
+  and `PATH_DEVICE` gives them `FLAG_DEVICE_MEMORY`. The results do not
+  depend on the chunks (the cells are independent). With
+  `device_cache` (the default) the buffers stay allocated after the call,
+  for the next one: a code that allocates more GPU memory of its own
+  between calls bounds them with a fixed `device_memory`, or frees them
+  with `kk::release_device_cache()` (or `device_cache` off). The interleaved kernel (large calls on a GPU) sizes its
   thread-local arrays at compile time for at most
   `KROME_DEVICE_MAX_PHOTO_BINS` co-evolved photon bins (default 32) and
   `KROME_DEVICE_MAX_DUST_BINS` dust bins (default 40); a call with more
@@ -1323,6 +1335,7 @@ Every solver call returns 0 on success.
 | `FLAG_NO_LAPACK` | `KROME_FLAG_NO_LAPACK` | `krome_flag_no_lapack` | -108 | `linsol` LAPACK in a build without it |
 | `FLAG_NO_KOKKOS` | `KROME_FLAG_NO_KOKKOS` | `krome_flag_no_kokkos` | -109 | device path before Kokkos is initialized |
 | `FLAG_NONPOSITIVE_T` | `KROME_FLAG_NONPOSITIVE_T` | `krome_flag_nonpositive_t` | -110 | the integration ended at a non-positive or non-finite Tgas; the cell is untouched |
+| `FLAG_DEVICE_MEMORY` | `KROME_FLAG_DEVICE_MEMORY` | `krome_flag_device_memory` | -111 | `PATH_DEVICE`: not even one cell fits in the device memory; the cell is untouched |
 
 `solve_equilibrium` returns +1 when t_max comes before convergence. The
 state at t_max is returned.

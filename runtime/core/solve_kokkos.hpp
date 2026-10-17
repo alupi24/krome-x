@@ -33,8 +33,11 @@
 // matching device compiler). Kokkos must be initialized by the caller.
 #pragma once
 #include <algorithm>
+#include <climits>
 #include <cmath>
+#include <exception>
 #include <mutex>
+#include <new>
 #include <string>
 #include <type_traits>
 #include <utility>
@@ -138,11 +141,8 @@ inline void release_device_cache() {
   if (device_cache_ != nullptr) *device_cache_ = DeviceBuffers_();
 }
 
-// cached bytes on the device (the per-cell arrays included)
-inline size_t device_cache_bytes() {
-  std::lock_guard<std::mutex> lk(device_cache_mutex_);
-  if (device_cache_ == nullptr) return 0;
-  const DeviceBuffers_& D = *device_cache_;
+// the bytes a set of buffers holds on the device
+inline size_t buffers_bytes_(const DeviceBuffers_& D) {
   const Batch& b = D.b;
   return b.tc.span() * sizeof(ThermCtx)
          + (b.dt.span() + b.Tfix.span() + b.n0.span() + b.phi.span()
@@ -152,6 +152,20 @@ inline size_t device_cache_bytes() {
             + D.atol.span() + D.rtolv.span()) * sizeof(double)
          + (D.iwork.span() + D.flags.span() + b.disC.span()) * sizeof(int)
          + D.stats.span() * sizeof(long);
+}
+
+// cached bytes on the device (the per-cell arrays included)
+inline size_t device_cache_bytes() {
+  std::lock_guard<std::mutex> lk(device_cache_mutex_);
+  return device_cache_ == nullptr ? 0 : buffers_bytes_(*device_cache_);
+}
+
+// tests: an allocation for more than this many cells throws std::bad_alloc
+// (a device out of memory, simulated); < 0: off
+inline long alloc_fail_cells_ = -1;
+inline void alloc_check_(long cap) {
+  if (alloc_fail_cells_ >= 0 && cap > alloc_fail_cells_)
+    throw std::bad_alloc();
 }
 
 // the first n rows of a view
@@ -198,6 +212,9 @@ inline void ensure_batch_(DeviceBuffers_& D, int ncell, int blk, int B,
   const bool same = blk == D.blk && B == D.B && nb == D.nb;
   if (ncell <= D.cap && same) return;
   const int cap = std::max(ncell, same ? D.cap : 0);
+  // the old buffers freed first: the peak is the new ones alone
+  D = DeviceBuffers_();
+  alloc_check_(cap);
   Batch& b = D.b;
   b.tc = TView("krome_tc", cap);
   b.dt = DView("krome_dt", cap);
@@ -234,17 +251,22 @@ inline void ensure_batch_(DeviceBuffers_& D, int ncell, int blk, int B,
   ++device_allocs_;
 }
 
-// the device's sparse LU: LINSOL_SPARSE, or AUTO where the host solve
-// takes it (sparse_auto_; the device has no LAPACK)
-inline bool percell_sparse_(const SolverOpts& o, int blk) {
-  return o.linsol == LINSOL_SPARSE
-         || (o.linsol == LINSOL_AUTO && sparse_auto_(blk));
-}
-
 // the per-cell arrays at the Batch capacity, wd integrator doubles per cell
 inline void ensure_percell_(DeviceBuffers_& D, long wd) {
   if (D.pcap == D.cap && D.cap > 0 && D.rw == D.b.rw && D.wd == wd) return;
   const int cap = D.cap, blk = D.blk;
+  // the old arrays freed first
+  D.y = DView();
+  D.work = DView();
+  D.iwork = IView1();
+  D.scr = DView();
+  D.flags = IView1();
+  D.stats = LView2();
+  D.yh = DView::HostMirror();
+  D.fh = IView1::HostMirror();
+  D.sh = LView2::HostMirror();
+  D.pcap = 0;
+  alloc_check_(cap);
   D.y = DView("krome_y", static_cast<size_t>(cap) * blk);
   D.work = DView("krome_bdf_work", static_cast<size_t>(cap) * wd);
   D.wd = wd;
@@ -269,13 +291,17 @@ inline void ensure_percell_(DeviceBuffers_& D, long wd) {
 // (init_ctx_): -102 (dust bins required), -103 (a photo module without a
 // field, or radiation.evolve without one), -106 (dust.evolve with conserve
 // 2), -107 (surface.bins without its bins)
-inline int setup_batch_(DeviceBuffers_& D, int& B, int ncell,
-                        const double* n, const double* Tgas,
-                        const double* dt, const Params* P, int pstride,
-                        const SolverOpts& o, const CellsOpts& co) {
-  B = 0;
+// the state layout of a call (the host solve()'s, init_ctx_) and its
+// photon (B) and dust (nb) bins: 0, or the input flags of setup_batch_
+struct Shape_ {
   int blk = NSPEC, iT = -1, iu = -1, Bev = 0, id = -1, Dd = 0, ia = -1,
-      A = 0, nb = 0;
+      A = 0, nb = 0, B = 0;
+  bool balance = false;
+};
+inline int batch_shape_(const SolverOpts& o, const CellsOpts& co,
+                        Shape_& sh) {
+  int blk = NSPEC, iT = -1, iu = -1, Bev = 0, id = -1, Dd = 0, ia = -1,
+      A = 0, nb = 0, B = 0;
   bool balance = false;
   if (o.evolve_T) iT = blk++;
 #ifdef KROME_PHOTO_HPP_INCLUDED
@@ -313,19 +339,101 @@ inline int setup_batch_(DeviceBuffers_& D, int& B, int ncell,
   balance = !EvolveConfig::Td && o.dust != nullptr;
 #endif
 #endif
+  (void)co;
+  sh.blk = blk;
+  sh.iT = iT;
+  sh.iu = iu;
+  sh.Bev = Bev;
+  sh.id = id;
+  sh.Dd = Dd;
+  sh.ia = ia;
+  sh.A = A;
+  sh.nb = nb;
+  sh.B = B;
+  sh.balance = balance;
+  return 0;
+}
+
+// the device's sparse LU: LINSOL_SPARSE, or AUTO where the host solve
+// takes it (sparse_auto_; the device has no LAPACK)
+inline bool percell_sparse_(const SolverOpts& o, int blk) {
+  return o.linsol == LINSOL_SPARSE
+         || (o.linsol == LINSOL_AUTO && sparse_auto_(blk));
+}
+
+// the device bytes per cell of a call (ensure_batch_ and ensure_percell_);
+// 0 when the inputs are rejected (setup_batch_ reports them)
+inline long long percell_bytes_(const SolverOpts& o, const CellsOpts& co) {
+  Shape_ sh;
+  if (batch_shape_(o, co, sh) != 0) return 0;
+  const int blk = sh.blk;
+  const long long rw = rhs_work_doubles(blk, sh.Bev, sh.nb, sh.Dd, sh.A)
+                       + 2LL * blk;
+  long long dbl = 2 + NSPEC + blk + rw   // dt, Tfix, n0, y, rhs work
+      + bdf::work_doubles(blk, percell_sparse_(o, blk), NSPEC, SPARSE_NNZ)
+      + 2LL * sh.nb;                     // Td and radius rows
+  long long bytes = static_cast<long long>(sizeof(ThermCtx));
+#ifdef KROME_PHOTO_HPP_INCLUDED
+  if (sh.B > 0) {
+    dbl += sh.B + 5LL * (NPHOTO > 0 ? NPHOTO : 1);
+    bytes += static_cast<long long>(sizeof(PhotoSumsView));
+  }
+#endif
+  return bytes + dbl * static_cast<long long>(sizeof(double))
+         + (bdf::work_ints(blk) + 1LL) * static_cast<long long>(sizeof(int))
+         + NSTAT_ * static_cast<long long>(sizeof(long));
+}
+
+// the free memory of the device [bytes] (CUDA, HIP); -1: unknown (the
+// host spaces and the others: no limit applied)
+inline long long device_free_bytes_() {
+#if defined(KOKKOS_ENABLE_CUDA)
+  size_t f = 0, t = 0;
+  if (cudaMemGetInfo(&f, &t) == cudaSuccess)
+    return static_cast<long long>(f);
+#elif defined(KOKKOS_ENABLE_HIP)
+  size_t f = 0, t = 0;
+  if (hipMemGetInfo(&f, &t) == hipSuccess) return static_cast<long long>(f);
+#endif
+  return -1;
+}
+
+// an exception from a device allocation (or a launch) out of memory
+inline bool out_of_memory_(const std::exception& e) {
+  if (dynamic_cast<const std::bad_alloc*>(&e) != nullptr) return true;
+  const std::string w = e.what();
+  for (const char* k : {"out of memory", "MemoryAllocation",
+                        "failed to allocate", "insufficient memory"})
+    if (w.find(k) != std::string::npos) return true;
+  return false;
+}
+
+inline int setup_batch_(DeviceBuffers_& D, int& B, int ncell,
+                        const double* n, const double* Tgas,
+                        const double* dt, const Params* P, int pstride,
+                        const SolverOpts& o, const CellsOpts& co) {
+  Shape_ sh;
+  B = 0;
+  const int sflag = batch_shape_(o, co, sh);
+  if (sflag != 0) return sflag;
+  B = sh.B;
+  const int blk = sh.blk, Bev = sh.Bev, Dd = sh.Dd, A = sh.A, nb = sh.nb;
+#ifdef KROME_PHOTO_HPP_INCLUDED
+  const PhotoModule* ph = o.photo;
+#endif
   ensure_batch_(D, ncell, blk, B, nb);
   Batch& b = D.b;
   b.ncell = ncell;
   b.blk = blk;
-  b.iT = iT;
-  b.iu = iu;
+  b.iT = sh.iT;
+  b.iu = sh.iu;
   b.Bev = Bev;
-  b.id = id;
+  b.id = sh.id;
   b.D = Dd;
-  b.ia = ia;
+  b.ia = sh.ia;
   b.A = A;
   b.nb = nb;
-  b.balance = balance;
+  b.balance = sh.balance;
   b.rw = rhs_work_doubles(blk, Bev, nb, Dd, A) + 2L * blk;
   for (int c = 0; c < ncell; ++c) {
     D.dth(c) = dt[c];
@@ -1017,10 +1125,15 @@ inline int solve_chunk_(DeviceBuffers_& D, int ncell, double* n,
 
 // integrate ncell cells over their own dt[c] on the device, one thread
 // per cell; P: one Params (pstride 0) or ncell of them (pstride 1). Calls
-// of more than CellsOpts::max_device_cells cells (when > 0) are integrated
-// in chunks of that size on the same buffers. Returns 0, the host's input
-// flags (-102, -103, -105, -106, -107; every cell gets it), -109 (Kokkos
-// not initialized), or the flag of the first cell that failed on the
+// of more cells than fit in one go are integrated in chunks on the same
+// buffers: at most the cells that CellsOpts::device_memory holds (by
+// default 80 % of the device's free memory, the buffers this call can
+// reuse included; CUDA and HIP). An allocation that still fails (out of memory) frees the
+// buffers and halves the chunk; when not even one cell fits, the
+// remaining cells run on the host with PATH_AUTO, and get
+// FLAG_DEVICE_MEMORY (-111) otherwise. Returns 0, the host's input flags
+// (-102, -103, -105, -106, -107; every cell gets it), -109 (Kokkos not
+// initialized), -111, or the flag of the first cell that failed on the
 // device and again on the host (the others written).
 inline int solve_cells_kokkos(int ncell, double* n, double* Tgas,
                               const double* dt, const Params* P,
@@ -1055,7 +1168,20 @@ inline int solve_cells_kokkos(int ncell, double* n, double* Tgas,
     }
     D = device_cache_;
   }
-  const int chunk = co.max_device_cells > 0 ? co.max_device_cells : ncell;
+  int chunk = ncell;
+  // the memory budget: the cells it holds bound the chunk
+  long long budget = co.device_memory;
+  if (budget == 0) {
+    const long long f = device_free_bytes_();
+    budget = f < 0 ? -1
+                   : static_cast<long long>(
+                         0.8 * static_cast<double>(
+                                   f + static_cast<long long>(
+                                           buffers_bytes_(*D))));
+  }
+  const long long per = percell_bytes_(o, co);
+  if (budget > 0 && per > 0)
+    chunk = static_cast<int>(std::min<long long>(chunk, budget / per));
   int B = 0, nb = 0;
 #ifdef KROME_PHOTO_HPP_INCLUDED
   B = o.photo != nullptr ? o.photo->B : 0;
@@ -1067,7 +1193,7 @@ inline int solve_cells_kokkos(int ncell, double* n, double* Tgas,
   CellsOpts c1 = co;
   if (EvolveConfig::rad && ncell == 1 && co.Phi == nullptr) c1.Phi = o.Phi;
   int first = 0, hosted = 0;
-  for (int c0 = 0; c0 < ncell; c0 += chunk) {
+  for (int c0 = 0; c0 < ncell;) {
     const int m = std::min(chunk, ncell - c0);
     CellsOpts cc = c1;
     if (c1.Phi != nullptr) cc.Phi = c1.Phi + static_cast<size_t>(c0) * B;
@@ -1076,14 +1202,46 @@ inline int solve_cells_kokkos(int ncell, double* n, double* Tgas,
       cc.adust = co.adust + static_cast<size_t>(c0) * nb;
     if (co.flags != nullptr) cc.flags = co.flags + c0;
     if (co.stats != nullptr) cc.stats = co.stats + c0;
-    const int f = solve_chunk_(*D, m, n + static_cast<size_t>(c0) * NSPEC,
-                               Tgas + c0, dt + c0,
-                               P + static_cast<size_t>(c0) * pstride, pstride,
-                               o, cc);
+    double* nc = n + static_cast<size_t>(c0) * NSPEC;
+    const Params* Pc = P + static_cast<size_t>(c0) * pstride;
+    int f = 0;
+    bool oom = m < 1;
+    if (!oom) {
+      // an allocation (or launch) out of memory throws before any output
+      // is written: the chunk's inputs are untouched
+      try {
+        f = solve_chunk_(*D, m, nc, Tgas + c0, dt + c0, Pc, pstride, o, cc);
+      } catch (const std::exception& e) {
+        if (!out_of_memory_(e)) throw;
+        oom = true;
+      }
+    }
+    if (oom) {
+      *D = DeviceBuffers_();  // whatever the attempt allocated
+      if (m > 1) {            // half the chunk, from the same cell
+        chunk = m / 2;
+        continue;
+      }
+      // not even one cell fits: the remaining cells
+      const int r = ncell - c0;
+      if (co.path == PATH_AUTO) {
+        cc.path = PATH_PERCELL;
+        f = solve_cells_percell(r, nc, Tgas + c0, dt + c0, Pc, pstride, o,
+                                cc);
+        hosted += r;
+      } else {
+        if (co.flags != nullptr)
+          for (int c = c0; c < ncell; ++c) co.flags[c] = FLAG_DEVICE_MEMORY;
+        f = FLAG_DEVICE_MEMORY;
+      }
+      if (first == 0) first = f;
+      break;
+    }
     hosted += percell_host_cells_;
     if (f == -102 || f == -103 || f == -106 || f == -107)
       return fail_all(f);  // the inputs, for every cell
     if (first == 0) first = f;
+    c0 += m;
   }
   percell_host_cells_ = hosted;
   return first;

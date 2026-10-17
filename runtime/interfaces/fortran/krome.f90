@@ -51,6 +51,7 @@ module krome
   integer, parameter, public :: krome_flag_no_lapack = -108
   integer, parameter, public :: krome_flag_no_kokkos = -109
   integer, parameter, public :: krome_flag_nonpositive_t = -110
+  integer, parameter, public :: krome_flag_device_memory = -111
   ! the C kinds used in the interface, re-exported for callers
   public :: c_ptr, c_null_ptr, c_int, c_double
   public :: krome_opts_new, krome_opts_free, krome_nspec_c, krome_npar_c, &
@@ -1040,7 +1041,7 @@ contains
 
   ! the error-report file (default "KROME_ERROR_REPORT"; in an MPI run
   ! give each rank its own name)
-  ! a one-line description of a solver flag (0, a KROME flag -100..-109,
+  ! a one-line description of a solver flag (0, a KROME flag -100..-111,
   ! or a negative CVODE flag)
   function krome_flag_message_f(flag) result(s)
     integer, intent(in) :: flag

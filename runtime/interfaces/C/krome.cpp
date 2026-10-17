@@ -35,6 +35,8 @@ static_assert(KROME_FLAG_NO_LAPACK == krome::FLAG_NO_LAPACK, "flag NO_LAPACK");
 static_assert(KROME_FLAG_NO_KOKKOS == krome::FLAG_NO_KOKKOS, "flag NO_KOKKOS");
 static_assert(KROME_FLAG_NONPOSITIVE_T == krome::FLAG_NONPOSITIVE_T,
               "flag NONPOSITIVE_T");
+static_assert(KROME_FLAG_DEVICE_MEMORY == krome::FLAG_DEVICE_MEMORY,
+              "flag DEVICE_MEMORY");
 
 struct krome_opts {
   krome::SolverOpts so;
@@ -231,8 +233,8 @@ int krome_opts_set(krome_opts* h, const char* key, double value) {
     h->co.device_cache = value != 0.0;
     return 0;
   }
-  if (!std::strcmp(key, "max_device_cells")) {
-    h->co.max_device_cells = static_cast<int>(value);
+  if (!std::strcmp(key, "device_memory")) {
+    h->co.device_memory = static_cast<long long>(value);
     return 0;
   }
   if (!std::strcmp(key, "min_interleave")) {
@@ -289,8 +291,8 @@ int krome_opts_get(const krome_opts* hc, const char* key, double* value) {
     *value = h->co.device_cache ? 1.0 : 0.0;
     return 0;
   }
-  if (!std::strcmp(key, "max_device_cells")) {
-    *value = static_cast<double>(h->co.max_device_cells);
+  if (!std::strcmp(key, "device_memory")) {
+    *value = static_cast<double>(h->co.device_memory);
     return 0;
   }
   if (!std::strcmp(key, "min_interleave")) {
