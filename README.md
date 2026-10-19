@@ -73,10 +73,11 @@ print(r.Tgas, r.n[net.idx("H2")])            # the final state, r.flags
 the project, lists every parameter).
 
 These examples are also Jupyter notebooks, with their outputs, in
-`examples/notebooks/`: `quickstart.ipynb` (this section, and a cell
+`examples/coupling/python/`: `quickstart.ipynb` (this section, and a cell
 followed in time), `collapse.ipynb` (the collapse below, with and
 without the continuum cooling) and `networks.ipynb` (documenting and
-converting networks).
+converting networks). The same cell followed in time is in
+`examples/coupling/` in C, C++ and Fortran too.
 
 ## Example: a primordial collapse
 
@@ -170,8 +171,9 @@ The other entry points, all described in the manual:
 - line cooling from user coolant files (`thermal.coolant_files`: LAMDA and CHIANTI
   conversions, `lamda2krome` and `chianti2krome`);
 - `KROME_ERROR_REPORT`, written when a solve fails;
-- the legacy tests ported to KROME-X (`python3 -m kromex --test NAME`)
-  and hydro coupling examples (`examples/coupling`).
+- the legacy tests ported to KROME-X (`python3 -m kromex --test NAME`),
+  and examples calling KROME-X from C, C++, Fortran and Python
+  (`examples/coupling`).
 
 ## Configuration files
 
@@ -235,7 +237,7 @@ a paper in LaTeX (docs/manual.md section 2).
 | `runtime/` | the library, copied into each generated project |
 | `networks/` | the legacy networks converted to `.knet` |
 | `data/` | the databases and tables KROME reads; `data/cooling/` the coolant files for `thermal.coolant_files` |
-| `examples/` | `examples/tests/`: the legacy tests ported to KROME-X (`python3 -m kromex --test NAME`); `examples/coupling/`: hydro-coupling drivers (Fortran/RAMSES, C/ENZO, C++/GIZMO, Python); `examples/notebooks/`: the README's examples as Jupyter notebooks |
+| `examples/` | `examples/tests/`: the legacy tests ported to KROME-X (`python3 -m kromex --test NAME`); `examples/coupling/`: the quick start's cell from C, C++ and Fortran, and the README's examples as Jupyter notebooks (`python/`) |
 | `kromex_convert/` | the converters of external data (commands, or `python3 -m kromex_convert.NAME`): `kida2krome` and `umist2krome` (networks from KIDA and the UMIST database), `lamda2krome` and `chianti2krome` (coolant files from LAMDA and CHIANTI) |
 | `docs/` | the manual and the network format |
 

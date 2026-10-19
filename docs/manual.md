@@ -979,7 +979,7 @@ net.device_finalize()                  # before exiting
 - **Failures:** only the cells that fail on the device are re-solved on
   the host, so only cells that really fail report.
 
-### 6.6 Examples: the shipped tests and hydro coupling
+### 6.6 Examples: the shipped tests and the coupling examples
 
 **The shipped tests** are the legacy tests, ported to KROME-X (legacy
 `./krome -test=NAME`):
@@ -997,10 +997,6 @@ options can be changed before running (`--set`, or the attributes).
   matplotlib, columns picked by name from the output header) and the
   test's data files. The driver is the project's program: `make` builds
   it, and no `example.cpp` is written.
-- **The Fortran-interface test** (`--test fortran`): the collapse test
-  through the Fortran binding (`test.f90`, helper module
-  `krome_test_utils.f90`) and through the C++ API (`test_cpp.cpp`).
-  `check_diffs.py` compares the two outputs.
 - **Output:** the same quantities as legacy, in files named by their
   content (`abundances.dat`, `cooling.dat`, ...); each test's README
   gives the legacy name of each file.
@@ -1008,18 +1004,14 @@ options can be changed before running (`--set`, or the attributes).
   `Preprocessor.tests()`) lists them, and each test's README notes what
   changed from legacy.
 
-**`examples/coupling/`** holds four drivers coupling KROME to a hydro code,
-one for each calling style:
-
-- Fortran, RAMSES-like: passive scalars and `krome_solve_x`;
-- C, ENZO-like: species fields in code units and `krome_solve_cells`;
-- C++, GIZMO-like: particles and `solve_cells` with per-particle `Params`;
-- Python: post-processing a snapshot.
-
-All four solve the same operator-split problem: gather the cells, make
-one call, then rebuild the internal energy from Tgas with `get_mu` and
-`get_gamma`. A failed cell is subcycled. Their README covers units,
-energy, failures and per-cell inputs.
+**`examples/coupling/`** calls KROME-X from each language, on the quick
+start's cell (primordial gas at 1e4 cm^-3 and 100 K, followed in time to
+1e6 yr): `c/` (the C interface, `krome_solve_cells`), `cpp/` (the C++
+API, `solve`), `fortran/` (the binding, `krome_solve`), each with a
+Makefile against a project generated from `examples/coupling/options.toml`,
+and `python/`, the README's examples as Jupyter notebooks. The compiled
+examples write the same `abundances.dat`; `compare.py` checks that they
+agree. Their README gives the commands.
 
 ## 7. Queries
 

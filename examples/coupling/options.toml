@@ -1,0 +1,13 @@
+# the KROME-X project of the coupling examples (README.md), the quick
+# start's configuration with the Fortran and Python bindings; from the
+# KROME-X folder:
+#   python3 -m kromex examples/coupling/options.toml --set project.outdir=build_coupling
+#   make -C build_coupling lib fortran shared
+
+[project]
+network = "primordial"
+bindings = ["fortran", "python"]
+
+[thermal]
+cooling = ["ATOMIC", "H2"]
+heating = ["CHEM", "COMPRESS"]
