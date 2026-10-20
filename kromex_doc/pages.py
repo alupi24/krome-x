@@ -291,7 +291,9 @@ class Site:
         self.page("species.html", "Species", (
             "<h1>Species (%d)</h1><p class='muted'>&Delta;H<sub>f</sub>: the "
             "formation enthalpy at 298.15 K [kJ/mol] (data/thermo_burcat"
-            ".toml: Burcat's database, Goos, Burcat &amp; Ruscic; "
+            ".toml: Burcat's database, Goos, Burcat &amp; Ruscic, not "
+            "covered by KROME-X's license: free to use with citation, not "
+            "in commercial software without the authors' permission; "
             "data/thermoNIST.dat).</p><table><tr><th>species</th><th>phase"
             "</th><th>mass [amu]</th><th>charge</th><th>composition</th>"
             "<th>&Delta;H<sub>f</sub></th><th>formed by</th>"

@@ -30,6 +30,7 @@ import sys
 from pathlib import Path
 
 import kromex  # noqa: F401 (puts the kromex modules on the path)
+import codegen  # noqa: E402
 import knet  # noqa: E402
 import paths  # noqa: E402
 
@@ -84,6 +85,7 @@ def document(network, outdir=None, ranges=None, values=None, tref=100.0,
     say("%s: %d species, %d reactions" % (src.name, len(net.species),
                                           len(net.reactions)))
     thermo = chem.Thermo()
+    say("NOTE: " + codegen.BURCAT_TERMS)
     say("missing chemistry ...")
     miss = missing.analyse(net, thermo, max_species=max_missing)
     say("graphs ...")

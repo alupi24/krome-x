@@ -73,9 +73,9 @@ int main() {
   // on the bins; kdust: the dust opacity per gas mass, d2g kappa
   std::vector<double> tE, tk;
   {
-    std::FILE* ft = std::fopen("opacityDraineR35.dat", "r");
+    std::FILE* ft = std::fopen("opacityDraineR31.dat", "r");
     if (ft == nullptr) {
-      std::printf("ERROR: missing opacityDraineR35.dat\n");
+      std::printf("ERROR: missing opacityDraineR31.dat\n");
       return 1;
     }
     double wl, k;

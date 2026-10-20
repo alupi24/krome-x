@@ -3,7 +3,8 @@
 ! grid points, n = 1e3 cm-3, Tgas = 50 K fixed, cosmic rays
 ! 5e-17 s-1) irradiated by 10 times the Draine flux in [5,13.6] eV.
 !The light is attenuated by the opacity of the photochemical cross
-! sections of the network and by dust (opacityDraineR35.dat,
+! sections of the network and by dust (opacityDraineR31.dat, Draine's
+! Milky Way R_V = 3.1 dust as data/kabs_draine_Rv31.dat,
 ! dust-to-gas 1e-2). The chemistry is evolved to 1e6 yr.
 !Output: profiles_final.dat final profiles (time, Av, Tgas, species),
 ! profiles.dat every time step, abundances_center.dat the time evolution of
@@ -19,7 +20,8 @@ which had no README or plot.py). Differences:
   krome_photoBin_store / restore / scale_array become the per-cell field
   SolverOpts::Phi = stored Phi x attenuation / 4;
 - krome_load_opacity_table("opacityDraineR35.dat", unitEnergy="micron")
-  is read by the driver and averaged on the bins with
+  (the same R_V = 3.1 table, misnamed in legacy: here
+  opacityDraineR31.dat) is read by the driver and averaged on the bins with
   spectra::dust_kappa_bins; krome_get_opacity_size_d2g(x, Tgas, dr, d2g)
   is get_absorption(x, Tgas, p, o, d2g kappa) x dr;
 - krome_set_user_crate(5e-17) is the network parameter crate (Params);

@@ -236,7 +236,7 @@ a paper in LaTeX (docs/manual.md section 2).
 | `options_template.toml` | every generation option, commented out, with its description, default and an example |
 | `runtime/` | the library, copied into each generated project |
 | `networks/` | the legacy networks converted to `.knet` |
-| `data/` | the databases and tables KROME reads; `data/cooling/` the coolant files for `thermal.coolant_files` |
+| `data/` | the databases and tables KROME reads (their sources and what to cite: `data/data_sources.md`); `data/cooling/` the coolant files for `thermal.coolant_files` |
 | `examples/` | `examples/tests/`: the legacy tests ported to KROME-X (`python3 -m kromex --test NAME`); `examples/coupling/`: the quick start's cell from C, C++ and Fortran, and the README's examples as Jupyter notebooks (`python/`) |
 | `kromex_convert/` | the converters of external data (commands, or `python3 -m kromex_convert.NAME`): `kida2krome` and `umist2krome` (networks from KIDA and the UMIST database), `lamda2krome` and `chianti2krome` (coolant files from LAMDA and CHIANTI) |
 | `docs/` | the manual and the network format |
@@ -264,4 +264,16 @@ The runtime:
   - LAPACK (Accelerate, OpenBLAS, MKL), for large networks;
   - Kokkos 4.x, for the device backend (GPU or OpenMP: one thread per
     cell).
+
+## License
+
+KROME-X is distributed under the GNU General Public License v3.0
+(`LICENSE`). The integrator ported from SUNDIALS keeps its BSD-3 license
+(`runtime/core/cvode/LICENSE.sundials`), and the bundled `tomli` its MIT
+license. The data files in `data/` are not covered by the GPL: they keep
+the terms of their providers, listed with their sources and citations in
+`data/data_sources.md`. In particular, Burcat's thermochemical database
+(`data/thermo_burcat.toml`, used for reverse reactions and the `DH`
+heating and cooling) may not be included in commercial software without
+its authors' permission.
 

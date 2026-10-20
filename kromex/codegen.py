@@ -99,6 +99,24 @@ def call(f, *a):
 
 import paths  # noqa: E402 (where the runtime and data are)
 
+# Burcat's thermochemical database (data/thermo_burcat.toml) is not
+# covered by KROME-X's GPL-3.0: its authors' terms, printed when a project
+# uses it and written next to its coefficients in the generated code
+BURCAT_TERMS = (
+    "Burcat's thermochemical database (E. Goos, A. Burcat & B. Ruscic, "
+    "https://respecth.elte.hu/burcat/; cite Burcat & Ruscic 2005), used "
+    "here, is not covered by KROME-X's GPL-3.0 license: it is free to use with "
+    "citation, but the database or parts of it may not be included in "
+    "commercial software without the authors' permission "
+    "(Elke.Goos@dlr.de); see data/data_sources.md")
+BURCAT_COMMENT = [
+    "// Thermochemical data from Burcat's database (E. Goos, A. Burcat &",
+    "// B. Ruscic, https://respecth.elte.hu/burcat/; Burcat & Ruscic 2005).",
+    "// Not covered by KROME-X's GPL-3.0: free to use with citation; the",
+    "// database or parts of it may not be included in commercial software",
+    "// without the authors' permission (Elke.Goos@dlr.de). See",
+    "// data/data_sources.md in KROME-X."]
+
 DEFAULT_DATA_DIR = paths.ROOT / "data" / "database"
 
 
@@ -2314,6 +2332,10 @@ class Codegen:
           "3.2)")
         need = sorted({r["sp"] for rx in revs
                        for r in rx["reactants"] + rx["products"]})
+        if any(sp in self.thermo_all()[0] for sp in need):
+            self.burcat_used = True
+            for ln in BURCAT_COMMENT:
+                w(ln)
         for sp in need:
             self.emit_gRT(w, sp)
         for q, rx in enumerate(revs):
@@ -6714,6 +6736,10 @@ class Codegen:
                     continue
                 rxs.append(rx)
                 species.update(x for x in sps if x != "e-")
+            if species:
+                self.burcat_used = True
+                for ln in BURCAT_COMMENT:
+                    w(ln)
             for sp in sorted(species):
                 c = thermo[sp]
                 w("// H/k [K] of %s (NASA, Burcat; T clamped to the data)"
@@ -8667,6 +8693,8 @@ def generate(args, ap=None):
     info["warnings"] = sorted(set(gen.warnings))
     for wmsg in info["warnings"]:
         print("WARNING: " + wmsg)
+    if getattr(gen, "burcat_used", False):
+        print("NOTE: " + BURCAT_TERMS)
     return info
 
 
