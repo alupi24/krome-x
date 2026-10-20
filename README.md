@@ -233,6 +233,7 @@ a paper in LaTeX (docs/manual.md section 2).
 |---|---|
 | `kromex/` | the code generator, used from this folder: `Preprocessor` (`preprocessor.py`, the configuration and the generation), the option definitions (`config.py`), the command line (`python3 -m kromex`, `__main__.py`), the generator (`codegen.py`: network -> project), the `.knet` parser (`knet.py`), the converter of legacy `react_*` files (`convert_legacy.py`), the physical constants (`constants.py`) |
 | `kromex_doc/` | the documentation of a network (`python3 -m kromex_doc`; legacy docmake): HTML site and LaTeX table, from the `.knet` |
+| `skills/kromex/SKILL.md` | a guide for AI coding assistants (Claude Code skill format): from a network to the calls in a simulation code |
 | `options_template.toml` | every generation option, commented out, with its description, default and an example |
 | `runtime/` | the library, copied into each generated project |
 | `networks/` | the legacy networks converted to `.knet` |
