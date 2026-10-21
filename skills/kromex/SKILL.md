@@ -1,6 +1,6 @@
 ---
 name: kromex
-description: Set up KROME-X chemistry and microphysics for a simulation or a one-zone calculation, from a chemical network to the calls in the host code. Use when choosing or writing a network (.knet, KIDA, UMIST), configuring the physics (cooling, heating, radiation, dust), generating and building a KROME-X project, calling it from C, C++, Fortran or Python, coupling it to a hydrodynamics code (many cells per call, GPU), or diagnosing failed solves.
+description: "Set up KROME-X chemistry and microphysics for a simulation or a one-zone calculation, from a chemical network to the calls in the host code. Use when choosing or writing a network (.knet, KIDA, UMIST), configuring the physics (cooling, heating, radiation, dust), generating and building a KROME-X project, calling it from C, C++, Fortran or Python, coupling it to a hydrodynamics code (many cells per call, GPU), or diagnosing failed solves."
 ---
 
 # KROME-X: from a network to a simulation

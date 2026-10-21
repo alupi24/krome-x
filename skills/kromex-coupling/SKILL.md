@@ -1,6 +1,6 @@
 ---
 name: kromex-coupling
-description: Couple KROME-X chemistry and microphysics to a hydrodynamics code (the host code, named by the user, e.g. RAMSES, ENZO, GIZMO, AREPO, FLASH, Athena++, PLUTO, Phantom, or a custom code). Use when the user asks to add KROME-X to a simulation code, to replace its cooling or chemistry module with KROME-X, or to check or debug an existing KROME-X coupling: units, passive scalars, energy and temperature, adiabatic index, radiation, cosmic rays, dust, time-stepping, CPU/GPU, build system and tests.
+description: "Couple KROME-X chemistry and microphysics to a hydrodynamics code (the host code, named by the user, e.g. RAMSES, ENZO, GIZMO, AREPO, FLASH, Athena++, PLUTO, Phantom, or a custom code). Use when the user asks to add KROME-X to a simulation code, to replace its cooling or chemistry module with KROME-X, or to check or debug an existing KROME-X coupling: units, passive scalars, energy and temperature, adiabatic index, radiation, cosmic rays, dust, time-stepping, CPU/GPU, build system and tests."
 ---
 
 # Coupling KROME-X to a hydrodynamics code
