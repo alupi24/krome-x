@@ -1,6 +1,6 @@
 # KROME-X
 
-KROME-X is a rewrite of KROME, the chemistry and microphysics package for
+KROME-X is a rewrite of [KROME](https://github.com/tgrassi/krome), the chemistry and microphysics package for
 astrophysical simulations. It reads a chemical network, generates code
 for it, and provides a stiff solver for the chemistry and the gas
 temperature. It is a C/C++ library, with optional Fortran and Python
@@ -29,50 +29,9 @@ Documentation:
 - [docs/network-format.md](docs/network-format.md): the `.knet` network
   format.
 
-## Citation policy
-
-If KROME-X is used in publications, please cite both the KROME-X paper and the original KROME paper, on which the new version is largely based.
-```
-@ARTICLE{,
-       author = {{Lupi}, A. and {Grassi}, T. and {Bovino}, S.},
-        title = "{KROME-X : a GPU-ready library for chemistry and microphysics in astrophysical simulations}",
-      journal = {},
-     keywords = {astrochemistry – methods: numerical – ISM: molecules – molecular processes – atomic processes},
-         year = 2026,
-        month = oct,
-       volume = {},
-       number = {},
-        pages = {},
-          doi = {},
-archivePrefix = {arXiv},
-       eprint = {2610.xxxx},
- primaryClass = {astro-ph.GA},
-       adsurl = {},
-      adsnote = {Provided by the SAO/NASA Astrophysics Data System}
-}
-```
-```
-@ARTICLE{2014MNRAS.439.2386G,
-       author = {{Grassi}, T. and {Bovino}, S. and {Schleicher}, D.~R.~G. and {Prieto}, J. and {Seifried}, D. and {Simoncini}, E. and {Gianturco}, F.~A.},
-        title = "{KROME - a package to embed chemistry in astrophysical simulations}",
-      journal = {\mnras},
-     keywords = {astrochemistry, methods: numerical, ISM: evolution, ISM: molecules, Astrophysics - Astrophysics of Galaxies},
-         year = 2014,
-        month = apr,
-       volume = {439},
-       number = {3},
-        pages = {2386-2419},
-          doi = {10.1093/mnras/stu114},
-archivePrefix = {arXiv},
-       eprint = {1311.1070},
- primaryClass = {astro-ph.GA},
-       adsurl = {https://ui.adsabs.harvard.edu/abs/2014MNRAS.439.2386G},
-      adsnote = {Provided by the SAO/NASA Astrophysics Data System}
-}
-```
 
 
-## Installation
+## 💻 Installation
 
 ```sh
 pip install .            # in the KROME-X folder: the package and its commands
@@ -85,7 +44,22 @@ works from the KROME-X folder itself: Python started there finds
 adds the folder to `sys.path`, or is run with `PYTHONPATH`). Building
 the generated projects needs a C++17 compiler (Requirements, below).
 
-## Quick start
+
+## :file_folder: Requirements
+
+- Python 3.8 or newer and numpy (`pip install .` installs the package and
+  numpy; without installation, run it from this folder);
+- a C++17 compiler (no external solver library: the integrator, a port
+  of CVODE's BDF from SUNDIALS 7.9, is part of the headers,
+  `runtime/core/cvode/bdf_cell.hpp`, BSD-3 license in
+  `runtime/core/cvode/LICENSE.sundials`);
+- optional:
+  - gfortran, for the Fortran binding;
+  - LAPACK (Accelerate, OpenBLAS, MKL), for large networks;
+  - Kokkos 4.x, for the device backend (GPU or OpenMP: one thread per
+    cell).
+
+## 🚀 Quick start
 
 A project is generated from a configuration: the network and the
 physics options, grouped in sections.
@@ -122,7 +96,7 @@ without the continuum cooling) and `networks.ipynb` (documenting and
 converting networks). The same cell followed in time is in
 `examples/coupling/` in C, C++ and Fortran too.
 
-## Example: a primordial collapse
+## ✳️ Example: a primordial collapse
 
 A one-zone free-fall collapse of primordial gas, from 1 to 10^16 cm^-3:
 the density grows by 1% every 0.01 free-fall times, and the chemistry
@@ -180,7 +154,7 @@ around 10^10-10^11 cm^-3. Above 10^13 cm^-3 the continuum cooling keeps
 the temperature near 2000 K up to 10^16 cm^-3; the shipped test, which
 continues to 10^18 cm^-3, reaches 3000 K.
 
-## Using KROME-X from C, C++ and Fortran
+## 🔗 Using KROME-X from C, C++ and Fortran
 
 Every project is a C/C++ library, with the optional Fortran binding:
 
@@ -218,7 +192,7 @@ The other entry points, all described in the manual:
   and examples calling KROME-X from C, C++, Fortran and Python
   (`examples/coupling`).
 
-## Configuration files
+## 🔧 Configuration files
 
 The same configuration as a TOML file:
 
@@ -258,7 +232,10 @@ regenerates it (`python3 -m kromex myproj/krome.toml`); `NETWORK.md`
 lists the options together with this network's species, parameters and
 reactions.
 
-## Documenting a network
+## 🤖 Skills
+To use KROME-X with agents, we provide a template skill file in the [skills/](skills/) folder.
+
+## 📚 Documenting a network
 
 ```sh
 python3 -m kromex_doc primordial -o doc_primordial    # then open doc_primordial/index.html
@@ -270,7 +247,7 @@ against T), the jumps of piecewise rates at their bounds, the missing
 reactions and branches, a graph per element, and the reaction table for
 a paper in LaTeX (docs/manual.md section 2).
 
-## Layout
+## :memo: Layout
 
 | path | contents |
 |---|---|
@@ -295,21 +272,51 @@ The runtime:
 | `core/` | the implementation: solver (`solve*.hpp`), queries, physics modules, embedded data tables (internal) |
 | `core/cvode/` | the integrator, CVODE's BDF ported from SUNDIALS 7.9 (`bdf_cell.hpp`), with the SUNDIALS license (`LICENSE.sundials`) |
 
-## Requirements
 
-- Python 3.8 or newer and numpy (`pip install .` installs the package and
-  numpy; without installation, run it from this folder);
-- a C++17 compiler (no external solver library: the integrator, a port
-  of CVODE's BDF from SUNDIALS 7.9, is part of the headers,
-  `runtime/core/cvode/bdf_cell.hpp`, BSD-3 license in
-  `runtime/core/cvode/LICENSE.sundials`);
-- optional:
-  - gfortran, for the Fortran binding;
-  - LAPACK (Accelerate, OpenBLAS, MKL), for large networks;
-  - Kokkos 4.x, for the device backend (GPU or OpenMP: one thread per
-    cell).
 
-## License
+## :mega: Citation policy
+
+If KROME-X is used in publications, please cite both the KROME-X paper and the original KROME paper, on which the new version is largely based.
+```
+@ARTICLE{,
+       author = {{Lupi}, A. and {Grassi}, T. and {Bovino}, S.},
+        title = "{KROME-X : a GPU-ready library for chemistry and microphysics in astrophysical simulations}",
+      journal = {},
+     keywords = {astrochemistry – methods: numerical – ISM: molecules – molecular processes – atomic processes},
+         year = 2026,
+        month = oct,
+       volume = {},
+       number = {},
+        pages = {},
+          doi = {},
+archivePrefix = {arXiv},
+       eprint = {2610.xxxx},
+ primaryClass = {astro-ph.GA},
+       adsurl = {},
+      adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+```
+```
+@ARTICLE{2014MNRAS.439.2386G,
+       author = {{Grassi}, T. and {Bovino}, S. and {Schleicher}, D.~R.~G. and {Prieto}, J. and {Seifried}, D. and {Simoncini}, E. and {Gianturco}, F.~A.},
+        title = "{KROME - a package to embed chemistry in astrophysical simulations}",
+      journal = {\mnras},
+     keywords = {astrochemistry, methods: numerical, ISM: evolution, ISM: molecules, Astrophysics - Astrophysics of Galaxies},
+         year = 2014,
+        month = apr,
+       volume = {439},
+       number = {3},
+        pages = {2386-2419},
+          doi = {10.1093/mnras/stu114},
+archivePrefix = {arXiv},
+       eprint = {1311.1070},
+ primaryClass = {astro-ph.GA},
+       adsurl = {https://ui.adsabs.harvard.edu/abs/2014MNRAS.439.2386G},
+      adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+```
+
+## :copyright: License
 
 KROME-X is distributed under the GNU General Public License v3.0
 (`LICENSE`). The integrator ported from SUNDIALS keeps its BSD-3 license
