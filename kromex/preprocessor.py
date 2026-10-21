@@ -148,12 +148,14 @@ class Preprocessor:
         def near(f, suffix=""):
             """a relative path: relative to base when the file is there;
             else as written (a shipped network or data file by name,
-            network = "primordial", found when generating)"""
+            network = "primordial", found when generating). Files only,
+            as paths.find: a folder of the same name (a project or a doc
+            site generated there, ./primordial) is not the network"""
             if not f or Path(f).is_absolute():
                 return f
             for q in (base / f,) + ((base / (f + suffix),) if suffix
                                     else ()):
-                if q.exists():
+                if q.is_file():
                     return str(q)
             return f
         v = kp._values
