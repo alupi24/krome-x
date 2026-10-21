@@ -236,7 +236,7 @@ reactions.
 To use KROME-X with agents, we provide a template skill file in the [skills/](skills/) folder.
 
 ## 📚 Documenting a network 
-(former Docmake)
+(former [Docmake](https://github.com/tgrassi/krome_wiki/blob/main/docmaker.md))
 
 ```sh
 python3 -m kromex_doc primordial -o doc_primordial    # then open doc_primordial/index.html
