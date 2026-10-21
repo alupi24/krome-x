@@ -235,7 +235,8 @@ reactions.
 ## 🤖 Skills
 To use KROME-X with agents, we provide a template skill file in the [skills/](skills/) folder.
 
-## 📚 Documenting a network
+## 📚 Documenting a network 
+(former Docmake)
 
 ```sh
 python3 -m kromex_doc primordial -o doc_primordial    # then open doc_primordial/index.html
@@ -246,6 +247,10 @@ build: a page per species and per reaction (the rate as a formula, k
 against T), the jumps of piecewise rates at their bounds, the missing
 reactions and branches, a graph per element, and the reaction table for
 a paper in LaTeX (docs/manual.md section 2).
+
+Live example: http://www.kromepackage.org/docmake_x/
+
+![example of the primordial network documentation](assets/docmake.png)
 
 ## :memo: Layout
 
