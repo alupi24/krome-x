@@ -29,6 +29,49 @@ Documentation:
 - [docs/network-format.md](docs/network-format.md): the `.knet` network
   format.
 
+## Citation policy
+
+If KROME-X is used in publications, please cite both the KROME-X paper and the original KROME paper, on which the new version is largely based.
+```
+@ARTICLE{,
+       author = {{Lupi}, A. and {Grassi}, T. and {Bovino}, S.},
+        title = "{KROME-X : a GPU-ready library for chemistry and microphysics in astrophysical simulations}",
+      journal = {},
+     keywords = {astrochemistry – methods: numerical – ISM: molecules – molecular processes – atomic processes},
+         year = 2026,
+        month = oct,
+       volume = {},
+       number = {},
+        pages = {},
+          doi = {},
+archivePrefix = {arXiv},
+       eprint = {2610.xxxx},
+ primaryClass = {astro-ph.GA},
+       adsurl = {},
+      adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+```
+```
+@ARTICLE{2014MNRAS.439.2386G,
+       author = {{Grassi}, T. and {Bovino}, S. and {Schleicher}, D.~R.~G. and {Prieto}, J. and {Seifried}, D. and {Simoncini}, E. and {Gianturco}, F.~A.},
+        title = "{KROME - a package to embed chemistry in astrophysical simulations}",
+      journal = {\mnras},
+     keywords = {astrochemistry, methods: numerical, ISM: evolution, ISM: molecules, Astrophysics - Astrophysics of Galaxies},
+         year = 2014,
+        month = apr,
+       volume = {439},
+       number = {3},
+        pages = {2386-2419},
+          doi = {10.1093/mnras/stu114},
+archivePrefix = {arXiv},
+       eprint = {1311.1070},
+ primaryClass = {astro-ph.GA},
+       adsurl = {https://ui.adsabs.harvard.edu/abs/2014MNRAS.439.2386G},
+      adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+```
+
+
 ## Installation
 
 ```sh
