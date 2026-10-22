@@ -41,20 +41,25 @@ def _label(e):
 def _prepare(series, xrange, decades):
     """the positive points of every series, their runs (a line breaks where
     the values are not positive), and the axes' log10 ranges; None when
-    nothing is positive"""
-    xs, ys, runs = [], [], []
+    nothing is positive. A series with "scale": False (context, e.g. a
+    formula continued outside its T range) is drawn but does not set the
+    y range, unless no other series has positive values"""
+    xs, ys, runs, yscale = [], [], [], []
     for s in series:
         x, y = np.asarray(s["x"], float), np.asarray(s["y"], float)
         m = (x > 0) & (y > 0) & np.isfinite(y)
         xs.append(x[m])
         ys.append(y[m])
+        if s.get("scale", True):
+            yscale.append(y[m])
         idx = np.flatnonzero(m)
         cut = np.flatnonzero(np.diff(idx) > 1) + 1
         runs.append([(x[r], y[r]) for r in np.split(idx, cut) if len(r)])
     if not any(len(y) for y in ys):
         return None
     xall = np.concatenate([x for x in xs if len(x)])
-    yall = np.concatenate([y for y in ys if len(y)])
+    yall = np.concatenate([y for y in (yscale if any(len(y) for y in yscale)
+                                       else ys) if len(y)])
     x0, x1 = (np.log10(xrange[0]), np.log10(xrange[1])) if xrange else \
         (np.log10(xall.min()), np.log10(xall.max()))
     y1 = np.log10(yall.max())

@@ -442,13 +442,13 @@ class Site:
             if tr and not math.isinf(tr[1]):
                 m = m | (Tp == tr[1])
             color = svgplot.COLORS[i % len(svgplot.COLORS)]
-            lab = ("#%d %s" % (rx["id"], latex.trange_tex(tr).replace(
-                "$", "").replace(r"\leq", "≤").replace(r"\,K", " K")
-                .replace(r"\times10^", "e")) if len(group) > 1 else None)
+            lab = ("#%d %s" % (rx["id"], latex.trange_text(tr))
+                   if len(group) > 1 else None)
             if tr:
                 series.append({"x": Tp, "y": np.where(m, np.nan, k),
                                "style": "dashed", "color": color,
-                               "opacity": 0.35, "width": 1.0})
+                               "opacity": 0.35, "width": 1.0,
+                               "scale": False})
             marks = []
             if tr:
                 for t in tr:

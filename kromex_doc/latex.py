@@ -269,16 +269,39 @@ def size(nd):
     return sum(1 for _ in knet.walk(nd))
 
 
-def trange_tex(tr):
-    """a T range: 10 <= T < 6700 K"""
+def num_text(v):
+    """a number as plain text: plain when short, 1.5e+08 otherwise"""
+    if float(v).is_integer() and abs(v) < 1e5:
+        return "%d" % v
+    return "%.6g" % v
+
+
+def _trange(tr, fmt, le, ge, unit):
+    """T < hi, T >= lo, or lo <= T < hi, the unit after each number;
+    empty for the whole T axis"""
     if not tr:
         return ""
     lo, hi = tr
-    lo_s = "" if lo <= 0 else r"%s \leq " % num(lo)
-    hi_s = "" if math.isinf(hi) else r" < %s" % num(hi)
-    if not lo_s and not hi_s:
-        return ""
-    return r"$%sT%s$\,K" % (lo_s, hi_s)
+    has_lo, has_hi = lo > 0, not math.isinf(hi)
+    if has_lo and has_hi:
+        return "%s%s %s T < %s%s" % (fmt(lo), unit, le, fmt(hi), unit)
+    if has_hi:
+        return "T < %s%s" % (fmt(hi), unit)
+    if has_lo:
+        return "T %s %s%s" % (ge, fmt(lo), unit)
+    return ""
+
+
+def trange_tex(tr):
+    """a T range as LaTeX math, e.g. $10\,\mathrm{K} \leq T <
+    6700\,\mathrm{K}$ (all inside the math, for MathJax too)"""
+    s = _trange(tr, num, r"\leq", r"\geq", r"\,\mathrm{K}")
+    return "$%s$" % s if s else ""
+
+
+def trange_text(tr):
+    """the same as plain text, e.g. 10 K \u2264 T < 6700 K (plot labels)"""
+    return _trange(tr, num_text, "\u2264", "\u2265", " K")
 
 
 def rate_tex(rx, tex):
