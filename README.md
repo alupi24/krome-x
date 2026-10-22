@@ -283,22 +283,19 @@ The runtime:
 
 If KROME-X is used in publications, please cite both the KROME-X paper and the original KROME paper, on which the new version is largely based.
 ```
-@ARTICLE{,
+@ARTICLE{arXiv:2610.28917,
        author = {{Lupi}, A. and {Grassi}, T. and {Bovino}, S.},
-        title = "{KROME-X : a GPU-ready library for chemistry and microphysics in astrophysical simulations}",
-      journal = {},
-     keywords = {astrochemistry – methods: numerical – ISM: molecules – molecular processes – atomic processes},
+        title = "{KROME-X: a GPU-ready library for chemistry and microphysics in astrophysical simulations}",
+      journal = {arXiv e-prints},
+     keywords = {astrochemistry, methods: numerical, ISM: molecules, molecular processes, atomic processes},
          year = 2026,
         month = oct,
-       volume = {},
-       number = {},
-        pages = {},
-          doi = {},
+          eid = {arXiv:2610.28917},
+          doi = {10.48550/arXiv.2610.28917},
 archivePrefix = {arXiv},
-       eprint = {2610.xxxx},
+       eprint = {2610.28917},
  primaryClass = {astro-ph.GA},
-       adsurl = {},
-      adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+          url = {https://arxiv.org/abs/2610.28917}
 }
 ```
 ```
