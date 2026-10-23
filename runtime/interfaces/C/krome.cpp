@@ -404,7 +404,13 @@ int krome_solve_cells_x(int ncell, double* x, const double* rho,
                         double* Tgas, const double* dt, const double* par,
                         int par_stride, const krome_cells* extra,
                         int* flags, const krome_opts* hc) {
-  if (hc == nullptr || ncell < 0 || x == nullptr || rho == nullptr)
+  // the arguments checked here, as krome_solve_cells does: its -1 after
+  // the solve is then FLAG_TOO_MUCH_WORK (a cell out of steps), not a
+  // rejection, and the other cells' fractions must still be written
+  if (hc == nullptr || ncell < 0 || x == nullptr || rho == nullptr
+      || Tgas == nullptr || dt == nullptr)
+    return -1;
+  if (par != nullptr && par_stride != 0 && par_stride != krome::NPAR)
     return -1;
   if (ncell == 0) return 0;
   std::vector<double> n(static_cast<size_t>(ncell) * krome::NSPEC);
@@ -418,7 +424,7 @@ int krome_solve_cells_x(int ncell, double* x, const double* rho,
   int* f = flags != nullptr ? flags : fl.data();
   const int r = krome_solve_cells(ncell, n.data(), Tgas, dt, par, par_stride,
                                   extra, f, hc);
-  if (r == -1 || r == -103) return r;  // rejected before solving
+  if (r == -103) return r;  // rejected before solving (flags not set)
   for (int c = 0; c < ncell; ++c)
     if (f[c] == 0)  // with renormalize_x rescaled to the input sum
       krome::n_to_x_out_(n.data() + static_cast<size_t>(c) * krome::NSPEC,
