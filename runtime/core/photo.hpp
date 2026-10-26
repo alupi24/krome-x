@@ -10,9 +10,9 @@
 //   k_r     = sum_b sigma_rb * Phi_b                       [s^-1]
 //   kabs_b  = sum_r sigma_rb * n[reactant_r]               [cm^-1]
 //   (photon number density in bin: Phi_b / c)
-// Radiative channels (spec 5.4): a photo rate may carry a shielding
-// factor s_r (photo(shield=...)), k_r = s_r sum_b sigma_rb Phi_b, which
-// also scales its photoheating; a J_LW rate k = khat J_LW, J_LW =
+// Radiative channels (network-format.md 5.4): a photo rate may carry a
+// shielding factor s_r (photo(shield=...)), k_r = s_r sum_b sigma_rb
+// Phi_b, which also scales its photoheating; a J_LW rate k = khat J_LW, J_LW =
 // sum_b lww_b Phi_b, acts on the bins as the cross section khat lww_b.
 // Each event absorbs 1/pdiss photons, so the photon removal is
 //   kabs_b = sum_r s_r sigma_rb n_r / pdiss_r + sum_q khat_q lww_b n_q / pdiss_q

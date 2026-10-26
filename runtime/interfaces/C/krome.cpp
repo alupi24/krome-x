@@ -37,6 +37,12 @@ static_assert(KROME_FLAG_NONPOSITIVE_T == krome::FLAG_NONPOSITIVE_T,
               "flag NONPOSITIVE_T");
 static_assert(KROME_FLAG_DEVICE_MEMORY == krome::FLAG_DEVICE_MEMORY,
               "flag DEVICE_MEMORY");
+static_assert(KROME_FLAG_CONSERVE_UNREACHED == krome::FLAG_CONSERVE_UNREACHED,
+              "flag CONSERVE_UNREACHED");
+static_assert(KROME_FLAG_CONSERVE_LARGE == krome::FLAG_CONSERVE_LARGE,
+              "flag CONSERVE_LARGE");
+static_assert(KROME_FLAG_HOST_RECOVERED == krome::FLAG_HOST_RECOVERED,
+              "flag HOST_RECOVERED");
 
 struct krome_opts {
   krome::SolverOpts so;
@@ -102,7 +108,7 @@ int for_cells_(int ncell, const double* n, const double* Tgas,
   krome::SolverOpts so = h != nullptr ? h->so : krome::SolverOpts();
   int B = 0;
   if (h != nullptr && h->has_photo) {
-    if (Phi == nullptr && need_phi) return -103;
+    if (Phi == nullptr && need_phi) return krome::FLAG_NO_FIELD;
     so.photo = &h->photo;
     B = Phi != nullptr ? h->photo.B : 0;
   }
@@ -112,9 +118,7 @@ int for_cells_(int ncell, const double* n, const double* Tgas,
   for (int c = 0; c < ncell; ++c) {
     krome::Params P;
     if (par != nullptr)
-      for (int i = 0; i < krome::NPAR; ++i)
-        *krome::param_ptr(P, i) =
-            par[static_cast<size_t>(c) * par_stride + i];
+      krome::params_from_row(par + static_cast<size_t>(c) * par_stride, P);
     if (B > 0)  // read only: queries never evolve the field
       so.Phi = const_cast<double*>(Phi + static_cast<size_t>(c) * B);
     const int fl = f(c, n + static_cast<size_t>(c) * krome::NSPEC,
@@ -378,7 +382,8 @@ int krome_solve_cells(int ncell, double* n, double* Tgas, const double* dt,
   krome::CellsOpts co = hc->co;
   co.flags = flags;
   if (hc->has_photo) {
-    if (Phi == nullptr) return -103;  // bins configured, no field given
+    // bins configured, no field given
+    if (Phi == nullptr) return krome::FLAG_NO_FIELD;
     so.photo = &hc->photo;
     co.Phi = Phi;
   }
@@ -393,8 +398,7 @@ int krome_solve_cells(int ncell, double* n, double* Tgas, const double* dt,
   std::vector<krome::Params> P(per_cell ? ncell : 1);
   if (par != nullptr)
     for (size_t c = 0; c < P.size(); ++c)
-      for (int i = 0; i < krome::NPAR; ++i)
-        *krome::param_ptr(P[c], i) = par[c * par_stride + i];
+      krome::params_from_row(par + c * par_stride, P[c]);
   return per_cell
       ? krome::solve_cells(ncell, n, Tgas, dt, P.data(), so, co)
       : krome::solve_cells(ncell, n, Tgas, dt, P[0], so, co);
@@ -424,7 +428,8 @@ int krome_solve_cells_x(int ncell, double* x, const double* rho,
   int* f = flags != nullptr ? flags : fl.data();
   const int r = krome_solve_cells(ncell, n.data(), Tgas, dt, par, par_stride,
                                   extra, f, hc);
-  if (r == -103) return r;  // rejected before solving (flags not set)
+  // rejected before solving (flags not set)
+  if (r == krome::FLAG_NO_FIELD) return r;
   for (int c = 0; c < ncell; ++c)
     if (f[c] == 0)  // with renormalize_x rescaled to the input sum
       krome::n_to_x_out_(n.data() + static_cast<size_t>(c) * krome::NSPEC,
@@ -691,7 +696,7 @@ int krome_dump_rates(const char* path, double Tmin, double Tmax, int npts,
 void krome_print_params(const double* par) {
   krome::Params P;
   if (par != nullptr)
-    for (int i = 0; i < krome::NPAR; ++i) *krome::param_ptr(P, i) = par[i];
+    krome::params_from_row(par, P);
   krome::print_params(P, stdout);
   std::fflush(stdout);
 }
@@ -750,7 +755,8 @@ int krome_get_gamma(int ncell, const double* n, const double* Tgas,
   return for_cells_(ncell, n, Tgas, par, par_stride, nullptr, nullptr,
                     [&](int c, const double* nc, double T,
                         const krome::Params& P, const krome::SolverOpts&) {
-                      if (krome::params_missing(P) >= 0) return -105;
+                      if (krome::params_missing(P) >= 0)
+                        return krome::FLAG_PARAM_UNSET;
                       gamma[c] = krome::get_gamma(nc, T, P);
                       return 0;
                     });
@@ -895,6 +901,48 @@ int krome_get_element_totals(int ncell, const double* n, double* tot) {
     krome::get_element_totals(n + static_cast<size_t>(c) * krome::NSPEC,
                               tot + static_cast<size_t>(c) * krome::NELEM);
   return 0;
+}
+
+int krome_get_element_totals_x(int ncell, const double* x, double* tot) {
+  if (ncell < 0 || x == nullptr || tot == nullptr) return -1;
+  for (int c = 0; c < ncell; ++c)
+    krome::get_element_totals_x(x + static_cast<size_t>(c) * krome::NSPEC,
+                                tot + static_cast<size_t>(c) * krome::NELEM);
+  return 0;
+}
+
+// consistent advection: the parameter rows as Params (one per cell, or one)
+static int conserve_cells_c_(int ncell, double* v, const double* ref,
+                             int ref_stride, const double* par,
+                             int par_stride, int* flags, bool x) {
+  if (ncell < 0 || v == nullptr || ref == nullptr || ref_stride < 0
+      || par_stride < 0)
+    return -1;
+  if (ref_stride != 0 && ref_stride != krome::NELEM) return -1;
+  const bool per_cell = par != nullptr && par_stride != 0;
+  std::vector<krome::Params> P(per_cell ? ncell : 1);
+  if (par != nullptr)
+    for (size_t c = 0; c < P.size(); ++c)
+      krome::params_from_row(par + c * par_stride, P[c]);
+  const int rs = ref_stride != 0 ? 1 : 0;
+  return x ? krome::conserve_cells_x(ncell, v, ref, rs, P.data(),
+                                     per_cell ? 1 : 0, flags)
+           : krome::conserve_cells(ncell, v, ref, rs, P.data(),
+                                   per_cell ? 1 : 0, flags);
+}
+
+int krome_conserve_cells(int ncell, double* n, const double* ref,
+                         int ref_stride, const double* par, int par_stride,
+                         int* flags) {
+  return conserve_cells_c_(ncell, n, ref, ref_stride, par, par_stride, flags,
+                           false);
+}
+
+int krome_conserve_cells_x(int ncell, double* x, const double* ref,
+                           int ref_stride, const double* par,
+                           int par_stride, int* flags) {
+  return conserve_cells_c_(ncell, x, ref, ref_stride, par, par_stride, flags,
+                           true);
 }
 
 int krome_n2x(int ncell, const double* n, double* x) {
@@ -1133,15 +1181,141 @@ int krome_device_initialize(void) {
   if (!Kokkos::is_initialized()) Kokkos::initialize();
   return 0;
 #else
-  return -104;
+  return krome::FLAG_UNSUPPORTED;
 #endif
 }
+int krome_device_initialize_id(int device_id) {
+#ifdef KROME_USE_KOKKOS
+  if (Kokkos::is_initialized()) return 1;
+  Kokkos::InitializationSettings st;
+  if (device_id >= 0) st.set_device_id(device_id);
+  Kokkos::initialize(st);
+  return 0;
+#else
+  (void)device_id;
+  return krome::FLAG_UNSUPPORTED;
+#endif
+}
+
+#ifdef KROME_USE_KOKKOS
+static_assert(KROME_LAYOUT_SPECIES_MAJOR == krome::kk::LAYOUT_SPECIES_MAJOR
+                  && KROME_LAYOUT_CELL_MAJOR == krome::kk::LAYOUT_CELL_MAJOR,
+              "layouts");
+#endif
+
+static int solve_cells_device_c_(int ncell, double* v, const double* rho,
+                                 int layout, long ld, double* Tgas,
+                                 const double* dt, const double* par,
+                                 int par_stride, const krome_cells* extra,
+                                 int* flags, krome_device_summary* summary,
+                                 const krome_opts* hc) {
+  if (summary != nullptr) *summary = krome_device_summary{0, 0, 0};
+  if (hc == nullptr || ncell < 0 || v == nullptr || Tgas == nullptr
+      || dt == nullptr || (layout != KROME_LAYOUT_SPECIES_MAJOR
+                           && layout != KROME_LAYOUT_CELL_MAJOR)
+      || (ld != 0 && ld < ncell))
+    return -1;
+  if (par != nullptr && par_stride != 0 && par_stride != krome::NPAR)
+    return -1;
+  if (ncell == 0) return 0;
+#ifdef KROME_USE_KOKKOS
+  krome::SolverOpts so = hc->so;
+  so.error_file = hc->error_file.c_str();
+  krome::kk::DeviceCells a;
+  a.n = v;
+  a.rho = rho;
+  a.layout = layout;
+  a.ld = ld;
+  a.Tgas = Tgas;
+  a.dt = dt;
+  a.par = par;
+  a.par_stride = par != nullptr ? par_stride : 0;
+  a.flags = flags;
+  if (hc->has_photo) {
+    so.photo = &hc->photo;
+    a.Phi = extra != nullptr ? extra->Phi : nullptr;
+  }
+  if (hc->has_dust) {
+    so.dust = const_cast<krome::DustBins*>(&hc->dust);
+    a.Td = extra != nullptr ? extra->Td : nullptr;
+    a.adust = extra != nullptr ? extra->adust : nullptr;
+  }
+  krome::kk::DeviceSummary sm;
+  const int r = krome::kk::solve_cells_device(ncell, a, so, hc->co, &sm);
+  if (summary != nullptr)
+    *summary = krome_device_summary{sm.device, sm.host, sm.failed};
+  return r;
+#else
+  (void)rho; (void)extra; (void)flags;
+  return krome::FLAG_UNSUPPORTED;
+#endif
+}
+
+int krome_solve_cells_device(int ncell, double* n, int layout, long ld,
+                             double* Tgas, const double* dt,
+                             const double* par, int par_stride,
+                             const krome_cells* extra, int* flags,
+                             krome_device_summary* summary,
+                             const krome_opts* h) {
+  return solve_cells_device_c_(ncell, n, nullptr, layout, ld, Tgas, dt, par,
+                               par_stride, extra, flags, summary, h);
+}
+
+int krome_solve_cells_x_device(int ncell, double* x, const double* rho,
+                               int layout, long ld, double* Tgas,
+                               const double* dt, const double* par,
+                               int par_stride, const krome_cells* extra,
+                               int* flags, krome_device_summary* summary,
+                               const krome_opts* h) {
+  if (rho == nullptr) return -1;
+  return solve_cells_device_c_(ncell, x, rho, layout, ld, Tgas, dt, par,
+                               par_stride, extra, flags, summary, h);
+}
+
+static int conserve_cells_device_c_(int ncell, double* v, int layout,
+                                    long ld, const double* ref,
+                                    int ref_stride, const double* par,
+                                    int par_stride, int* flags, bool x) {
+  if (ncell < 0 || v == nullptr || ref == nullptr
+      || (ref_stride != 0 && ref_stride != krome::NELEM)
+      || (par != nullptr && par_stride != 0 && par_stride != krome::NPAR)
+      || (layout != KROME_LAYOUT_SPECIES_MAJOR
+          && layout != KROME_LAYOUT_CELL_MAJOR)
+      || (ld != 0 && ld < ncell))
+    return -1;
+#ifdef KROME_USE_KOKKOS
+  return krome::kk::conserve_cells_device(ncell, v, x, layout, ld, ref,
+                                          ref_stride, par,
+                                          par != nullptr ? par_stride : 0,
+                                          flags);
+#else
+  (void)flags; (void)x;
+  return krome::FLAG_UNSUPPORTED;
+#endif
+}
+
+int krome_conserve_cells_device(int ncell, double* n, int layout, long ld,
+                                const double* ref, int ref_stride,
+                                const double* par, int par_stride,
+                                int* flags) {
+  return conserve_cells_device_c_(ncell, n, layout, ld, ref, ref_stride, par,
+                                  par_stride, flags, false);
+}
+
+int krome_conserve_cells_x_device(int ncell, double* x, int layout, long ld,
+                                  const double* ref, int ref_stride,
+                                  const double* par, int par_stride,
+                                  int* flags) {
+  return conserve_cells_device_c_(ncell, x, layout, ld, ref, ref_stride, par,
+                                  par_stride, flags, true);
+}
+
 int krome_device_finalize(void) {
 #ifdef KROME_USE_KOKKOS
   if (Kokkos::is_initialized() && !Kokkos::is_finalized()) Kokkos::finalize();
   return 0;
 #else
-  return -104;
+  return krome::FLAG_UNSUPPORTED;
 #endif
 }
 

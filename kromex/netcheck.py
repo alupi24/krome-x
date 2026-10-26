@@ -17,7 +17,11 @@
 3. The network as a whole: species formed but never destroyed, destroyed
    but never formed, or in no reaction (warnings); the same reaction
    written more than once with the same rate (a warning: counted twice) or
-   with different rates (a note: summed as channels).
+   with different rates (a note: summed as channels); detailed balance
+   (balance.py): collisional reactions that run one way although their
+   reverse, missing from the network, reaches 1 % of the forward flux
+   inside their temperature range (a warning, the first ones named), and
+   endothermic ones whose exothermic reverse is missing (a note).
 
 Parameters are set to a probe value (1.3e-17; Tdust 10 K): a rate that
 depends on a parameter is checked for consistency, but its value is only
@@ -384,6 +388,48 @@ def budget_warnings(net):
     return out
 
 
+def balance_warnings(net, gen, shown=8):
+    """detailed balance (balance.analyse): a warning naming the one-way
+    reactions whose reverse sets in at the lowest temperatures (the first
+    `shown`), a note on the endothermic ones; ([warnings], [notes])"""
+    import balance
+    a = balance.analyse(net, balance.load_tables(gen.data_dir))
+    warn, note = [], []
+    fl = a["flagged"]
+    if fl:
+        def first(e):
+            return min(v for v in e["cross"].values() if v is not None)
+        fl = sorted(fl, key=first)
+        warn.append(
+            "detailed balance: %d collisional reaction%s run%s one way "
+            "although %s reverse, not in the network, reaches %g %% of the "
+            "forward flux inside %s temperature range (with every species "
+            "at 1 to 1e12 cm^-3), e.g. %s%s: where the network is used "
+            "there, add the reverse (A <-> B); kromex-doc lists them all "
+            "(Reverse reactions)" % (
+                len(fl), "" if len(fl) == 1 else "s",
+                "s" if len(fl) == 1 else "", "its" if len(fl) == 1 else
+                "their", 100 * balance.THRESHOLD,
+                "its" if len(fl) == 1 else "their",
+                "; ".join("%s (line %s) above %.0f K" % (
+                    e["eq"], e["line"], first(e)) for e in fl[:shown]),
+                "; ..." if len(fl) > shown else ""))
+    en = a["endothermic"]
+    if en:
+        n3 = sum(1 for e in en if len(e["P"]) >= 3)
+        note.append(
+            "detailed balance: %d endothermic reaction%s without %s "
+            "reverse, which is the dominant direction (an exothermic "
+            "association or recombination; %d three-body, where the "
+            "forward makes more particles: important at high density): "
+            "%s%s" % (
+                len(en), "" if len(en) == 1 else "s",
+                "its" if len(en) == 1 else "their", n3,
+                "; ".join(e["eq"] for e in en[:shown]),
+                "; ..." if len(en) > shown else ""))
+    return warn, note
+
+
 def repeated(net):
     """the same reaction written more than once, applying at a common T
     (not the pieces of one piecewise rate): its rates are summed.
@@ -704,7 +750,9 @@ def check(net, gen, tmp):
                             max(v for _, v in pts), 3 * (o - 1),
                             MAX_RATE[o], where(rx, pts)))
     rw, rn = repeated(net)
-    warnings += rw + budget_warnings(net)
+    bw, bn = balance_warnings(net, gen)
+    warnings += rw + budget_warnings(net) + bw
+    rn = rn + bn
     return {"ok": not failures, "k": worst_k, "rhs": worst_d,
             "jac": worst_j, "freeze": worst_f,
             "n_stub": len(net.reactions) - len(supported),

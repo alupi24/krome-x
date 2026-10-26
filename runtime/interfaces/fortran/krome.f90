@@ -52,14 +52,28 @@ module krome
   integer, parameter, public :: krome_flag_no_kokkos = -109
   integer, parameter, public :: krome_flag_nonpositive_t = -110
   integer, parameter, public :: krome_flag_device_memory = -111
+  integer, parameter, public :: krome_flag_conserve_unreached = -112
+  integer, parameter, public :: krome_flag_conserve_large = 2
+  integer, parameter, public :: krome_flag_host_recovered = 1
   ! the C kinds used in the interface, re-exported for callers
-  public :: c_ptr, c_null_ptr, c_int, c_double
+  public :: c_ptr, c_null_ptr, c_int, c_double, c_long, c_loc
   public :: krome_opts_new, krome_opts_free, krome_nspec_c, krome_npar_c, &
        krome_nrea_c
   ! device backend (Kokkos build): 1 / 0; initialize / finalize Kokkos
   ! when the caller does not (-104 without the backend)
   public :: krome_has_device, krome_device_initialize, &
-       krome_device_finalize
+       krome_device_finalize, krome_device_initialize_id
+  ! device-resident data (krome.h krome_solve_cells_device; manual 6.8):
+  ! every array in the device's memory, passed as a C pointer (CUDA
+  ! Fortran: c_loc of a device array; OpenACC: c_loc inside host_data
+  ! use_device). Species-major: n(ld, nspec), the default; cell-major:
+  ! n(nspec, ncell). The rows (Phi, Td, adust) in a krome_cells_c of device
+  ! pointers; the summary on the host
+  integer, parameter, public :: krome_layout_species_major = 0
+  integer, parameter, public :: krome_layout_cell_major = 1
+  public :: krome_cells_c, krome_device_summary, krome_solve_cells_device, &
+       krome_solve_cells_x_device, krome_conserve_cells_device, &
+       krome_conserve_cells_x_device
   public :: krome_set, krome_get, krome_species_idx, krome_param_idx, &
        krome_species_name_f, krome_params_default, krome_set_photo, &
        krome_version_f, &
@@ -81,7 +95,9 @@ module krome
        krome_get_gamma, krome_get_mu, krome_get_rho, krome_get_ntot, &
        krome_get_Hnuclei, krome_get_charge, krome_get_electrons, &
        krome_get_free_fall_time, krome_get_jeans_length, &
-       krome_get_element_totals, krome_n2x, krome_x2n, krome_equilibrium, &
+       krome_get_element_totals, krome_get_element_totals_x, &
+       krome_conserve, krome_conserve_x, &
+       krome_n2x, krome_x2n, krome_equilibrium, &
        krome_get_qeff, krome_get_free_fall_time_rho, krome_num2col, &
        krome_ncoolant_c, krome_coolant_name_f, krome_coolant_species_f, &
        krome_coolant_nlev_f, krome_coolant_levels, &
@@ -110,6 +126,12 @@ module krome
     type(c_ptr) :: td = c_null_ptr
     type(c_ptr) :: adust = c_null_ptr
   end type krome_cells_c
+  ! the counts of a device-resident call (krome.h krome_device_summary)
+  type, bind(C) :: krome_device_summary
+    integer(c_long) :: device = 0  ! solved on the device
+    integer(c_long) :: host = 0    ! failed there, solved on the host
+    integer(c_long) :: failed = 0  ! failed on both
+  end type krome_device_summary
 
   interface
     function krome_has_device() bind(C, name="krome_has_device") result(r)
@@ -126,6 +148,52 @@ module krome
       import :: c_int
       integer(c_int) :: r
     end function krome_device_finalize
+    function krome_device_initialize_id(device_id) &
+        bind(C, name="krome_device_initialize_id") result(r)
+      import :: c_int
+      integer(c_int), value :: device_id
+      integer(c_int) :: r
+    end function krome_device_initialize_id
+    function krome_solve_cells_device(ncell, n, layout, ld, tgas, dt, par, &
+        par_stride, ex, flags, summary, h) &
+        bind(C, name="krome_solve_cells_device") result(r)
+      import :: c_ptr, c_int, c_long, krome_cells_c, krome_device_summary
+      integer(c_int), value :: ncell, layout, par_stride
+      integer(c_long), value :: ld
+      type(c_ptr), value :: n, tgas, dt, par, flags, h
+      type(krome_cells_c), intent(in) :: ex
+      type(krome_device_summary), intent(out) :: summary
+      integer(c_int) :: r
+    end function krome_solve_cells_device
+    function krome_solve_cells_x_device(ncell, x, rho, layout, ld, tgas, dt, &
+        par, par_stride, ex, flags, summary, h) &
+        bind(C, name="krome_solve_cells_x_device") result(r)
+      import :: c_ptr, c_int, c_long, krome_cells_c, krome_device_summary
+      integer(c_int), value :: ncell, layout, par_stride
+      integer(c_long), value :: ld
+      type(c_ptr), value :: x, rho, tgas, dt, par, flags, h
+      type(krome_cells_c), intent(in) :: ex
+      type(krome_device_summary), intent(out) :: summary
+      integer(c_int) :: r
+    end function krome_solve_cells_x_device
+    function krome_conserve_cells_device(ncell, n, layout, ld, ref, &
+        ref_stride, par, par_stride, flags) &
+        bind(C, name="krome_conserve_cells_device") result(r)
+      import :: c_ptr, c_int, c_long
+      integer(c_int), value :: ncell, layout, ref_stride, par_stride
+      integer(c_long), value :: ld
+      type(c_ptr), value :: n, ref, par, flags
+      integer(c_int) :: r
+    end function krome_conserve_cells_device
+    function krome_conserve_cells_x_device(ncell, x, layout, ld, ref, &
+        ref_stride, par, par_stride, flags) &
+        bind(C, name="krome_conserve_cells_x_device") result(r)
+      import :: c_ptr, c_int, c_long
+      integer(c_int), value :: ncell, layout, ref_stride, par_stride
+      integer(c_long), value :: ld
+      type(c_ptr), value :: x, ref, par, flags
+      integer(c_int) :: r
+    end function krome_conserve_cells_x_device
     function krome_nspec_c() bind(C, name="krome_nspec") result(r)
       import :: c_int
       integer(c_int) :: r
@@ -575,6 +643,32 @@ module krome
       real(c_double) :: out(*)
       integer(c_int) :: r
     end function c_get_element_totals
+    function c_get_element_totals_x(ncell, x, out) &
+         bind(C, name="krome_get_element_totals_x") result(r)
+      import :: c_int, c_double
+      integer(c_int), value :: ncell
+      real(c_double), intent(in) :: x(*)
+      real(c_double) :: out(*)
+      integer(c_int) :: r
+    end function c_get_element_totals_x
+    function c_conserve_cells(ncell, n, ref, ref_stride, par, par_stride, &
+         flags) bind(C, name="krome_conserve_cells") result(r)
+      import :: c_int, c_double, c_ptr
+      integer(c_int), value :: ncell, ref_stride, par_stride
+      real(c_double) :: n(*)
+      real(c_double), intent(in) :: ref(*)
+      type(c_ptr), value :: par, flags
+      integer(c_int) :: r
+    end function c_conserve_cells
+    function c_conserve_cells_x(ncell, x, ref, ref_stride, par, &
+         par_stride, flags) bind(C, name="krome_conserve_cells_x") result(r)
+      import :: c_int, c_double, c_ptr
+      integer(c_int), value :: ncell, ref_stride, par_stride
+      real(c_double) :: x(*)
+      real(c_double), intent(in) :: ref(*)
+      type(c_ptr), value :: par, flags
+      integer(c_int) :: r
+    end function c_conserve_cells_x
     function c_scale_z(ncell, n, z) bind(C, name="krome_scale_Z") result(r)
       import :: c_int, c_double
       integer(c_int), value :: ncell
@@ -1469,13 +1563,72 @@ contains
     ierr = c_get_jeans(int(size(n, 2), c_int), n, Tgas, out)
   end function krome_get_jeans_length
 
-  ! element totals tot(nelem, ncell) [atoms cm^-3]
+  ! element totals tot(nelem, ncell) [atoms cm^-3]; _x: per gram of gas
+  ! [atoms g^-1] from the mass fractions x(nspec, ncell) (legacy
+  ! krome_conserveLinGetRef_x)
   function krome_get_element_totals(n, tot) result(ierr)
     real(c_double), intent(in) :: n(:, :)
     real(c_double), intent(out) :: tot(:, :)
     integer :: ierr
     ierr = c_get_element_totals(int(size(n, 2), c_int), n, tot)
   end function krome_get_element_totals
+  function krome_get_element_totals_x(x, tot) result(ierr)
+    real(c_double), intent(in) :: x(:, :)
+    real(c_double), intent(out) :: tot(:, :)
+    integer :: ierr
+    ierr = c_get_element_totals_x(int(size(x, 2), c_int), x, tot)
+  end function krome_get_element_totals_x
+
+  ! consistent advection (legacy krome_conserveLin_x; manual 6.7): the
+  ! cells n(nspec, ncell) [or x, mass fractions] moved back to the
+  ! reference element totals ref(nelem, ncell) or ref(nelem, 1) (one row
+  ! for all cells) and to zero net charge; par(npar, ncell) or par(npar,
+  ! 1), optional (the defaults), for the freeze directives; flags(ncell),
+  ! optional: 0, krome_flag_conserve_unreached or the warning
+  ! krome_flag_conserve_large. Returns the lowest failing cell's flag, or 0
+  function krome_conserve(n, ref, par, flags) result(ierr)
+    real(c_double), intent(inout) :: n(:, :)
+    real(c_double), intent(in) :: ref(:, :)
+    real(c_double), intent(in), target, optional :: par(:, :)
+    integer(c_int), intent(out), target, optional :: flags(:)
+    integer :: ierr
+    ierr = conserve_f_(n, ref, .false., par, flags)
+  end function krome_conserve
+  function krome_conserve_x(x, ref, par, flags) result(ierr)
+    real(c_double), intent(inout) :: x(:, :)
+    real(c_double), intent(in) :: ref(:, :)
+    real(c_double), intent(in), target, optional :: par(:, :)
+    integer(c_int), intent(out), target, optional :: flags(:)
+    integer :: ierr
+    ierr = conserve_f_(x, ref, .true., par, flags)
+  end function krome_conserve_x
+  function conserve_f_(v, ref, isx, par, flags) result(ierr)
+    real(c_double), intent(inout) :: v(:, :)
+    real(c_double), intent(in) :: ref(:, :)
+    logical, intent(in) :: isx
+    real(c_double), intent(in), target, optional :: par(:, :)
+    integer(c_int), intent(out), target, optional :: flags(:)
+    integer :: ierr
+    integer(c_int) :: rs, ps
+    type(c_ptr) :: pp, fp
+    rs = 0
+    if (size(ref, 2) > 1) rs = int(size(ref, 1), c_int)
+    pp = c_null_ptr
+    ps = 0
+    if (present(par)) then
+      pp = c_loc(par)
+      if (size(par, 2) > 1) ps = int(size(par, 1), c_int)
+    end if
+    fp = c_null_ptr
+    if (present(flags)) fp = c_loc(flags)
+    if (isx) then
+      ierr = c_conserve_cells_x(int(size(v, 2), c_int), v, ref, rs, pp, &
+                                ps, fp)
+    else
+      ierr = c_conserve_cells(int(size(v, 2), c_int), v, ref, rs, pp, ps, &
+                              fp)
+    end if
+  end function conserve_f_
 
   ! number densities <-> mass fractions (rho(ncell) [g cm^-3])
   function krome_n2x(n, x) result(ierr)

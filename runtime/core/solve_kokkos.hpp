@@ -55,6 +55,20 @@ using IView1 = Kokkos::View<int*, MemSpace>;
 using LView2 = Kokkos::View<long**, Kokkos::LayoutRight, MemSpace>;
 using TView = Kokkos::View<ThermCtx*, MemSpace>;
 
+// the static field's per-reaction photon sums of a cell (photo_sums): five
+// arrays of NPHOTO, back to back in one row of Batch::psum
+constexpr int NPSUM_ = 5;
+#ifdef KROME_PHOTO_HPP_INCLUDED
+// point v's sums (s, se, ss, sc, sp) into the row s[NPSUM_ * NPHOTO]
+KOKKOS_INLINE_FUNCTION void bind_psum_(double* s, PhotoSumsView& v) {
+  v.s = s;
+  v.se = s + NPHOTO;
+  v.ss = s + 2 * NPHOTO;
+  v.sc = s + 3 * NPHOTO;
+  v.sp = s + 4 * NPHOTO;
+}
+#endif
+
 // what one batch needs on the device (Views: reference-counted handles,
 // captured by value in the kernels)
 struct Batch {
@@ -72,7 +86,7 @@ struct Batch {
   DView dt, Tfix;                        // per cell
   DView2 n0;         // [ncell][NSPEC] input densities (n_global)
   DView2 phi;        // [ncell][B] per-cell photon field (radiation.evolve: out)
-  DView2 psum;       // [ncell][5*NPHOTO] static-field bin sums
+  DView2 psum;       // [ncell][NPSUM_ * NPHOTO] static-field bin sums
 #ifdef KROME_PHOTO_HPP_INCLUDED
   Kokkos::View<PhotoSumsView*, MemSpace> psv;  // per cell: views of psum
 #endif
@@ -99,7 +113,13 @@ struct Batch {
 // in use (another host thread), or with device_cache off, gets buffers of
 // its own for that call.
 
-constexpr int NSTAT_ = 10;  // statistics per cell (per-cell)
+// the integrator's statistics per cell (the columns of DeviceBuffers_::
+// stats, copied into SolveStats)
+enum StatCol_ {
+  ST_STEPS_, ST_RHS_, ST_JAC_, ST_RHS_JAC_, ST_LSETUPS_, ST_NEWTON_,
+  ST_NEWTON_FAILS_, ST_ERR_FAILS_, ST_RESTARTS_,
+  NSTAT_  // the number of columns
+};
 
 struct DeviceBuffers_ {
   int cap = 0;    // cells
@@ -160,6 +180,10 @@ inline size_t device_cache_bytes() {
   return device_cache_ == nullptr ? 0 : buffers_bytes_(*device_cache_);
 }
 
+// tests: the kernel reports every cell c with c % device_fail_every_ == 0
+// (a chunk's index) as failed (FLAG_TOO_MUCH_WORK), to exercise the host
+// fallback; 0: off
+inline int device_fail_every_ = 0;
 // tests: an allocation for more than this many cells throws std::bad_alloc
 // (a device out of memory, simulated); < 0: off
 inline long alloc_fail_cells_ = -1;
@@ -226,7 +250,7 @@ inline void ensure_batch_(DeviceBuffers_& D, int ncell, int blk, int B,
   b.psv = Kokkos::View<PhotoSumsView*, MemSpace>();
   if (B > 0) {
     b.phi = DView2("krome_phi", cap, B);
-    b.psum = DView2("krome_psum", cap, 5 * (NPHOTO > 0 ? NPHOTO : 1));
+    b.psum = DView2("krome_psum", cap, NPSUM_ * (NPHOTO > 0 ? NPHOTO : 1));
     b.psv = Kokkos::View<PhotoSumsView*, MemSpace>("krome_psv", cap);
   }
 #endif
@@ -285,12 +309,6 @@ inline void ensure_percell_(DeviceBuffers_& D, long wd) {
 
 // ---- the backend ---------------------------------------------------------
 
-// the per-cell device data of a call (densities, dt, fixed Tgas, ThermCtx
-// with its photo and dust views, the dust rows and tables) in D.b, and the
-// state layout; B: the photon bins. 0, or the host solve()'s input flags
-// (init_ctx_): -102 (dust bins required), -103 (a photo module without a
-// field, or radiation.evolve without one), -106 (dust.evolve with conserve
-// 2), -107 (surface.bins without its bins)
 // the state layout of a call (the host solve()'s, init_ctx_) and its
 // photon (B) and dust (nb) bins: 0, or the input flags of setup_batch_
 struct Shape_ {
@@ -298,6 +316,13 @@ struct Shape_ {
       A = 0, nb = 0, B = 0;
   bool balance = false;
 };
+// a flag batch_shape_ returns: the options and inputs are wrong for every
+// cell of the call alike (nothing is integrated)
+inline bool input_flag_(int f) {
+  return f == FLAG_NO_DUST || f == FLAG_NO_FIELD
+         || f == FLAG_CONSERVE_GAS_TOTAL || f == FLAG_SURFACE_BINS;
+}
+
 inline int batch_shape_(const SolverOpts& o, const CellsOpts& co,
                         Shape_& sh) {
   int blk = NSPEC, iT = -1, iu = -1, Bev = 0, id = -1, Dd = 0, ia = -1,
@@ -307,7 +332,7 @@ inline int batch_shape_(const SolverOpts& o, const CellsOpts& co,
 #ifdef KROME_PHOTO_HPP_INCLUDED
   const PhotoModule* ph = o.photo;
   if (ph != nullptr) {
-    if (o.Phi == nullptr && co.Phi == nullptr) return -103;
+    if (o.Phi == nullptr && co.Phi == nullptr) return FLAG_NO_FIELD;
     B = ph->B;
     if constexpr (EvolveConfig::rad) {
       Bev = B;
@@ -315,13 +340,14 @@ inline int batch_shape_(const SolverOpts& o, const CellsOpts& co,
       blk += B;
     }
   } else if (EvolveConfig::rad) {
-    return -103;
+    return FLAG_NO_FIELD;
   }
 #endif
 #ifdef KROME_DUST_BINS_HPP_INCLUDED
   if constexpr (SURF_NB > 0)
-    if (o.dust == nullptr || o.dust->nb != SURF_NB) return -107;
-  if (TC::cool_dust_bins && o.evolve_T && o.dust == nullptr) return -102;
+    if (o.dust == nullptr || o.dust->nb != SURF_NB) return FLAG_SURFACE_BINS;
+  if (TC::cool_dust_bins && o.evolve_T && o.dust == nullptr)
+    return FLAG_NO_DUST;
   nb = o.dust != nullptr ? o.dust->nb : 0;
   if (EvolveConfig::Td && o.evolve_T) {
     Dd = nb;
@@ -329,8 +355,8 @@ inline int batch_shape_(const SolverOpts& o, const CellsOpts& co,
     blk += Dd;
   }
   if constexpr (EvolveConfig::dust) {
-    if (o.dust == nullptr) return -102;
-    if (o.conserve == 2) return -106;
+    if (o.dust == nullptr) return FLAG_NO_DUST;
+    if (o.conserve == 2) return FLAG_CONSERVE_GAS_TOTAL;
     A = nb;
     ia = blk;
     blk += A;
@@ -408,20 +434,10 @@ inline bool out_of_memory_(const std::exception& e) {
   return false;
 }
 
-inline int setup_batch_(DeviceBuffers_& D, int& B, int ncell,
-                        const double* n, const double* Tgas,
-                        const double* dt, const Params* P, int pstride,
-                        const SolverOpts& o, const CellsOpts& co) {
-  Shape_ sh;
-  B = 0;
-  const int sflag = batch_shape_(o, co, sh);
-  if (sflag != 0) return sflag;
-  B = sh.B;
+// the Batch arrays and state layout for ncell cells of the shape sh
+inline void set_shape_(DeviceBuffers_& D, const Shape_& sh, int ncell) {
   const int blk = sh.blk, Bev = sh.Bev, Dd = sh.Dd, A = sh.A, nb = sh.nb;
-#ifdef KROME_PHOTO_HPP_INCLUDED
-  const PhotoModule* ph = o.photo;
-#endif
-  ensure_batch_(D, ncell, blk, B, nb);
+  ensure_batch_(D, ncell, blk, sh.B, nb);
   Batch& b = D.b;
   b.ncell = ncell;
   b.blk = blk;
@@ -435,17 +451,16 @@ inline int setup_batch_(DeviceBuffers_& D, int& B, int ncell,
   b.nb = nb;
   b.balance = sh.balance;
   b.rw = rhs_work_doubles(blk, Bev, nb, Dd, A) + 2L * blk;
-  for (int c = 0; c < ncell; ++c) {
-    D.dth(c) = dt[c];
-    D.Tfh(c) = Tgas[c];
-    for (int i = 0; i < NSPEC; ++i)
-      D.n0h(c, i) = n[static_cast<size_t>(c) * NSPEC + i];
-  }
-  Kokkos::deep_copy(rows1_(b.dt, ncell), rows1_(D.dth, ncell));
-  Kokkos::deep_copy(rows1_(b.Tfix, ncell), rows1_(D.Tfh, ncell));
-  Kokkos::deep_copy(rows2_(b.n0, ncell), rows2_(D.n0h, ncell));
+}
 
+// the tables of the photo module and of the dust population on the device
+// (re-uploaded when they change); B photon bins, nb dust bins
+inline void upload_tables_(DeviceBuffers_& D, const SolverOpts& o, int B,
+                           int nb) {
+  Batch& b = D.b;
+  (void)b; (void)o; (void)B; (void)nb;
 #ifdef KROME_PHOTO_HPP_INCLUDED
+  const PhotoModule* ph = o.photo;
   if (ph != nullptr) {
     upload_(b.sigma, ph->sigma, "krome_sigma");
     upload_(b.sigmaE, ph->sigmaE, "krome_sigmaE");
@@ -456,11 +471,6 @@ inline int setup_batch_(DeviceBuffers_& D, int& B, int ncell,
     upload_(b.elo, ph->Elo, "krome_elo");
     upload_(b.ehi, ph->Ehi, "krome_ehi");
     upload_(b.lww, ph->lww, "krome_lww");
-    for (int c = 0; c < ncell; ++c)
-      for (int q = 0; q < B; ++q)
-        D.phh(c, q) = co.Phi != nullptr
-            ? co.Phi[static_cast<size_t>(c) * B + q] : o.Phi[q];
-    Kokkos::deep_copy(rows2_(b.phi, ncell), rows2_(D.phh, ncell));
   }
 #endif
 #ifdef KROME_DUST_BINS_HPP_INCLUDED
@@ -484,26 +494,14 @@ inline int setup_batch_(DeviceBuffers_& D, int& B, int ncell,
     b.dTmin = du.TbbMin;
     b.dTmax = du.TbbMax;
     b.dTmult = du.TbbMult;
-    for (int c = 0; c < ncell; ++c)
-      for (int k = 0; k < nb; ++k) {
-        const size_t r = static_cast<size_t>(c) * nb + k;
-        D.tdh(c, k) = co.Td != nullptr ? co.Td[r] : du.Td[k];
-        D.adh(c, k) = co.adust != nullptr ? co.adust[r] : du.a[k];
-      }
-    Kokkos::deep_copy(rows2_(b.tdr, ncell), rows2_(D.tdh, ncell));
-    Kokkos::deep_copy(rows2_(b.adr, ncell), rows2_(D.adh, ncell));
   }
 #endif
-  // per-cell ThermCtx on the host, then its device-side pointers
-  for (int c = 0; c < ncell; ++c) {
-    ThermCtx& t = D.tch(c);
-    t = ThermCtx();
-    t.p = P[static_cast<size_t>(c) * pstride];
-    t.p.hk = StateHooks();
-    for (int r = 0; r <= NPHOTO; ++r) t.shield[r] = 1.0;
-    for (int q = 0; q <= NLW; ++q) t.khat[q] = 0.0;
-  }
-  Kokkos::deep_copy(rows1_(b.tc, ncell), rows1_(D.tch, ncell));
+}
+
+// the per-cell ThermCtx pointers of the first ncell cells, on the device:
+// the parameters' state hooks, the photo views and the static field's bin
+// sums, the dust views (the contexts themselves already in b.tc)
+inline void setup_ctx_(const Batch& b, int B, int ncell) {
   {
     const Batch bb = b;
     const int Bb = B;
@@ -539,11 +537,7 @@ inline int setup_batch_(DeviceBuffers_& D, int& B, int ncell,
               photo_sums(v, t.Phi, s, s + NPHOTO, s + 2 * NPHOTO,
                          s + 3 * NPHOTO, s + 4 * NPHOTO);
               PhotoSumsView& pv = bb.psv(c);
-              pv.s = s;
-              pv.se = s + NPHOTO;
-              pv.ss = s + 2 * NPHOTO;
-              pv.sc = s + 3 * NPHOTO;
-              pv.sp = s + 4 * NPHOTO;
+              bind_psum_(s, pv);
               pv.hab = photo_habing(v, t.Phi);
               t.psum = &pv;
             }
@@ -576,6 +570,74 @@ inline int setup_batch_(DeviceBuffers_& D, int& B, int ncell,
           (void)Bb;
         });
   }
+}
+
+// the per-cell device data of a call (densities, dt, fixed Tgas, ThermCtx
+// with its photo and dust views, the dust rows and tables) in D.b, and the
+// state layout; B: the photon bins. 0, or the host solve()'s input flags
+// (init_ctx_): -102 (dust bins required), -103 (a photo module without a
+// field, or radiation.evolve without one), -106 (dust.evolve with conserve
+// 2), -107 (surface.bins without its bins)
+inline int setup_batch_(DeviceBuffers_& D, int& B, int ncell,
+                        const double* n, const double* Tgas,
+                        const double* dt, const Params* P, int pstride,
+                        const SolverOpts& o, const CellsOpts& co) {
+  Shape_ sh;
+  B = 0;
+  const int sflag = batch_shape_(o, co, sh);
+  if (sflag != 0) return sflag;
+  B = sh.B;
+  const int nb = sh.nb;
+#ifdef KROME_PHOTO_HPP_INCLUDED
+  const PhotoModule* ph = o.photo;
+#endif
+  set_shape_(D, sh, ncell);
+  Batch& b = D.b;
+  for (int c = 0; c < ncell; ++c) {
+    D.dth(c) = dt[c];
+    D.Tfh(c) = Tgas[c];
+    for (int i = 0; i < NSPEC; ++i)
+      D.n0h(c, i) = n[static_cast<size_t>(c) * NSPEC + i];
+  }
+  Kokkos::deep_copy(rows1_(b.dt, ncell), rows1_(D.dth, ncell));
+  Kokkos::deep_copy(rows1_(b.Tfix, ncell), rows1_(D.Tfh, ncell));
+  Kokkos::deep_copy(rows2_(b.n0, ncell), rows2_(D.n0h, ncell));
+
+  upload_tables_(D, o, B, nb);
+#ifdef KROME_PHOTO_HPP_INCLUDED
+  if (ph != nullptr) {
+    for (int c = 0; c < ncell; ++c)
+      for (int q = 0; q < B; ++q)
+        D.phh(c, q) = co.Phi != nullptr
+            ? co.Phi[static_cast<size_t>(c) * B + q] : o.Phi[q];
+    Kokkos::deep_copy(rows2_(b.phi, ncell), rows2_(D.phh, ncell));
+  }
+#endif
+#ifdef KROME_DUST_BINS_HPP_INCLUDED
+  if (nb > 0) {
+    const DustBins& du = *o.dust;
+    for (int c = 0; c < ncell; ++c)
+      for (int k = 0; k < nb; ++k) {
+        const size_t r = static_cast<size_t>(c) * nb + k;
+        D.tdh(c, k) = co.Td != nullptr ? co.Td[r] : du.Td[k];
+        D.adh(c, k) = co.adust != nullptr ? co.adust[r] : du.a[k];
+      }
+    Kokkos::deep_copy(rows2_(b.tdr, ncell), rows2_(D.tdh, ncell));
+    Kokkos::deep_copy(rows2_(b.adr, ncell), rows2_(D.adh, ncell));
+  }
+#endif
+  // per-cell ThermCtx on the host, then its device-side pointers
+  for (int c = 0; c < ncell; ++c) {
+    ThermCtx& t = D.tch(c);
+    t = ThermCtx();
+    t.p = P[static_cast<size_t>(c) * pstride];
+    t.p.hk = StateHooks();
+    for (int r = 0; r <= NPHOTO; ++r) t.shield[r] = 1.0;
+    for (int q = 0; q <= NLW; ++q) t.khat[q] = 0.0;
+  }
+  Kokkos::deep_copy(rows1_(b.tc, ncell), rows1_(D.tch, ncell));
+  setup_ctx_(b, B, ncell);
+  (void)nb;
   return 0;
 }
 
@@ -841,22 +903,13 @@ KOKKOS_INLINE_FUNCTION int percell_end_(const Batch& b, long c, long S,
 // the device), for diagnostics
 inline int percell_host_cells_ = 0;
 
-template <bool IL>
-inline int solve_percell_layout_(DeviceBuffers_& D, int ncell, double* n,
-                                 double* Tgas, const double* dt,
-                                 const Params* P, int pstride,
-                                 const SolverOpts& o, const CellsOpts& co) {
+// the per-cell arrays and the tolerances of a call (both data paths)
+inline void percell_prepare_(DeviceBuffers_& D, const SolverOpts& o) {
   const Batch& b = D.b;
   const int blk = b.blk;
   const bool sparse = percell_sparse_(o, blk);
   const long wd = bdf::work_doubles(blk, sparse, NSPEC, SPARSE_NNZ);
   ensure_percell_(D, wd);
-  // the stride of a cell's arrays, and where cell c's start
-  const long S = IL ? ncell : 1;
-  const DView y = D.y, work = D.work, scr = D.scr;
-  const IView1 iwork = D.iwork;
-  const IView1 flags = D.flags;
-  const LView2 stats = D.stats;
   // tolerances, the same for every cell (the host solve()'s)
   std::vector<double> at(blk), rt(blk, o.rtol);
   for (int i = 0; i < NSPEC; ++i) {
@@ -869,22 +922,26 @@ inline int solve_percell_layout_(DeviceBuffers_& D, int ncell, double* n,
   for (int k = 0; k < b.A; ++k) at[b.ia + k] = o.atol_n;
   upload_(D.atol, at, "krome_atol");
   upload_(D.rtolv, rt, "krome_rtolv");
+}
+
+// the per-cell kernel over the first ncell cells (their states in D.y,
+// laid out as IL; percell_prepare_ done): each thread integrates its
+// cell, its flag and statistics into D.flags, D.stats
+template <bool IL>
+inline void percell_launch_(DeviceBuffers_& D, int ncell,
+                            const SolverOpts& o) {
+  const Batch& b = D.b;
+  const int blk = b.blk;
+  const bool sparse = percell_sparse_(o, blk);
+  const long wd = bdf::work_doubles(blk, sparse, NSPEC, SPARSE_NNZ);
+  const long S = IL ? ncell : 1;
+  const DView y = D.y, work = D.work, scr = D.scr;
+  const IView1 iwork = D.iwork;
+  const IView1 flags = D.flags;
+  const LView2 stats = D.stats;
   const DView atol = D.atol;
   const bool varies = rtol_varies_(o);
   const DView rtolv = D.rtolv;
-  auto yh = D.yh;
-  auto yix = [&](int c, int i) {
-    return IL ? static_cast<size_t>(i) * ncell + c
-              : static_cast<size_t>(c) * blk + i;
-  };
-  // n and Tgas; the kernel packs the other slots (field, Td, grains)
-  for (int c = 0; c < ncell; ++c) {
-    for (int i = 0; i < NSPEC; ++i)
-      yh(yix(c, i)) = n[static_cast<size_t>(c) * NSPEC + i];
-    if (b.iT >= 0) yh(yix(c, b.iT)) = Tgas[c];
-  }
-  const int ny = ncell * blk;
-  Kokkos::deep_copy(rows1_(y, ny), rows1_(yh, ny));
   const JacMode jm = o.jac != JAC_AUTO ? o.jac
                      : (o.evolve_T ? JAC_FD : JAC_ANALYTIC);
   bdf::Opts bo;
@@ -895,6 +952,7 @@ inline int solve_percell_layout_(DeviceBuffers_& D, int ncell, double* n,
   bo.dq_jac = jm == JAC_FD;
   bo.sparse = sparse;  // (the tables: set in the kernel, sparse_tables_)
   const int max_restarts = o.max_restarts;
+  const int fail_every = device_fail_every_;
   Kokkos::parallel_for(
       "krome_bdf_cells", PercellPolicy_<IL>(0, ncell),
       KOKKOS_LAMBDA(const int c) {
@@ -921,8 +979,10 @@ inline int solve_percell_layout_(DeviceBuffers_& D, int ncell, double* n,
             charge_newton_(oc);
             double* wc = work.data() + (IL ? c : static_cast<long>(c) * wd);
             int* ic = iwork.data() + (IL ? c : static_cast<long>(c) * blk);
-            const int fl = bdf::integrate<CellProb_<IL>, !IL>(
+            int fl = bdf::integrate<CellProb_<IL>, !IL>(
                 pr, blk, yc, dtc, oc, max_restarts, wc, ic, &st, &nr, S);
+            if (fail_every > 0 && c % fail_every == 0)
+              fl = FLAG_TOO_MUCH_WORK;  // tests: device_fail_every_
             return percell_end_(b, c, S, yc, rc, tc, yp, fl);
           };
           // a runtime if, not if constexpr: nvcc rejects an extended lambda
@@ -933,16 +993,12 @@ inline int solve_percell_layout_(DeviceBuffers_& D, int ncell, double* n,
             // local memory: interleaved by the hardware)
             ThermCtx tc = b.tc(c);
 #ifdef KROME_PHOTO_HPP_INCLUDED
-            double psl[5 * (NPHOTO > 0 ? NPHOTO : 1)];
+            double psl[NPSUM_ * (NPHOTO > 0 ? NPHOTO : 1)];
             PhotoSumsView pvl;
             if (tc.psum != nullptr) {
               const double* src = &b.psum(c, 0);
-              for (int i = 0; i < 5 * NPHOTO; ++i) psl[i] = src[i];
-              pvl.s = psl;
-              pvl.se = psl + NPHOTO;
-              pvl.ss = psl + 2 * NPHOTO;
-              pvl.sc = psl + 3 * NPHOTO;
-              pvl.sp = psl + 4 * NPHOTO;
+              for (int i = 0; i < NPSUM_ * NPHOTO; ++i) psl[i] = src[i];
+              bind_psum_(psl, pvl);
               pvl.hab = tc.psum->hab;
               tc.psum = &pvl;
             }
@@ -955,22 +1011,47 @@ inline int solve_percell_layout_(DeviceBuffers_& D, int ncell, double* n,
           }
         }
         flags(c) = f;
-        stats(c, 0) = st.nst;
-        stats(c, 1) = st.nfe;
-        stats(c, 2) = st.nje;
-        stats(c, 3) = st.nfeDQ;
-        stats(c, 4) = st.nsetups;
-        stats(c, 5) = st.nni;
-        stats(c, 6) = st.nnf;
-        stats(c, 7) = st.netf;
-        stats(c, 8) = nr;
+        stats(c, ST_STEPS_) = st.nst;
+        stats(c, ST_RHS_) = st.nfe;
+        stats(c, ST_JAC_) = st.nje;
+        stats(c, ST_RHS_JAC_) = st.nfeDQ;
+        stats(c, ST_LSETUPS_) = st.nsetups;
+        stats(c, ST_NEWTON_) = st.nni;
+        stats(c, ST_NEWTON_FAILS_) = st.nnf;
+        stats(c, ST_ERR_FAILS_) = st.netf;
+        stats(c, ST_RESTARTS_) = nr;
       });
   Kokkos::fence();
+}
+
+template <bool IL>
+inline int solve_percell_layout_(DeviceBuffers_& D, int ncell, double* n,
+                                 double* Tgas, const double* dt,
+                                 const Params* P, int pstride,
+                                 const SolverOpts& o, const CellsOpts& co) {
+  percell_prepare_(D, o);
+  const Batch& b = D.b;
+  const int blk = b.blk;
+  const DView y = D.y;
+  auto yh = D.yh;
+  auto yix = [&](int c, int i) {
+    return IL ? static_cast<size_t>(i) * ncell + c
+              : static_cast<size_t>(c) * blk + i;
+  };
+  // n and Tgas; the kernel packs the other slots (field, Td, grains)
+  for (int c = 0; c < ncell; ++c) {
+    for (int i = 0; i < NSPEC; ++i)
+      yh(yix(c, i)) = n[static_cast<size_t>(c) * NSPEC + i];
+    if (b.iT >= 0) yh(yix(c, b.iT)) = Tgas[c];
+  }
+  const int ny = ncell * blk;
+  Kokkos::deep_copy(rows1_(y, ny), rows1_(yh, ny));
+  percell_launch_<IL>(D, ncell, o);
   auto fh = D.fh;
   auto sh = D.sh;
   Kokkos::deep_copy(rows1_(yh, ny), rows1_(y, ny));
-  Kokkos::deep_copy(rows1_(fh, ncell), rows1_(flags, ncell));
-  Kokkos::deep_copy(rows2_(sh, ncell), rows2_(stats, ncell));
+  Kokkos::deep_copy(rows1_(fh, ncell), rows1_(D.flags, ncell));
+  Kokkos::deep_copy(rows2_(sh, ncell), rows2_(D.stats, ncell));
   // the per-cell rows the caller gets back
   const int B = b.Bev;
   const bool phi_out = B > 0 && co.Phi != nullptr;
@@ -989,15 +1070,15 @@ inline int solve_percell_layout_(DeviceBuffers_& D, int ncell, double* n,
     if (co.stats != nullptr) {
       SolveStats& s = co.stats[c];
       s = SolveStats();
-      s.steps = sh(c, 0);
-      s.rhs_evals = sh(c, 1);
-      s.jac_evals = sh(c, 2);
-      s.rhs_evals_jac = sh(c, 3);
-      s.lin_setups = sh(c, 4);
-      s.newton_iters = sh(c, 5);
-      s.newton_fails = sh(c, 6);
-      s.err_fails = sh(c, 7);
-      s.restarts = static_cast<int>(sh(c, 8));
+      s.steps = sh(c, ST_STEPS_);
+      s.rhs_evals = sh(c, ST_RHS_);
+      s.jac_evals = sh(c, ST_JAC_);
+      s.rhs_evals_jac = sh(c, ST_RHS_JAC_);
+      s.lin_setups = sh(c, ST_LSETUPS_);
+      s.newton_iters = sh(c, ST_NEWTON_);
+      s.newton_fails = sh(c, ST_NEWTON_FAILS_);
+      s.err_fails = sh(c, ST_ERR_FAILS_);
+      s.restarts = static_cast<int>(sh(c, ST_RESTARTS_));
     }
     if (!(dt[c] > 0.0)) continue;
     double n0c[NSPEC];
@@ -1123,14 +1204,59 @@ inline int solve_chunk_(DeviceBuffers_& D, int ncell, double* n,
   return solve_percell_(D, ncell, n, Tgas, dt, P, pstride, o, co);
 }
 
+// the device buffers of a call: the cache (CellsOpts::device_cache) when
+// no other host thread holds it (lk, locked here, keeps it until the call
+// returns; the cache is freed before Kokkos finalizes), else `local`,
+// allocated for this call alone
+inline DeviceBuffers_* acquire_buffers_(const CellsOpts& co,
+                                        DeviceBuffers_& local,
+                                        std::unique_lock<std::mutex>& lk) {
+  if (!co.device_cache || !lk.try_lock()) return &local;
+  if (device_cache_ == nullptr) device_cache_ = new DeviceBuffers_();
+  if (!device_cache_hook_) {
+    Kokkos::push_finalize_hook([] {
+      std::lock_guard<std::mutex> g(device_cache_mutex_);
+      if (device_cache_ != nullptr) *device_cache_ = DeviceBuffers_();
+      device_cache_hook_ = false;
+    });
+    device_cache_hook_ = true;
+  }
+  return device_cache_;
+}
+
+// the default memory budget of a call: this fraction of the device's free
+// memory (plus the buffers the call reuses)
+constexpr double DEVICE_MEMORY_FRACTION_ = 0.8;
+
+// the cells of one chunk: ncell, or as many as the memory budget holds
+// (CellsOpts::device_memory bytes; 0: DEVICE_MEMORY_FRACTION_ of the free
+// memory, where the runtime reports it; < 0: unbounded); 0 when not even
+// one cell fits
+inline int chunk_cells_(int ncell, const DeviceBuffers_& D,
+                        const SolverOpts& o, const CellsOpts& co) {
+  long long budget = co.device_memory;
+  if (budget == 0) {
+    const long long f = device_free_bytes_();
+    budget = f < 0 ? -1
+                   : static_cast<long long>(
+                         DEVICE_MEMORY_FRACTION_ * static_cast<double>(
+                             f + static_cast<long long>(buffers_bytes_(D))));
+  }
+  const long long per = percell_bytes_(o, co);
+  if (budget > 0 && per > 0)
+    return static_cast<int>(std::min<long long>(ncell, budget / per));
+  return ncell;
+}
+
 // integrate ncell cells over their own dt[c] on the device, one thread
 // per cell; P: one Params (pstride 0) or ncell of them (pstride 1). Calls
 // of more cells than fit in one go are integrated in chunks on the same
 // buffers: at most the cells that CellsOpts::device_memory holds (by
 // default 80 % of the device's free memory, the buffers this call can
-// reuse included; CUDA and HIP). An allocation that still fails (out of memory) frees the
-// buffers and halves the chunk; when not even one cell fits, the
-// remaining cells run on the host with PATH_AUTO, and get
+// reuse included; CUDA and HIP; chunk_cells_). An allocation that still
+// fails (out of memory) frees the buffers and halves the chunk; when not
+// even one cell fits, the remaining cells run on the host with PATH_AUTO,
+// and get
 // FLAG_DEVICE_MEMORY (-111) otherwise. Returns 0, the host's input flags
 // (-102, -103, -105, -106, -107; every cell gets it), -109 (Kokkos not
 // initialized), -111, or the flag of the first cell that failed on the
@@ -1140,48 +1266,23 @@ inline int solve_cells_kokkos(int ncell, double* n, double* Tgas,
                               int pstride, const SolverOpts& o,
                               const CellsOpts& co) {
   if (ncell <= 0) return 0;
-  if (!Kokkos::is_initialized()) return -109;
+  if (!Kokkos::is_initialized()) return FLAG_NO_KOKKOS;
   auto fail_all = [&](int f) {
     if (co.flags != nullptr)
       for (int c = 0; c < ncell; ++c) co.flags[c] = f;
     return f;
   };
 #ifdef KROME_GAS_TOTAL
-  if (o.conserve != 0) return fail_all(-106);
+  if (o.conserve != 0) return fail_all(FLAG_CONSERVE_GAS_TOTAL);
 #endif
   for (int c = 0; c < ncell; ++c)
     if (params_missing(P[static_cast<size_t>(c) * pstride]) >= 0)
-      return fail_all(-105);
+      return fail_all(FLAG_PARAM_UNSET);
   // the buffers: the cache, unless off or in use by another caller
   DeviceBuffers_ local;
-  DeviceBuffers_* D = &local;
   std::unique_lock<std::mutex> lk(device_cache_mutex_, std::defer_lock);
-  if (co.device_cache && lk.try_lock()) {
-    if (device_cache_ == nullptr) device_cache_ = new DeviceBuffers_();
-    if (!device_cache_hook_) {  // freed before Kokkos finalizes
-      Kokkos::push_finalize_hook([] {
-        std::lock_guard<std::mutex> g(device_cache_mutex_);
-        if (device_cache_ != nullptr) *device_cache_ = DeviceBuffers_();
-        device_cache_hook_ = false;
-      });
-      device_cache_hook_ = true;
-    }
-    D = device_cache_;
-  }
-  int chunk = ncell;
-  // the memory budget: the cells it holds bound the chunk
-  long long budget = co.device_memory;
-  if (budget == 0) {
-    const long long f = device_free_bytes_();
-    budget = f < 0 ? -1
-                   : static_cast<long long>(
-                         0.8 * static_cast<double>(
-                                   f + static_cast<long long>(
-                                           buffers_bytes_(*D))));
-  }
-  const long long per = percell_bytes_(o, co);
-  if (budget > 0 && per > 0)
-    chunk = static_cast<int>(std::min<long long>(chunk, budget / per));
+  DeviceBuffers_* D = acquire_buffers_(co, local, lk);
+  int chunk = chunk_cells_(ncell, *D, o, co);
   int B = 0, nb = 0;
 #ifdef KROME_PHOTO_HPP_INCLUDED
   B = o.photo != nullptr ? o.photo->B : 0;
@@ -1238,13 +1339,471 @@ inline int solve_cells_kokkos(int ncell, double* n, double* Tgas,
       break;
     }
     hosted += percell_host_cells_;
-    if (f == -102 || f == -103 || f == -106 || f == -107)
-      return fail_all(f);  // the inputs, for every cell
+    if (input_flag_(f)) return fail_all(f);  // the inputs, for every cell
     if (first == 0) first = f;
     c0 += m;
   }
   percell_host_cells_ = hosted;
   return first;
+}
+
+// ---- device-resident data (level A; gpu-percell-design.md 14.3) ---------
+//
+// The cells' arrays already in the device's memory (the Kokkos memory
+// space): the call reads and writes them there, and only the cells that
+// fail on the device travel to the host (re-solved by solve(), flagged).
+// KROME-X's own conventions: cgs, Tgas, the network's species and
+// parameters; the host code gathers its cells into these arrays first.
+
+// the species arrays: one array per species, n[i * ld + c] (a Fortran
+// x(ncell, nspec), the default), or one row per cell, n[c * NSPEC + i]
+constexpr int LAYOUT_SPECIES_MAJOR = 0;
+constexpr int LAYOUT_CELL_MAJOR = 1;
+
+// the caller's device arrays of a call
+struct DeviceCells {
+  double* n = nullptr;          // number densities [cm^-3], or the mass
+                                // fractions when rho is given
+  const double* rho = nullptr;  // [ncell] gas density [g cm^-3] (x input)
+  int layout = LAYOUT_SPECIES_MAJOR;
+  long ld = 0;                  // species-major: the stride between the
+                                // species' arrays (0: ncell)
+  double* Tgas = nullptr;       // [ncell]
+  const double* dt = nullptr;   // [ncell] [s]
+  const double* par = nullptr;  // parameter rows (param_names order;
+                                // nullptr: the defaults)
+  int par_stride = 0;           // doubles between rows: 0 (one row) or NPAR
+  double* Phi = nullptr;        // [ncell][photo bins], optional
+  double* Td = nullptr;         // [ncell][dust bins], optional
+  double* adust = nullptr;      // [ncell][dust bins], optional
+  int* flags = nullptr;         // [ncell], optional: 0 solved on the device,
+                                // FLAG_HOST_RECOVERED, or < 0 (failed)
+};
+
+// a call's outcome, on the host
+struct DeviceSummary {
+  long device = 0;  // cells solved on the device
+  long host = 0;    // failed on the device, recovered on the host
+  long failed = 0;  // failed on both (left untouched)
+};
+
+KROME_HD inline long dev_idx_(int layout, long ld, long c, int i) {
+  return layout == LAYOUT_CELL_MAJOR ? c * NSPEC + i : i * ld + c;
+}
+
+// one chunk of m cells (a: the chunk's arrays, already offset); the flags
+// of the failed cells and the summary updated; returns 0, an input flag
+// for every cell (-102, -103, -106, -107), or the lowest failing cell's
+// flag
+inline int solve_chunk_device_(DeviceBuffers_& D, int m, const DeviceCells& a,
+                               const SolverOpts& o, const CellsOpts& co,
+                               DeviceSummary& sum) {
+  CellsOpts cs = co;
+  cs.Phi = a.Phi;
+  Shape_ sh;
+  const int sflag = batch_shape_(o, cs, sh);
+  if (sflag != 0) return sflag;
+  const int B = sh.B, nb = sh.nb;
+  set_shape_(D, sh, m);
+  Batch& b = D.b;
+  upload_tables_(D, o, B, nb);
+  // the rows' defaults: the options' field, the population's Td and radii
+  DView phi0, td0, a0, xin("krome_xin", m);
+  std::vector<double> hphi, htd, ha;
+#ifdef KROME_PHOTO_HPP_INCLUDED
+  if (B > 0 && o.Phi != nullptr) hphi.assign(o.Phi, o.Phi + B);
+#endif
+#ifdef KROME_DUST_BINS_HPP_INCLUDED
+  if (nb > 0) {
+    htd = o.dust->Td;
+    ha = o.dust->a;
+  }
+#endif
+  upload_(phi0, hphi, "krome_phi0");
+  upload_(td0, htd, "krome_td0");
+  upload_(a0, ha, "krome_a0");
+  const long ld = a.ld > 0 ? a.ld : m;
+  const int lay = a.layout;
+  const DeviceCells ac = a;
+  const int ps = a.par_stride;
+  // gather: the cells' inputs and contexts into the buffers
+  Kokkos::parallel_for(
+      "krome_gather", Kokkos::RangePolicy<ExecSpace>(0, m),
+      KOKKOS_LAMBDA(const int c) {
+        b.dt(c) = ac.dt[c];
+        b.Tfix(c) = ac.Tgas[c];
+        double xs = 0.0;
+        for (int i = 0; i < NSPEC; ++i) {
+          double v = ac.n[dev_idx_(lay, ld, c, i)];
+          if (ac.rho != nullptr) {
+            if (species_mass_g[i] > 0.0) xs += v;
+            v = species_mass_g[i] > 0.0 ? ac.rho[c] * v / species_mass_g[i]
+                                        : 0.0;
+          }
+          b.n0(c, i) = v;
+        }
+        xin(c) = xs;
+        for (int q = 0; q < B; ++q)
+          b.phi(c, q) = ac.Phi != nullptr
+              ? ac.Phi[static_cast<long>(c) * B + q] : phi0(q);
+        for (int k = 0; k < nb; ++k) {
+          b.tdr(c, k) = ac.Td != nullptr
+              ? ac.Td[static_cast<long>(c) * nb + k] : td0(k);
+          b.adr(c, k) = ac.adust != nullptr
+              ? ac.adust[static_cast<long>(c) * nb + k] : a0(k);
+        }
+        ThermCtx& t = b.tc(c);
+        t = ThermCtx();
+        if (ac.par != nullptr)
+          params_from_row(ac.par + static_cast<long>(c) * ps, t.p);
+        t.p.hk = StateHooks();
+        for (int r = 0; r <= NPHOTO; ++r) t.shield[r] = 1.0;
+        for (int q = 0; q <= NLW; ++q) t.khat[q] = 0.0;
+      });
+  setup_ctx_(b, B, m);
+  percell_prepare_(D, o);
+  const bool il = percell_interleave_(m, co, b);
+  const int blk = b.blk;
+  const DView y = D.y;
+  {  // the states, in the kernel's layout: element i of cell c at
+     // y[c cstride + i S] (interleaved: S = m cells, cstride 1;
+     // contiguous: S 1, cstride blk)
+    const long S = il ? m : 1;
+    const long cstride = il ? 1 : blk;
+    Kokkos::parallel_for(
+        "krome_y0", Kokkos::RangePolicy<ExecSpace>(0, m),
+        KOKKOS_LAMBDA(const int c) {
+          for (int i = 0; i < NSPEC; ++i) y(c * cstride + i * S) = b.n0(c, i);
+          if (b.iT >= 0) y(c * cstride + b.iT * S) = b.Tfix(c);
+        });
+  }
+  if (il)
+    percell_launch_<true>(D, m, o);
+  else
+    percell_launch_<false>(D, m, o);
+  const IView1 flags = D.flags;
+  // scatter: the solved cells back into the caller's arrays
+  {
+    const long S = il ? m : 1;
+    const long cstride = il ? 1 : blk;
+    const bool clip = o.clip_negative, renorm = o.renormalize_x;
+    const int cons = o.conserve;
+    Kokkos::parallel_for(
+        "krome_scatter", Kokkos::RangePolicy<ExecSpace>(0, m),
+        KOKKOS_LAMBDA(const int c) {
+          const int f = flags(c);
+          if (ac.flags != nullptr) ac.flags[c] = f;
+          if (f != 0 || !(b.dt(c) > 0.0)) return;
+          double nc[NSPEC];
+          for (int i = 0; i < NSPEC; ++i) {
+            double v = y(c * cstride + i * S);
+            if (clip && v < 0.0) v = 0.0;
+            nc[i] = v;
+          }
+          conserve_cell_(&b.n0(c, 0), nc, b.tc(c).p, cons);
+          if (ac.rho != nullptr) {
+            const double r = ac.rho[c];
+            double xs = 0.0;
+            for (int i = 0; i < NSPEC; ++i) {
+              nc[i] = species_mass_g[i] * nc[i] / r;
+              if (species_mass_g[i] > 0.0) xs += nc[i];
+            }
+            if (renorm && xs > 0.0)
+              for (int i = 0; i < NSPEC; ++i) nc[i] *= xin(c) / xs;
+          }
+          for (int i = 0; i < NSPEC; ++i) ac.n[dev_idx_(lay, ld, c, i)] = nc[i];
+          if (b.iT >= 0) ac.Tgas[c] = y(c * cstride + b.iT * S);
+          if (ac.Phi != nullptr)
+            for (int q = 0; q < b.Bev; ++q)
+              ac.Phi[static_cast<long>(c) * B + q] = b.phi(c, q);
+          if (ac.Td != nullptr)
+            for (int k = 0; k < b.nb; ++k)
+              ac.Td[static_cast<long>(c) * nb + k] = b.tdr(c, k);
+          if (ac.adust != nullptr && b.A > 0)
+            for (int k = 0; k < b.nb; ++k)
+              ac.adust[static_cast<long>(c) * nb + k] = b.adr(c, k);
+        });
+  }
+  Kokkos::fence();
+  // the failed cells: their inputs, still in the buffers, to the host
+  auto fh = D.fh;
+  Kokkos::deep_copy(rows1_(fh, m), rows1_(flags, m));
+  std::vector<int> failed;
+  for (int c = 0; c < m; ++c)
+    if (fh(c) != 0) failed.push_back(c);
+  sum.device += m - static_cast<long>(failed.size());
+  if (failed.empty()) return 0;
+  const int nf = static_cast<int>(failed.size());
+  IView1 fidx("krome_failed", nf);
+  {
+    Kokkos::View<const int*, Kokkos::HostSpace,
+                 Kokkos::MemoryTraits<Kokkos::Unmanaged>> hv(failed.data(),
+                                                             nf);
+    Kokkos::deep_copy(fidx, hv);
+  }
+  // a failed cell's inputs, one row of st: the columns
+  const int IN_N = 0, IN_T = NSPEC, IN_DT = IN_T + 1, IN_RHO = IN_DT + 1,
+            IN_PAR = IN_RHO + 1, IN_PHI = IN_PAR + NPAR, IN_TD = IN_PHI + B,
+            IN_A = IN_TD + nb, IN_W = IN_A + nb;
+  DView2 st("krome_failed_cells", nf, IN_W);
+  Kokkos::parallel_for(
+      "krome_pack_failed", Kokkos::RangePolicy<ExecSpace>(0, nf),
+      KOKKOS_LAMBDA(const int k) {
+        const int c = fidx(k);
+        for (int i = 0; i < NSPEC; ++i) st(k, IN_N + i) = b.n0(c, i);
+        st(k, IN_T) = b.Tfix(c);
+        st(k, IN_DT) = b.dt(c);
+        st(k, IN_RHO) = ac.rho != nullptr ? ac.rho[c] : 0.0;
+        for (int i = 0; i < NPAR; ++i)
+          st(k, IN_PAR + i) = ac.par != nullptr
+              ? ac.par[static_cast<long>(c) * ps + i] : 0.0;
+        for (int q = 0; q < B; ++q) st(k, IN_PHI + q) = b.phi(c, q);
+        for (int q = 0; q < nb; ++q) st(k, IN_TD + q) = b.tdr(c, q);
+        for (int q = 0; q < nb; ++q) st(k, IN_A + q) = b.adr(c, q);
+      });
+  auto sth = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), st);
+  auto xinh = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), xin);
+  std::vector<double> nn(static_cast<size_t>(nf) * NSPEC), TT(nf), dd(nf),
+      ph(static_cast<size_t>(nf) * B), td(static_cast<size_t>(nf) * nb),
+      ad(static_cast<size_t>(nf) * nb);
+  std::vector<Params> pp(nf);
+  for (int k = 0; k < nf; ++k) {
+    const size_t kn = static_cast<size_t>(k) * NSPEC,
+                 kB = static_cast<size_t>(k) * B,
+                 kb = static_cast<size_t>(k) * nb;
+    for (int i = 0; i < NSPEC; ++i) nn[kn + i] = sth(k, IN_N + i);
+    TT[k] = sth(k, IN_T);
+    dd[k] = sth(k, IN_DT);
+    double row[NPAR > 0 ? NPAR : 1];
+    for (int i = 0; i < NPAR; ++i) row[i] = sth(k, IN_PAR + i);
+    if (a.par != nullptr) params_from_row(row, pp[k]);
+    for (int q = 0; q < B; ++q) ph[kB + q] = sth(k, IN_PHI + q);
+    for (int q = 0; q < nb; ++q) td[kb + q] = sth(k, IN_TD + q);
+    for (int q = 0; q < nb; ++q) ad[kb + q] = sth(k, IN_A + q);
+  }
+  std::vector<int> fk(nf, 0);
+  CellsOpts ck = co;
+  ck.path = PATH_PERCELL;
+  ck.flags = fk.data();
+  ck.stats = nullptr;
+  ck.Phi = B > 0 ? ph.data() : nullptr;
+  ck.Td = nb > 0 ? td.data() : nullptr;
+  ck.adust = nb > 0 ? ad.data() : nullptr;
+  solve_cells_percell(nf, nn.data(), TT.data(), dd.data(), pp.data(), 1, o,
+                      ck);
+  // the results back to the device and into the caller's arrays: one row
+  // of ot per failed cell, the columns
+  const int OUT_FLAG = 0, OUT_N = 1, OUT_T = OUT_N + NSPEC,
+            OUT_PHI = OUT_T + 1, OUT_TD = OUT_PHI + B, OUT_A = OUT_TD + nb,
+            OUT_W = OUT_A + nb;
+  DView2 ot("krome_failed_out", nf, OUT_W);
+  auto oh = Kokkos::create_mirror_view(ot);
+  int first = 0;
+  for (int k = 0; k < nf; ++k) {
+    const int f = fk[k];
+    oh(k, OUT_FLAG) = f == 0 ? FLAG_HOST_RECOVERED : f;
+    if (f == 0) {
+      ++sum.host;
+    } else {
+      ++sum.failed;
+      if (first == 0) first = f;
+    }
+    double* nk = nn.data() + static_cast<size_t>(k) * NSPEC;
+    if (a.rho != nullptr && f == 0) {
+      double xk[NSPEC];
+      n_to_x_out_(nk, sth(k, IN_RHO), xinh(failed[k]), o, xk);
+      for (int i = 0; i < NSPEC; ++i) nk[i] = xk[i];
+    }
+    const size_t kB = static_cast<size_t>(k) * B,
+                 kb = static_cast<size_t>(k) * nb;
+    for (int i = 0; i < NSPEC; ++i) oh(k, OUT_N + i) = nk[i];
+    oh(k, OUT_T) = TT[k];
+    for (int q = 0; q < B; ++q) oh(k, OUT_PHI + q) = ph[kB + q];
+    for (int q = 0; q < nb; ++q) oh(k, OUT_TD + q) = td[kb + q];
+    for (int q = 0; q < nb; ++q) oh(k, OUT_A + q) = ad[kb + q];
+  }
+  Kokkos::deep_copy(ot, oh);
+  Kokkos::parallel_for(
+      "krome_unpack_failed", Kokkos::RangePolicy<ExecSpace>(0, nf),
+      KOKKOS_LAMBDA(const int k) {
+        const int c = fidx(k);
+        const int f = static_cast<int>(ot(k, OUT_FLAG));
+        if (ac.flags != nullptr) ac.flags[c] = f;
+        if (f != FLAG_HOST_RECOVERED) return;
+        for (int i = 0; i < NSPEC; ++i)
+          ac.n[dev_idx_(lay, ld, c, i)] = ot(k, OUT_N + i);
+        if (b.iT >= 0) ac.Tgas[c] = ot(k, OUT_T);
+        if (ac.Phi != nullptr && b.Bev > 0)
+          for (int q = 0; q < B; ++q)
+            ac.Phi[static_cast<long>(c) * B + q] = ot(k, OUT_PHI + q);
+        if (ac.Td != nullptr)
+          for (int q = 0; q < nb; ++q)
+            ac.Td[static_cast<long>(c) * nb + q] = ot(k, OUT_TD + q);
+        if (ac.adust != nullptr && b.A > 0)
+          for (int q = 0; q < nb; ++q)
+            ac.adust[static_cast<long>(c) * nb + q] = ot(k, OUT_A + q);
+      });
+  Kokkos::fence();
+  percell_host_cells_ += nf;
+  return first;
+}
+
+// the device's flags of cells [0, ncell) set to f
+inline void device_fill_flags_(int* flags, int ncell, int f) {
+  if (flags == nullptr || ncell <= 0) return;
+  Kokkos::parallel_for(
+      "krome_fill_flags", Kokkos::RangePolicy<ExecSpace>(0, ncell),
+      KOKKOS_LAMBDA(const int c) { flags[c] = f; });
+  Kokkos::fence();
+}
+
+// Integrate ncell cells whose arrays are in the device's memory (a), each
+// over its own dt, as solve_cells_kokkos does with host arrays: the same
+// kernel, layouts, buffer cache, memory budget and chunking (CellsOpts:
+// device_cache, device_memory, min_interleave; its Phi, Td, adust, flags
+// and stats are not used: a's rows and flags instead). The results are
+// written in place, on the device (fenced before and after: the caller's
+// kernels are complete, its next ones see the results); the cells that
+// fail on the device are re-solved on the host from their inputs and
+// flagged FLAG_HOST_RECOVERED, or keep the host's (negative) flag and
+// their inputs. sum (optional, on
+// the host): the counts. Returns 0, the inputs' flag for every cell (-102,
+// -103, -105 a REQUIRED parameter unset in some row, -106, -107), -109
+// (Kokkos not initialized), -111 (not even one cell fits in the memory),
+// or the lowest failing cell's flag
+inline int solve_cells_device(int ncell, const DeviceCells& a,
+                              const SolverOpts& o, const CellsOpts& co,
+                              DeviceSummary* sum = nullptr) {
+  DeviceSummary local_sum;
+  DeviceSummary& sm = sum != nullptr ? *sum : local_sum;
+  sm = DeviceSummary();
+  if (ncell <= 0) return 0;
+  if (!Kokkos::is_initialized()) return FLAG_NO_KOKKOS;
+  Kokkos::fence();  // the caller's kernels on the arrays are complete
+  auto fail_all = [&](int f) {
+    device_fill_flags_(a.flags, ncell, f);
+    sm.failed = ncell;
+    return f;
+  };
+#ifdef KROME_GAS_TOTAL
+  if (o.conserve != 0) return fail_all(FLAG_CONSERVE_GAS_TOTAL);
+#endif
+  {  // a REQUIRED parameter unset in any row: nothing is integrated
+    const DeviceCells ac = a;
+    const int ps = a.par_stride;
+    int missing = 0;
+    Kokkos::parallel_reduce(
+        "krome_params_check", Kokkos::RangePolicy<ExecSpace>(0, ncell),
+        KOKKOS_LAMBDA(const int c, int& acc) {
+          Params p;
+          if (ac.par != nullptr)
+            params_from_row(ac.par + static_cast<long>(c) * ps, p);
+          if (params_missing(p) >= 0) acc += 1;
+        },
+        missing);
+    if (missing > 0) return fail_all(FLAG_PARAM_UNSET);
+  }
+  DeviceBuffers_ local;
+  std::unique_lock<std::mutex> lk(device_cache_mutex_, std::defer_lock);
+  DeviceBuffers_* D = acquire_buffers_(co, local, lk);
+  CellsOpts cs = co;
+  cs.Phi = a.Phi;
+  int chunk = chunk_cells_(ncell, *D, o, cs);
+  int B = 0, nb = 0;
+#ifdef KROME_PHOTO_HPP_INCLUDED
+  B = o.photo != nullptr ? o.photo->B : 0;
+#endif
+#ifdef KROME_DUST_BINS_HPP_INCLUDED
+  nb = o.dust != nullptr ? o.dust->nb : 0;
+#endif
+  percell_host_cells_ = 0;
+  int first = 0;
+  const long ld = a.ld > 0 ? a.ld : ncell;
+  for (int c0 = 0; c0 < ncell;) {
+    const int m = std::min(chunk, ncell - c0);
+    DeviceCells ac = a;  // the chunk's arrays
+    ac.ld = ld;
+    ac.n = a.layout == LAYOUT_CELL_MAJOR
+        ? a.n + static_cast<size_t>(c0) * NSPEC : a.n + c0;
+    if (a.rho != nullptr) ac.rho = a.rho + c0;
+    ac.Tgas = a.Tgas + c0;
+    ac.dt = a.dt + c0;
+    if (a.par != nullptr)
+      ac.par = a.par + static_cast<size_t>(c0) * a.par_stride;
+    if (a.Phi != nullptr) ac.Phi = a.Phi + static_cast<size_t>(c0) * B;
+    if (a.Td != nullptr) ac.Td = a.Td + static_cast<size_t>(c0) * nb;
+    if (a.adust != nullptr) ac.adust = a.adust + static_cast<size_t>(c0) * nb;
+    if (a.flags != nullptr) ac.flags = a.flags + c0;
+    int f = 0;
+    bool oom = m < 1;
+    if (!oom) {
+      try {
+        f = solve_chunk_device_(*D, m, ac, o, cs, sm);
+      } catch (const std::exception& e) {
+        if (!out_of_memory_(e)) throw;
+        oom = true;
+      }
+    }
+    if (oom) {
+      *D = DeviceBuffers_();
+      if (m > 1) {
+        chunk = m / 2;
+        continue;
+      }
+      device_fill_flags_(ac.flags, ncell - c0, FLAG_DEVICE_MEMORY);
+      sm.failed += ncell - c0;
+      if (first == 0) first = FLAG_DEVICE_MEMORY;
+      break;
+    }
+    if (input_flag_(f)) return fail_all(f);
+    if (first == 0) first = f;
+    c0 += m;
+  }
+  return first;
+}
+
+// consistent advection (conserve_to_n_; conserve_cells) on cells whose
+// arrays are in the device's memory: n (or the mass fractions x, mass true;
+// then ref per gram) in either layout, the reference rows ref (ref_stride
+// doubles between rows: 0 or NELEM), the parameter rows par (par_stride:
+// 0 or NPAR; nullptr: the defaults), flags[ncell] (optional). Returns the
+// flag of the lowest failing cell (negative), else 0
+inline int conserve_cells_device(int ncell, double* v, bool mass, int layout,
+                                 long ld, const double* ref, int ref_stride,
+                                 const double* par, int par_stride,
+                                 int* flags) {
+  if (ncell <= 0) return 0;
+  if (!Kokkos::is_initialized()) return FLAG_NO_KOKKOS;
+  Kokkos::fence();
+  const long l = ld > 0 ? ld : ncell;
+  IView1 own;  // the flags, when the caller wants none
+  int* fp = flags;
+  if (fp == nullptr) {
+    own = IView1("krome_conserve_flags", ncell);
+    fp = own.data();
+  }
+  int lowest = ncell;  // the lowest failing cell
+  Kokkos::parallel_reduce(
+      "krome_conserve_cells", Kokkos::RangePolicy<ExecSpace>(0, ncell),
+      KOKKOS_LAMBDA(const int c, int& acc) {
+        double x[NSPEC];
+        for (int i = 0; i < NSPEC; ++i) x[i] = v[dev_idx_(layout, l, c, i)];
+        Params p;
+        if (par != nullptr)
+          params_from_row(par + static_cast<long>(c) * par_stride, p);
+        const double* r = ref + static_cast<long>(c) * ref_stride;
+        const int f = mass ? conserve_to_x_(x, r, p) : conserve_to_(x, r, p);
+        for (int i = 0; i < NSPEC; ++i) v[dev_idx_(layout, l, c, i)] = x[i];
+        fp[c] = f;
+        if (f < 0 && c < acc) acc = c;
+      },
+      Kokkos::Min<int>(lowest));
+  Kokkos::fence();
+  if (lowest >= ncell) return 0;
+  int f = 0;
+  Kokkos::deep_copy(f, Kokkos::View<int, MemSpace, Kokkos::MemoryTraits<
+                           Kokkos::Unmanaged>>(fp + lowest));
+  return f;
 }
 
 // registration with the solve_cells dispatcher (solve_cells.hpp)

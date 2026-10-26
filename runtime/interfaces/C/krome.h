@@ -84,6 +84,9 @@
 #define KROME_FLAG_NO_KOKKOS (-109)     /* device before initialization */
 #define KROME_FLAG_NONPOSITIVE_T (-110) /* ended at Tgas <= 0: untouched */
 #define KROME_FLAG_DEVICE_MEMORY (-111) /* device: no cell fits in memory */
+#define KROME_FLAG_CONSERVE_UNREACHED (-112) /* advection: ref unreachable */
+#define KROME_FLAG_CONSERVE_LARGE 2     /* advection: > 50% change (warning) */
+#define KROME_FLAG_HOST_RECOVERED 1     /* device data: solved on the host */
 
 #ifdef __cplusplus
 extern "C" {
@@ -190,6 +193,12 @@ int krome_opts_get_rtol_species(const krome_opts* h, double* rtol);
 int krome_has_device(void);
 int krome_device_initialize(void);
 int krome_device_finalize(void);
+/* krome_device_initialize on the GPU device_id (a host code with one GPU
+ * per MPI rank passes the device it uses itself, e.g. rank % ngpu); -1:
+ * Kokkos' default. 0, or 1 when Kokkos was already initialized (by the
+ * host code or an earlier call: its device stays), -104 without the
+ * device backend. */
+int krome_device_initialize_id(int device_id);
 
 /* photon bins [eV edges] for photo rates, photoheating and grains;
  * nbins bins with edges Elo[b] < Ehi[b]. After this call, Phi arrays
@@ -278,6 +287,61 @@ int krome_solve_cells_x(int ncell, double* x, const double* rho,
                         double* Tgas, const double* dt, const double* par,
                         int par_stride, const krome_cells* extra,
                         int* flags, const krome_opts* h);
+
+/* ---- device-resident data (manual 6.8) ---------------------------------
+ * krome_solve_cells and _x on arrays in the device's memory (pointers of
+ * the Kokkos build's GPU runtime, CUDA or HIP; host memory in a host-only
+ * Kokkos build): read and written there by the device; only the cells
+ * that fail on the device travel to the host, re-solved from their
+ * inputs. The species arrays (n, or x with rho) in one of two layouts:
+ *   KROME_LAYOUT_SPECIES_MAJOR  n[i * ld + c]: one array per species, ld
+ *                               doubles apart (ld >= ncell; 0: ncell),
+ *                               i.e. a Fortran n(ld, nspec)
+ *   KROME_LAYOUT_CELL_MAJOR     n[c * nspec + i], as krome_solve_cells
+ * Tgas, dt, rho [ncell]; par: rows of npar parameters (par_stride 0, one
+ * row for every cell, or npar; NULL: the defaults); extra (a host struct,
+ * may be NULL): device pointers to the Phi / Td / adust rows, as in
+ * krome_solve_cells; flags[ncell] (device, may be NULL): 0 solved on the
+ * device, KROME_FLAG_HOST_RECOVERED failed on the device and solved on the
+ * host, < 0 failed on both (the cell untouched); summary (host, may be
+ * NULL): the counts. The device is fenced before and after the call (the
+ * host code's kernels on the arrays are complete; its next kernels see
+ * the results). The handle's options as for krome_solve_cells (the device
+ * memory budget and the buffer cache included; path and min_device are
+ * not used). Returns 0, the lowest failing cell's flag, a flag of every
+ * cell (-103, -105 a required parameter unset in some row: nothing
+ * integrated, -106, -107), -109 (Kokkos not initialized), -111 (not even
+ * one cell fits in the device memory), -104 (a build without the device
+ * backend), or -1 (bad arguments). */
+#define KROME_LAYOUT_SPECIES_MAJOR 0
+#define KROME_LAYOUT_CELL_MAJOR 1
+typedef struct {
+  long device;  /* cells solved on the device */
+  long host;    /* failed on the device, solved on the host */
+  long failed;  /* failed on both */
+} krome_device_summary;
+int krome_solve_cells_device(int ncell, double* n, int layout, long ld,
+                             double* Tgas, const double* dt,
+                             const double* par, int par_stride,
+                             const krome_cells* extra, int* flags,
+                             krome_device_summary* summary,
+                             const krome_opts* h);
+int krome_solve_cells_x_device(int ncell, double* x, const double* rho,
+                               int layout, long ld, double* Tgas,
+                               const double* dt, const double* par,
+                               int par_stride, const krome_cells* extra,
+                               int* flags, krome_device_summary* summary,
+                               const krome_opts* h);
+/* krome_conserve_cells and _x on device arrays (layout and ld as above;
+ * ref, par and flags on the device too) */
+int krome_conserve_cells_device(int ncell, double* n, int layout, long ld,
+                                const double* ref, int ref_stride,
+                                const double* par, int par_stride,
+                                int* flags);
+int krome_conserve_cells_x_device(int ncell, double* x, int layout, long ld,
+                                  const double* ref, int ref_stride,
+                                  const double* par, int par_stride,
+                                  int* flags);
 
 /* the file of the error report (default "KROME_ERROR_REPORT", replaced at
  * each failed solve; in an MPI run give each rank its own name) */
@@ -390,8 +454,31 @@ int krome_get_photo_heating(int ncell, const double* n, const double* Tgas,
                             double* heat);
 int krome_get_ratio_flux_draine(int ncell, const double* Phi,
                                 const krome_opts* h, double* ratio);
-/* element totals tot[ncell][nelem] [atoms cm^-3] (krome_element_name) */
+/* element totals tot[ncell][nelem] [atoms cm^-3] (krome_element_name);
+ * _x: per gram of gas [atoms g^-1] from the mass fractions x (legacy
+ * krome_conserveLinGetRef_x) */
 int krome_get_element_totals(int ncell, const double* n, double* tot);
+int krome_get_element_totals_x(int ncell, const double* x, double* tot);
+/* consistent advection (legacy krome_conserveLin_x; manual 6.7): after
+ * the host code advects the species, each cell n[ncell][nspec] (or x,
+ * mass fractions) is moved back to its reference element totals ref
+ * (krome_get_element_totals of a reference cell; for x, per gram:
+ * krome_get_element_totals_x) and to zero net charge: negatives clipped,
+ * the elements by the minimal relative correction of the conserve option
+ * (the ionization kept), then the electrons from neutrality. ref_stride:
+ * 0 (one row for every cell) or nelem (one row per cell); par, par_stride
+ * as for krome_solve_cells (NULL: the defaults), for the network's freeze
+ * directives. flags[ncell] (optional, may be NULL): each cell's flag, 0,
+ * KROME_FLAG_CONSERVE_UNREACHED (an element without free carriers: the
+ * cell corrected as far as possible) or the warning
+ * KROME_FLAG_CONSERVE_LARGE (a species changed by more than 50%). Returns
+ * the lowest failing cell's flag (negative), 0, or -1 on bad arguments. */
+int krome_conserve_cells(int ncell, double* n, const double* ref,
+                         int ref_stride, const double* par, int par_stride,
+                         int* flags);
+int krome_conserve_cells_x(int ncell, double* x, const double* ref,
+                           int ref_stride, const double* par,
+                           int par_stride, int* flags);
 /* number densities <-> mass fractions x = m n / rho; rho[ncell] */
 int krome_n2x(int ncell, const double* n, double* x);
 

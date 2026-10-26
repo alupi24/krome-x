@@ -119,12 +119,12 @@
 #metals = ["C", "C+", "O", "Si", "Fe"]
 
 # coolant files in the legacy coolZ.dat format (LAMDA / CHIANTI conversions,
-# e.g. data/coolO2.dat; legacy -coolFile), added to the embedded coolZ.dat;
-# select their coolants with thermal.cooling=<name> (CII, FeII for atoms and
-# ions, the species for molecules: O2) or thermal.cooling = ['FILE'] (all),
-# or with thermal.metals; each is its own cooling term
+# e.g. data/cooling/coolO2.dat; legacy -coolFile), added to the embedded
+# coolZ.dat; select their coolants with thermal.cooling=<name> (CII, FeII
+# for atoms and ions, the species for molecules: O2) or thermal.cooling =
+# ['FILE'] (all), or with thermal.metals; each is its own cooling term
 # default: []
-#coolant_files = ["data/coolO2.dat"]
+#coolant_files = ["data/cooling/coolO2.dat"]
 
 # optical depth of the line coolants (the coolZ.dat metals and the
 # thermal.coolant_files coolants): LVG, the Sobolev escape probability (1 -

@@ -1,19 +1,28 @@
 // KROME-X solver: one BDF integrator (core/cvode/bdf_cell.hpp, CVODE's BDF
-// ported) for every combination of evolved ingredients (dense LU, or
-// LAPACK's; the per-cell device backend runs the same integrator).
+// ported) for every combination of evolved ingredients (its own dense LU,
+// a static-pivot sparse LU, or LAPACK's: SolverOpts::linsol; the per-cell
+// device backend runs the same integrator).
 //
-//   state y = [ n_0..n_{S-1} | Tgas     | u_0..u_{B-1} | Td_0..Td_{D-1} ]
-//               always         evolve_T   EvolveConfig   EvolveConfig
-//                              (runtime)  ::rad          ::Td (with Tgas)
-//   (the photon-field and dust-temperature blocks are fixed at generation,
-//   codegen radiation.evolve / dust.evolve_Td; Tgas is the one runtime switch)
+//   y = [ n_0..n_{NSPEC-1} | Tgas     | u_0..u_{B-1} | Td_0..Td_{D-1} |
+//         always             evolve_T   EvolveConfig   EvolveConfig
+//                            (runtime)  ::rad          ::Td (with Tgas)
+//         N_0..N_{A-1} ]
+//         EvolveConfig
+//         ::dust
+//   (the photon-field, dust-temperature and grain blocks are fixed at
+//   generation: radiation.evolve, dust.evolve_Td, dust.evolve; Tgas is the
+//   one runtime switch)
 //   u_b = ln Phi_b: the co-evolved photon flux per bin cannot overshoot
-//   below zero (docs/solver-design.md section 2)
+//   below zero (docs/solver-design.md section 2); N_b: the key-element
+//   atoms held in the bin's grains [cm^-3] (the radius follows from it)
 //
 //   dn/dt   = chemistry(n, k(T, n, Phi)) [+ secondary-ionization fluxes]
 //   dT/dt   = (gamma_ad - 1)(heat - cool) / (kB ntot)       (thermal_aux)
 //   du_b/dt = -c kabs_b(n)                                 (pure absorption)
-//   dTd/dt  = pre dT/dt / (pre + intBB'(Td) besc)  (legacy -usedTdust)
+//   dTd/dt  = each grain's energy equation: gas collisions in, net
+//             radiation out (dust_dTdust, dust_bins.hpp)
+//   dN_b/dt = accretion, sputtering, sublimation (dust.evolve rates,
+//             dust_bins.hpp)
 //
 // Blocks absent from the state are inputs: a fixed Tgas, a field Phi held
 // at the caller's values (photochemistry, photoheating and grains still
@@ -63,15 +72,18 @@ inline const char* flag_message(int flag) {
   switch (flag) {
     case FLAG_OK: return "success";
     case FLAG_NO_DUST: return "cooling DUSTBINS with Tgas evolved needs SolverOpts::dust";
-    case FLAG_NO_FIELD: return "photo reactions need a PhotoModule and a field Phi (or --evolve-rad without a PhotoModule)";
+    case FLAG_NO_FIELD: return "photo reactions need a PhotoModule and a field Phi (or radiation.evolve without a PhotoModule)";
     case FLAG_UNSUPPORTED: return "configuration not supported by the requested path, or backend not built";
     case FLAG_PARAM_UNSET: return "a required parameter is unset (NaN)";
-    case FLAG_CONSERVE_GAS_TOTAL: return "conservation is not available with --gas-total";
-    case FLAG_SURFACE_BINS: return "--surface-bins needs SolverOpts::dust with the generated number of bins";
+    case FLAG_CONSERVE_GAS_TOTAL: return "conservation is not available with dust.gas_total";
+    case FLAG_SURFACE_BINS: return "surface.bins needs SolverOpts::dust with the generated number of bins";
     case FLAG_NO_LAPACK: return "LINSOL_LAPACK in a build without LAPACK (KROME_USE_LAPACK)";
     case FLAG_NO_KOKKOS: return "device path used before Kokkos::initialize()";
     case FLAG_NONPOSITIVE_T: return "the integration ended at a non-positive or non-finite Tgas (input untouched)";
     case FLAG_DEVICE_MEMORY: return "device path: not even one cell fits in the device memory (CellsOpts::device_memory)";
+    case FLAG_CONSERVE_UNREACHED: return "consistent advection: the reference element totals or neutrality cannot be reached (an element without free carriers); the cell corrected as far as possible";
+    case FLAG_CONSERVE_LARGE: return "consistent advection: reference reached, but a species changed by more than 50% (a warning)";
+    case FLAG_HOST_RECOVERED: return "device-resident calls: failed on the device, solved on the host (FLAG_HOST_RECOVERED); solve_equilibrium: not converged, t_max reached first";
     case FLAG_TOO_MUCH_WORK: return "max_steps exhausted before t_end (FLAG_TOO_MUCH_WORK)";
     case FLAG_TOO_MUCH_ACC: return "tolerances too small for machine precision (FLAG_TOO_MUCH_ACC)";
     case FLAG_ERR_FAILURE: return "repeated error-test failures (FLAG_ERR_FAILURE)";
@@ -106,6 +118,9 @@ inline const char* flag_name(int flag) {
     case FLAG_NO_KOKKOS: return "FLAG_NO_KOKKOS";
     case FLAG_NONPOSITIVE_T: return "FLAG_NONPOSITIVE_T";
     case FLAG_DEVICE_MEMORY: return "FLAG_DEVICE_MEMORY";
+    case FLAG_CONSERVE_UNREACHED: return "FLAG_CONSERVE_UNREACHED";
+    case FLAG_CONSERVE_LARGE: return "FLAG_CONSERVE_LARGE";
+    case FLAG_HOST_RECOVERED: return "FLAG_HOST_RECOVERED";
     case FLAG_TOO_MUCH_WORK: return "FLAG_TOO_MUCH_WORK";
     case FLAG_TOO_MUCH_ACC: return "FLAG_TOO_MUCH_ACC";
     case FLAG_ERR_FAILURE: return "FLAG_ERR_FAILURE";
@@ -158,8 +173,8 @@ struct ThermCtx {
   const double* dust_tdb = nullptr;
 #endif
   double k[NREA + 1];  // +1 keeps zero-reaction (cooling-only) networks legal
-  // radiative channels (spec 5.4), evaluated with the rates: photo
-  // shielding factors and the J_LW unit rates
+  // radiative channels (network-format.md 5.4), evaluated with the rates:
+  // photo shielding factors and the J_LW unit rates
   double shield[NPHOTO + 1];
   double khat[NLW + 1];
 };
@@ -241,11 +256,22 @@ constexpr int count_active_(const bool* a, int n) {
 constexpr int NHEAT = count_active_(heat_active_, NHEAT_ALL);
 constexpr int NCOOL = count_active_(cool_active_, NCOOL_ALL);
 
+// the Z_EXTENDED merge weights (legacy cooling_ZExtended): the CIE tables
+// (ZCIE, hot) above 1e4 K and the network's metal lines (cooling_Z, cold)
+// below, blended by a tanh 1e3 K wide; the two forms are kept as legacy
+// wrote them (cold is not computed as 1 - hot)
+KROME_HD inline double zext_hot_(double T) {
+  return (std::tanh(1e-3 * (T - 1e4)) + 1.0) * 0.5;
+}
+KROME_HD inline double zext_cold_(double T) {
+  return (std::tanh(1e-3 * (-T + 1e4)) + 1.0) * 0.5;
+}
+
 // the cooling floor (thermal.floor): the floored terms evaluated at
 // Tfloor, subtracted from the cooling at Tgas, i.e. each floored cooler
 // becomes cool(Tgas) - cool(Tfloor) (legacy individual floors). For
 // Z_EXTENDED legacy floors only the metal-line part of the tanh merge,
-// with the merge weight at Tgas: f2(Tgas) cooling_Z(Tfloor).
+// with the merge weight at Tgas: zext_cold_(Tgas) cooling_Z(Tfloor).
 KROME_HD inline double floor_cool_(double Tgas, double Tf, const double* n,
                           ThermCtx* c) {
   double f = 0.0;
@@ -264,8 +290,7 @@ KROME_HD inline double floor_cool_(double Tgas, double Tf, const double* n,
   }
   if constexpr (TC::floor_ZCIE) f += cooling_ZCIE(Tf, n, c->p);
   if constexpr (TC::floor_Zext) {
-    const double f2 = (std::tanh(1e-3 * (-Tgas + 1e4)) + 1.0) * 0.5;
-    f += f2 * cooling_Z(Tf, n, c->p);
+    f += zext_cold_(Tgas) * cooling_Z(Tf, n, c->p);
   }
   (void)Tgas; (void)Tf; (void)n; (void)c;
   return f;
@@ -328,7 +353,7 @@ KROME_HD inline void thermal_terms_(double Tgas, const double* n, const double* 
   if constexpr (TC::heat_ZCIE) {
     double hz = heating_ZCIE(Tgas, n, c->p);
     if constexpr (TC::cool_Zext)
-      hz *= (std::tanh(1e-3 * (Tgas - 1e4)) + 1.0) * 0.5;
+      hz *= zext_hot_(Tgas);
     H[H_ZCIE] = hz;
   }
 
@@ -346,12 +371,9 @@ KROME_HD inline void thermal_terms_(double Tgas, const double* n, const double* 
   if constexpr (TC::cool_Z) C[C_Z] = cooling_Z(Tgas, n, c->p);
   if constexpr (NCOOL_FILE > 0) cooling_files_(Tgas, n, c->p, C + C_FILE0);
   if constexpr (TC::cool_ZCIE) C[C_ZCIE] = cooling_ZCIE(Tgas, n, c->p);
-  if constexpr (TC::cool_Zext) {  // legacy cooling_ZExtended tanh merge
-    const double f1 = (std::tanh(1e-3 * (Tgas - 1e4)) + 1.0) * 0.5;
-    const double f2 = (std::tanh(1e-3 * (-Tgas + 1e4)) + 1.0) * 0.5;
-    C[C_ZEXT] = f1 * cooling_ZCIE(Tgas, n, c->p)
-        + f2 * cooling_Z(Tgas, n, c->p);
-  }
+  if constexpr (TC::cool_Zext)  // legacy cooling_ZExtended tanh merge
+    C[C_ZEXT] = zext_hot_(Tgas) * cooling_ZCIE(Tgas, n, c->p)
+        + zext_cold_(Tgas) * cooling_Z(Tgas, n, c->p);
   if constexpr (TC::cooling_floor)
     C[C_FLOOR] = -floor_cool_(Tgas, cooling_floor_T_(c->p), n, c);
 #ifdef KROME_COOLING_HPP_INCLUDED
@@ -440,21 +462,38 @@ struct RhsCtx {
   double* awcur = nullptr;  // [nb] area weights of the state's radii (the
                             // dust hook's)
   double* U = nullptr;      // [NSPEC * NAGG] the split Jacobian's coupling
-  double *k0 = nullptr, *kp = nullptr, *kunit = nullptr;  // [NREA + 1]
-  double *dnf = nullptr, *dnx = nullptr, *dnx0 = nullptr,
-         *dnx1 = nullptr;                                 // [NSPEC]
-  double *td0 = nullptr, *td1 = nullptr;                  // [D + 1]
-  double *da0 = nullptr, *da1 = nullptr;                  // [A]
-  double *dn0 = nullptr, *dn1 = nullptr;                  // [NSPEC]
-  double* fm = nullptr;                                   // [NEQ]
+  // the Jacobian's scratch (jac_assemble_, jac_dust_), each the base (0) or
+  // the perturbed (1, p) value of a difference quotient:
+  double* k0 = nullptr;     // [NREA + 1] the rates at the state (tc.k is
+                            // overwritten by every rhs evaluation)
+  double* kp = nullptr;     // [NREA + 1] the rates at a perturbed state
+  double* kunit = nullptr;  // [NREA + 1] unit-rate probe of the shielded
+                            // photo reactions (their dk/dn)
+  double* dnf = nullptr;    // [NSPEC] the chemistry rhs with the probe
+  double* dnx = nullptr;    // [NSPEC] the aux fluxes added to dn/dt
+                            // (secondary ionization) by the rhs
+  double *dnx0 = nullptr, *dnx1 = nullptr;  // [NSPEC] the aux fluxes at
+                                            // the state / perturbed
+  double *td0 = nullptr, *td1 = nullptr;    // [D + 1] the aux rows (dTgas/dt,
+                                            // dTd/dt) at the state / perturbed
+  double *da0 = nullptr, *da1 = nullptr;    // [A] the grain-atom rates
+  double *dn0 = nullptr, *dn1 = nullptr;    // [NSPEC] the gas exchange with
+                                            // the grains (dust.evolve)
+  double* fm = nullptr;     // [NEQ] the rhs at y - h (central differences)
 };
 
-// the doubles of the RhsCtx work arrays (rhs_bind_ lays them out); nb: the
-// dust bins (0: none)
+// the doubles of the RhsCtx work arrays (rhs_bind_ lays them out, in this
+// order: keep the two in step); nb: the dust bins (0: none)
 KROME_HD constexpr long rhs_work_doubles(int NEQ, int B, int nb, int D,
                                          int A) {
-  return 2L * B + 3L * A + 2L * nb + static_cast<long>(NSPEC) * NAGG
-         + 3L * (NREA + 1) + 7L * NSPEC + 2L * (D + 1) + NEQ;
+  return 2L * B                          // Phi, kabs
+         + 3L * A                        // arad, da0, da1
+         + 2L * nb                       // awcur, tdb
+         + static_cast<long>(NSPEC) * NAGG   // U
+         + 3L * (NREA + 1)               // k0, kp, kunit
+         + 7L * NSPEC                    // dnd, dnf, dnx, dnx0, dnx1, dn0, dn1
+         + 2L * (D + 1)                  // td0, td1
+         + NEQ;                          // fm
 }
 // point the work arrays of c into w[rhs_work_doubles(...)] (nb: the dust
 // bins; tdb only when the balance Td is used); returns the end of them
@@ -1072,10 +1111,10 @@ struct SolveCtx : RhsCtx {
 };
 
 // build the state layout and work buffers for the given options; returns
-// 0, or -102 / -103 / -105 for inconsistent inputs (see solve)
+// 0, or the input flags -102, -103, -105, -106, -107 (see solve)
 inline int init_ctx_(SolveCtx& c, double Tgas, const Params& params,
                      const SolverOpts& o) {
-  if (params_missing(params) >= 0) return -105;
+  if (params_missing(params) >= 0) return FLAG_PARAM_UNSET;
   c.tc.p = params;
   c.Tfix = Tgas;
   c.NEQ = NSPEC;
@@ -1085,7 +1124,7 @@ inline int init_ctx_(SolveCtx& c, double Tgas, const Params& params,
   c.tc.photo_on = o.photo != nullptr;
   if (o.photo) c.tc.ph = o.photo->view();
   if (o.photo) {
-    if (o.Phi == nullptr) return -103;
+    if (o.Phi == nullptr) return FLAG_NO_FIELD;
     if constexpr (EvolveConfig::rad) {
       c.B = o.photo->B;
       c.iu = c.NEQ;
@@ -1094,13 +1133,13 @@ inline int init_ctx_(SolveCtx& c, double Tgas, const Params& params,
       c.tc.Phi = o.Phi;
     }
   } else if (EvolveConfig::rad) {
-    return -103;  // generated to co-evolve a field, none supplied
+    return FLAG_NO_FIELD;  // generated to co-evolve a field, none supplied
   }
 #endif
 #ifdef KROME_DUST_BINS_HPP_INCLUDED
   // surface.bins: the per-bin surface species need that many bins
   if constexpr (SURF_NB > 0)
-    if (o.dust == nullptr || o.dust->nb != SURF_NB) return -107;
+    if (o.dust == nullptr || o.dust->nb != SURF_NB) return FLAG_SURFACE_BINS;
   c.tc.dust_on = o.dust != nullptr;
   if (o.dust != nullptr) {
     // the population as the physics sees it: its own radii and counts
@@ -1111,7 +1150,8 @@ inline int init_ctx_(SolveCtx& c, double Tgas, const Params& params,
     c.tc.dust_Td = o.dust->Td.data();
   }
   // configured binned-dust cooling needs its population
-  if (TC::cool_dust_bins && o.evolve_T && o.dust == nullptr) return -102;
+  if (TC::cool_dust_bins && o.evolve_T && o.dust == nullptr)
+    return FLAG_NO_DUST;
   // Tdust as state (dust.evolve_Td) only while Tgas evolves: with thermal
   // evolution off the dust temperatures stay fixed as well
   if (EvolveConfig::Td && o.evolve_T) {
@@ -1123,8 +1163,8 @@ inline int init_ctx_(SolveCtx& c, double Tgas, const Params& params,
   // the element conservation (conserve 2) would undo the exchange with
   // the grains
   if constexpr (EvolveConfig::dust) {
-    if (o.dust == nullptr) return -102;
-    if (o.conserve == 2) return -106;
+    if (o.dust == nullptr) return FLAG_NO_DUST;
+    if (o.conserve == 2) return FLAG_CONSERVE_GAS_TOTAL;
     c.A = o.dust->nb;
     c.ia = c.NEQ;
     c.NEQ += c.A;
@@ -1215,7 +1255,8 @@ inline void solve_caches_(SolveCtx& c, const double* n) {
     }
 #ifndef KROME_NO_RATE_REUSE
     // evolved Tgas: rates_fixed reused while Tgas is the same (exact; not
-    // with binned dust, whose Td-dependent rates follow the state)
+    // with binned dust, whose Td-dependent rates follow the state);
+    // -DKROME_NO_RATE_REUSE turns it off, to check that it is exact
     else if (!c.tc.dust_on && c.tdb == nullptr && c.id < 0 && c.ia < 0
              && c.tc.dust.nb == 0) {
       c.kT_.assign(NREA + 1, 0.0);
@@ -1234,87 +1275,85 @@ inline void solve_caches_(SolveCtx& c, const double* n) {
   (void)c; (void)n;
 }
 
-// post-solve conservation of cell n against its input n0 (SolverOpts::
-// conserve). Mode 1: electrons restore the input net charge. Mode 2: the
+// row k of the conserved quantities: the element counts (k < NELEM) and
+// the charge (k = NELEM) of species i
+KROME_HD inline double conserved_row_(int k, int i) {
+  return k < NELEM ? species_elements[i * NELEM + k] : species_charge[i];
+}
+
+// the largest relative residual of the conserved totals of n against
+// target[NELEM + 1] (the element rows; the charge row too when charge):
+// |target - sum A n| over max(|target|, sum |A| n)
+KROME_HD inline double totals_residual_(const double* n, const double* target,
+                                        bool charge) {
+  double worst = 0.0;
+  for (int k = 0; k < NELEM + (charge ? 1 : 0); ++k) {
+    double t = 0.0, sc = std::fabs(target[k]);
+    for (int i = 0; i < NSPEC; ++i) {
+      const double a = conserved_row_(k, i) * n[i];
+      t += a;
+      sc += std::fabs(a);
+    }
+    if (sc > 0.0) worst = std::fmax(worst, std::fabs(target[k] - t) / sc);
+  }
+  return worst;
+}
+
+// the projection of n onto the totals target[NELEM + 1] (the element
+// totals, then the net charge; the charge row only when charge): the
 // minimal relative correction delta_s = w_s sum_k A_ks lambda_k, w_s = n_s
-// (a species at zero stays zero), that restores the input element totals
-// and charge (rows A: species_elements, species_charge); frozen and opaque
-// species do not move. The small system (A W A^T) lambda = residual is
-// solved by Gaussian elimination with partial pivoting (dependent rows are
-// skipped); projection and clipping are iterated a few times. Mode 3:
-// the electrons neutralize the ions, n(e-) = max(sum q n over the other
-// species, 0), even while a freeze directive holds e- fixed (legacy
-// -computeElectrons, applied after the solve instead of in the rhs).
-inline void conserve_cell_(const double* n0, double* n, const Params& p,
-                           int mode) {
-  if (mode <= 0) return;
-  if (mode == 3) {
-#ifdef KROME_HAS_E
-    double qi = 0.0;
-    for (int i = 0; i < NSPEC; ++i)
-      if (i != IDX_E) qi += species_charge[i] * n[i];
-    n[IDX_E] = std::fmax(qi, 0.0);
-#endif
-    (void)n0; (void)p;
-    return;
-  }
-  bool fixed[NSPEC];
-  for (int i = 0; i < NSPEC; ++i) fixed[i] = species_opaque[i];
-  if constexpr (NFREEZE_MAX > 0) {
-    int idx[NFREEZE_MAX > 0 ? NFREEZE_MAX : 1];
-    const int m = frozen_species(p, idx);
-    for (int q = 0; q < m; ++q) fixed[idx[q]] = true;
-  }
-  (void)p;
-  double q0 = 0.0, q = 0.0;
-  for (int i = 0; i < NSPEC; ++i) {
-    q0 += species_charge[i] * n0[i];
-    q += species_charge[i] * n[i];
-  }
-  (void)q0; (void)q;  // unused without electrons
-  if (mode == 1) {
-#ifdef KROME_HAS_E
-    if (!fixed[IDX_E]) n[IDX_E] = std::fmax(n[IDX_E] + (q - q0), 0.0);
-#endif
-    return;
-  }
-  constexpr int NR = NELEM + 1;  // elements + charge
-  auto A = [](int k, int i) -> double {
-    return k < NELEM ? species_elements[i * NELEM + k] : species_charge[i];
-  };
-  for (int it = 0; it < 3; ++it) {
-    double r[NR], M[NR][NR];
+// (a species at zero stays zero); fixed species do not move. The small
+// system (A W A^T) lambda = residual is solved by Gaussian elimination
+// with partial pivoting (dependent rows are skipped); the projection is
+// repeated after clipping negatives, up to 20 times, until the residual
+// is below 1e-13. Returns the final residual (totals_residual_). Used by
+// the post-solve conservation (SolverOpts::conserve = 2, the cell's input
+// totals) and by consistent advection (conserve_to_); device-callable
+KROME_HD inline double project_totals_(double* n, const double* target,
+                                       const bool* fixed, bool charge) {
+  const int NR = NELEM + (charge ? 1 : 0);
+  constexpr int NRMAX = NELEM + 1;
+  for (int it = 0; it < 20; ++it) {
+    double r[NRMAX], M[NRMAX][NRMAX];
     for (int k = 0; k < NR; ++k) {
-      double t0 = 0.0, t1 = 0.0;
-      for (int i = 0; i < NSPEC; ++i) {
-        t0 += A(k, i) * n0[i];
-        t1 += A(k, i) * n[i];
-      }
-      r[k] = t0 - t1;
+      double t1 = 0.0;
+      for (int i = 0; i < NSPEC; ++i) t1 += conserved_row_(k, i) * n[i];
+      r[k] = target[k] - t1;
       for (int l = 0; l < NR; ++l) {
         double s = 0.0;
         for (int i = 0; i < NSPEC; ++i)
-          if (!fixed[i]) s += A(k, i) * A(l, i) * n[i];
+          if (!fixed[i])
+            s += conserved_row_(k, i) * conserved_row_(l, i) * n[i];
         M[k][l] = s;
       }
     }
     // Gaussian elimination with partial pivoting; rows without freedom
     // (or dependent on others) get lambda = 0
-    double lam[NR];
+    double lam[NRMAX];
     for (int k = 0; k < NR; ++k) lam[k] = 0.0;
     double scale = 0.0;
     for (int k = 0; k < NR; ++k) scale = std::fmax(scale, std::fabs(M[k][k]));
-    bool used[NR] = {};
+    bool used[NRMAX] = {};
     for (int col = 0; col < NR; ++col) {
       int piv = -1;
+      // a pivot below 1e-14 of the largest diagonal is roundoff: the row
+      // is dependent on the others (or has no free species), lambda 0
       double best = 1e-14 * scale;
       for (int row = col; row < NR; ++row)
-        if (std::fabs(M[row][col]) > best) best = std::fabs(M[row][col]),
-                                           piv = row;
+        if (std::fabs(M[row][col]) > best) {
+          best = std::fabs(M[row][col]);
+          piv = row;
+        }
       if (piv < 0) continue;
       if (piv != col) {
-        for (int l = 0; l < NR; ++l) std::swap(M[piv][l], M[col][l]);
-        std::swap(r[piv], r[col]);
+        for (int l = 0; l < NR; ++l) {
+          const double t = M[piv][l];
+          M[piv][l] = M[col][l];
+          M[col][l] = t;
+        }
+        const double t = r[piv];
+        r[piv] = r[col];
+        r[col] = t;
       }
       used[col] = true;
       for (int row = col + 1; row < NR; ++row) {
@@ -1333,12 +1372,138 @@ inline void conserve_cell_(const double* n0, double* n, const Params& p,
     for (int i = 0; i < NSPEC; ++i) {
       if (fixed[i]) continue;
       double d = 0.0;
-      for (int k = 0; k < NR; ++k) d += A(k, i) * lam[k];
+      for (int k = 0; k < NR; ++k) d += conserved_row_(k, i) * lam[k];
       n[i] += n[i] * d;
-      if (n[i] < 0.0) n[i] = 0.0, clipped = true;
+      if (n[i] < 0.0) {
+        n[i] = 0.0;
+        clipped = true;
+      }
     }
-    if (!clipped) break;
+    if (!clipped || totals_residual_(n, target, charge) < 1e-13) break;
   }
+  return totals_residual_(n, target, charge);
+}
+
+// the species the projections leave alone: the opaque ones, and those the
+// network's freeze directives hold for these parameters
+KROME_HD inline void conserved_fixed_(const Params& p, bool* fixed) {
+  for (int i = 0; i < NSPEC; ++i) fixed[i] = species_opaque[i];
+  if constexpr (NFREEZE_MAX > 0) {
+    int idx[NFREEZE_MAX > 0 ? NFREEZE_MAX : 1];
+    const int m = frozen_species(p, idx);
+    for (int q = 0; q < m; ++q) fixed[idx[q]] = true;
+  }
+  (void)p;
+}
+
+// post-solve conservation of cell n against its input n0 (SolverOpts::
+// conserve). Mode 1: electrons restore the input net charge. Mode 2: the
+// projection project_totals_ onto the input element totals and charge.
+// Mode 3: the electrons neutralize the ions, n(e-) = max(sum q n over the
+// other species, 0), even while a freeze directive holds e- fixed (legacy
+// -computeElectrons, applied after the solve instead of in the rhs).
+KROME_HD inline void conserve_cell_(const double* n0, double* n,
+                                    const Params& p, int mode) {
+  if (mode <= 0) return;
+  if (mode == 3) {
+#ifdef KROME_HAS_E
+    double qi = 0.0;
+    for (int i = 0; i < NSPEC; ++i)
+      if (i != IDX_E) qi += species_charge[i] * n[i];
+    n[IDX_E] = std::fmax(qi, 0.0);
+#endif
+    (void)n0; (void)p;
+    return;
+  }
+  bool fixed[NSPEC];
+  conserved_fixed_(p, fixed);
+  if (mode == 1) {
+#ifdef KROME_HAS_E
+    double q0 = 0.0, q = 0.0;
+    for (int i = 0; i < NSPEC; ++i) {
+      q0 += species_charge[i] * n0[i];
+      q += species_charge[i] * n[i];
+    }
+    if (!fixed[IDX_E]) n[IDX_E] = std::fmax(n[IDX_E] + (q - q0), 0.0);
+#endif
+    return;
+  }
+  double target[NELEM + 1];
+  for (int k = 0; k <= NELEM; ++k) {
+    target[k] = 0.0;
+    for (int i = 0; i < NSPEC; ++i) target[k] += conserved_row_(k, i) * n0[i];
+  }
+  project_totals_(n, target, fixed, true);
+}
+
+// consistent advection (legacy krome_conserveLin_x, Grassi et al. 2017
+// App. E): the cell n moved to the element totals ref[NELEM] (atoms
+// cm^-3, element_names order; get_element_totals of a reference cell) and
+// to zero net charge. Negatives are clipped first. The elements by
+// project_totals_ (without the charge row: the ionization is kept), then
+// the electrons from neutrality, n(e-) = sum q n over the other species
+// (as legacy); when the electrons cannot do it (anions dominate, e- frozen
+// or absent), the charge too by the projection. Opaque and frozen species
+// do not move. Returns 0; FLAG_CONSERVE_UNREACHED when the reference or
+// neutrality cannot be reached (an element without free carriers: the
+// cell is corrected as far as possible); FLAG_CONSERVE_LARGE (> 0, a
+// warning) when it was reached by changing a species by more than 50 %
+KROME_HD inline int conserve_to_n_(double* n, const double* ref,
+                                   const bool* fixed) {
+  double n0[NSPEC];
+  for (int i = 0; i < NSPEC; ++i) {
+    if (!fixed[i] && n[i] < 0.0) n[i] = 0.0;
+    n0[i] = n[i];
+  }
+  double target[NELEM + 1];
+  for (int k = 0; k < NELEM; ++k) target[k] = ref[k];
+  target[NELEM] = 0.0;
+  project_totals_(n, target, fixed, false);
+  bool charge_done = false;
+#ifdef KROME_HAS_E
+  if (!fixed[IDX_E]) {
+    double qi = 0.0;
+    for (int i = 0; i < NSPEC; ++i)
+      if (i != IDX_E) qi += species_charge[i] * n[i];
+    if (qi >= 0.0) {
+      n[IDX_E] = qi;
+      charge_done = true;
+    } else {
+      n[IDX_E] = 0.0;
+    }
+  }
+#endif
+  if (!charge_done) project_totals_(n, target, fixed, true);
+  if (totals_residual_(n, target, true) > 1e-12)
+    return FLAG_CONSERVE_UNREACHED;
+  for (int i = 0; i < NSPEC; ++i)
+    if (n0[i] > 0.0 && std::fabs(n[i] - n0[i]) > 0.5 * n0[i])
+      return FLAG_CONSERVE_LARGE;
+  return 0;
+}
+
+KROME_HD inline int conserve_to_(double* n, const double* ref,
+                                 const Params& p) {
+  bool fixed[NSPEC];
+  conserved_fixed_(p, fixed);
+  return conserve_to_n_(n, ref, fixed);
+}
+
+// the same with mass fractions x and ref per gram (get_element_totals_x):
+// n = x / m per gram, corrected, x = m n; species without mass untouched
+KROME_HD inline int conserve_to_x_(double* x, const double* ref,
+                                   const Params& p) {
+  bool fixed[NSPEC];
+  conserved_fixed_(p, fixed);
+  double n[NSPEC];
+  for (int i = 0; i < NSPEC; ++i) {
+    if (!(species_mass_g[i] > 0.0)) fixed[i] = true;
+    n[i] = species_mass_g[i] > 0.0 ? x[i] / species_mass_g[i] : 0.0;
+  }
+  const int f = conserve_to_n_(n, ref, fixed);
+  for (int i = 0; i < NSPEC; ++i)
+    if (!fixed[i]) x[i] = species_mass_g[i] * n[i];
+  return f;
 }
 
 
@@ -1528,7 +1693,7 @@ inline int write_error_report_(const bdf::Diag& d, const double* y,
     if (i == c.iT) return "Tgas";
     if (c.iu >= 0 && i >= c.iu && i < c.iu + c.B) return "ln Phi (bin)";
     if (c.id >= 0 && i >= c.id && i < c.id + c.D) return "Tdust (bin)";
-    if (c.ia >= 0 && i >= c.ia && i < c.ia + c.A) return "grain radius (bin)";
+    if (c.ia >= 0 && i >= c.ia && i < c.ia + c.A) return "grain atoms (bin)";
     return "?";
   };
   std::vector<int> ord(NREA);
@@ -1856,9 +2021,11 @@ inline int write_error_report_(const bdf::Diag& d, const double* y,
 // integrate from t = 0 to t_end [s]. n[NSPEC] [cm^-3] is updated in place;
 // Tgas is updated when opts.evolve_T (else it is the fixed temperature),
 // opts.Phi with radiation.evolve, opts.dust->Td with dust.evolve_Td (and Tgas
-// evolved). On failure (after the restarts, see SolverOpts)
-// the inputs are left untouched. Returns 0 on success, a negative
-// integrator flag on failure (FLAG_TOO_MUCH_WORK, ...), or
+// evolved) or with the balance Td of the final state (binned dust without
+// dust.evolve_Td), opts.dust->a with dust.evolve. On failure (after the
+// restarts, see SolverOpts) the inputs are left untouched. Returns 0 on
+// success, a negative integrator flag on failure (FLAG_TOO_MUCH_WORK,
+// ...), or
 //   -102  cooling DUSTBINS configured, Tgas evolved and no DustBins
 //   -103  photo module without a field Phi, or radiation.evolve without a
 //         photo module
@@ -1866,13 +2033,14 @@ inline int write_error_report_(const bdf::Diag& d, const double* y,
 //   -106  conservation requested with the dust.gas_total representation
 //   -107  surface.bins: no DustBins, or not SURF_NB bins
 //   -108  linsol LINSOL_LAPACK in a build without LAPACK
+//   -110  the integration ended at a non-positive or non-finite Tgas
 inline int solve(double* n, double& Tgas, const Params& params,
                  double t_end, const SolverOpts& o, SolveStats* stats) {
   if (stats != nullptr) *stats = SolveStats();
 #ifdef KROME_GAS_TOTAL
   if (o.conserve != 0) {  // slots store totals: not supported
-    if (stats != nullptr) stats->flag = -106;
-    return -106;
+    if (stats != nullptr) stats->flag = FLAG_CONSERVE_GAS_TOTAL;
+    return FLAG_CONSERVE_GAS_TOTAL;
   }
 #endif
   SolveCtx c;
@@ -1883,8 +2051,8 @@ inline int solve(double* n, double& Tgas, const Params& params,
   }
   const int NEQ = c.NEQ;
   if (o.linsol == LINSOL_LAPACK && !HAS_LAPACK) {
-    if (stats != nullptr) stats->flag = -108;
-    return -108;
+    if (stats != nullptr) stats->flag = FLAG_NO_LAPACK;
+    return FLAG_NO_LAPACK;
   }
   const LinSol ls = linsol_of_(o.linsol, NEQ);
   install_hooks_(c, n, o);

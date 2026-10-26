@@ -5,7 +5,8 @@ Emits one self-contained header `net_<name>.hpp` with:
   - species table (indices, names, masses, charges)
   - Params struct (runtime parameters with file defaults)
   - rates(Tgas, n, p, k): rate coefficients, piecewise groups clamped per
-    spec 3.1 (build option `outside=zero` supported via OUTSIDE_ZERO)
+    network-format.md 3.1 (build option `outside=zero` supported via
+    OUTSIDE_ZERO)
   - rhs(n, k, dn): chemical right-hand side
   - jacobian(Tgas, n, p, k, J): analytic dense Jacobian d(dn_i)/d(n_j),
     including d(k)/d(n) terms from density-dependent rate expressions
@@ -30,8 +31,6 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 import knet  # noqa: E402
 import constants  # noqa: E402
-
-LN10 = "2.302585092994045684"
 
 # ---------------------------------------------------------------------------
 # AST helpers: constant folding constructors + differentiation
@@ -772,7 +771,7 @@ def d2e(s):
 
 
 class Codegen:
-    # outside-of-range behavior for piecewise T groups (spec 3.1):
+    # outside-of-range behavior for piecewise T groups (network-format.md 3.1):
     #  'asym' (default): zero below the lower bound, clamp above the upper
     #  'clamp': clamp at both bounds; 'zero': legacy KROME (reaction off)
     # secondary ionization follows Quadri et al. 2025 (arXiv:2505.05556,
@@ -866,10 +865,10 @@ class Codegen:
         self.metal_cooling = metal_cooling
         self.zcie = zcie  # '' | '2012' (HM12 UV + heating) | 'nouv'
         self.dust_tables = dust_tables  # '' | 'HM2012' | 'MC'
+        self.dh = bool(dh)  # enthalpy heating/cooling (legacy DH)
         # gas+total representation (docs/solver-design.md section 4): each
         # surface slot of a gas<->surface pair stores TOTAL = gas + surface,
         # removing the stiff freezeout/evaporation exchange from it
-        self.dh = bool(dh)  # enthalpy heating/cooling (legacy DH)
         self.gas_total = bool(gas_total)
         self.pair_gas, self.total_of = {}, {}
         if self.gas_total:
@@ -880,16 +879,14 @@ class Codegen:
                         self.pair_gas[s] = base
                         self.total_of[base] = s
         self.data_dir = Path(data_dir)
-        # per-species defaults (--custom-atol / --custom-rtol, legacy
-        # -customATOL / -customRTOL): {species: value}, the starting
-        # SolverOpts::atol_species / rtol_species
         self.photo_db = load_photo_db(self.data_dir /
                                       "photoioniziation.dat")
         self.warnings = []
+        # per-species defaults (--custom-atol / --custom-rtol, legacy
+        # -customATOL / -customRTOL): {species: value}, the starting
+        # SolverOpts::atol_species / rtol_species
         self.custom_atol = self.load_species_tols(custom_atol, "atol")
         self.custom_rtol = self.load_species_tols(custom_rtol, "rtol")
-        # thermal processes: fixed at generation time (legacy -cooling= /
-        # -heating=); emitted as the constexpr ThermalConfig
         # --cmb-pumping: needed by configure_floor (the pumped metal lines
         # drop out of the cooling floor)
         self.cmb_pumping = bool(cmb_pumping)
@@ -900,10 +897,10 @@ class Codegen:
         self.cool_levels = None if cool_levels is None else int(cool_levels)
         self.file_coolants = self.load_cool_files(cool_files or ())
         self.file_active = []
+        # thermal processes: fixed at generation time (legacy -cooling= /
+        # -heating=); emitted as the constexpr ThermalConfig
         self.thermal = self.configure_thermal(cooling, heating,
                                               cooling_floor)
-        # what is evolved alongside the chemistry: fixed at generation too
-        # (thermal evolution as a whole stays the one runtime switch)
         # krome_fshield() model (legacy -shielding): WG11 by default since
         # 2.0.0 (legacy's default was none, f = 1, which switched off the
         # shielding a network asks for); NONE keeps f = 1
@@ -940,6 +937,8 @@ class Codegen:
                              "needs thermal.photoelectric = 'WD01'")
         self.habing_shield = bool(habing_shield)
         self.thermal["photo_induced"] = self.photo_induced
+        # what is evolved alongside the chemistry: fixed at generation too
+        # (thermal evolution as a whole stays the one runtime switch)
         self.evolve_rad = bool(evolve_rad)
         self.evolve_Td = bool(evolve_Td)
         # --evolve-dust: grain radii of the bins as solver state, changed
@@ -1373,6 +1372,11 @@ class Codegen:
     # -- differentiation d/d n(target) ---------------------------------------
 
     def diff(self, a, target):
+        """the derivative of the expression AST a (knet.py's node forms)
+        with respect to target, as a new AST (ZERO / ONE for constants):
+        target is a species name (d/dn), "Tgas", or "@ntot" / "@Hnuclei"
+        for the aggregates (whose own dependence on the densities is the
+        Jacobian's low-rank part)"""
         if "n" in a or "str" in a:
             return ZERO
         if "s" in a:
@@ -1475,6 +1479,10 @@ class Codegen:
         return "(%s)" % s if p < need else s
 
     def _cx(self, a, tvar):
+        """the C++ text of the expression AST a, and its precedence (1: a
+        sum, 2: a product or a unary minus, 9: an atom or a call), from
+        which _wrap decides the parentheses; tvar: the C++ name of the
+        rate's (clamped) temperature"""
         if "n" in a:
             s = self.cnum(a["n"])
             return s, (2 if s.startswith("-") else 9)
@@ -1851,13 +1859,13 @@ class Codegen:
         return ast, None
 
     def resolve_auto(self):
-        """bare `auto` rates (spec 7): look the reaction up in the legacy
-        rate database (data/database/*.dat, in load_auto_db order) with
-        legacy's rules: the first matching entry without T limits wins; entries
-        with limits are range pieces of one piecewise rate; an unlimited entry
-        after limited ones is an overlap error. Entries needing machinery KROME-X
-        lacks (reverse reactions, legacy dust variables) stay stubbed with a
-        warning naming the cause."""
+        """bare `auto` rates (network-format.md 7): look the reaction up in
+        the legacy rate database (data/database/*.dat, in load_auto_db
+        order) with legacy's rules: the first matching entry without T
+        limits wins; entries with limits are range pieces of one piecewise
+        rate; an unlimited entry after limited ones is an overlap error.
+        Entries needing machinery KROME-X lacks (reverse reactions, legacy
+        dust variables) stay stubbed with a warning naming the cause."""
         if getattr(self, "_auto_done", False):
             return
         self._auto_done = True
@@ -2186,7 +2194,7 @@ class Codegen:
             self.warnings.append("rates.screening: no reaction between charged "
                                  "nuclei")
 
-    # -- reverse reactions (spec 3.2) ------------------------------------------
+    # -- reverse reactions (network-format.md 3.2) ---------------------------
 
     def load_thermo_nist(self):
         """data/thermoNIST.dat (NIST-JANAF Shomate): NAME -> list of ranges
@@ -2267,9 +2275,9 @@ class Codegen:
         w("}")
 
     def resolve_reverse(self):
-        """`A <-> B` (spec 3.2): the reverse reaction B -> A is added right
-        after each forward piece, with the forward's temperature range and
-        conditions and the rate from detailed balance,
+        """`A <-> B` (network-format.md 3.2): the reverse reaction B -> A is
+        added right after each forward piece, with the forward's
+        temperature range and conditions and the rate from detailed balance,
           k_rev = k_fwd / K_c,  K_c = exp(-dG/RT) (P0 / kB T)^dn,
         P0 = 1 bar, dG and dn = n_products - n_reactants of the forward
         reaction. Legacy -reverse applied the (kB T / P0)^dn factor twice
@@ -2409,7 +2417,7 @@ class Codegen:
                 rev["eq"] if rev is not None else "NO REVERSE FOUND"))
         return "\n".join(lines) + "\n"
 
-    # -- grain-surface chemistry (spec 5.3) -----------------------------------
+    # -- grain-surface chemistry (network-format.md 5.3) ---------------------
 
     SURF_APP2 = 9e-16     # area of a surface site, (3 A)^2 [cm^2] (Hocuk+15)
     SURF_TUNNEL_A = 1e-8  # barrier width for tunnelling [cm] (legacy ar)
@@ -2581,8 +2589,8 @@ class Codegen:
         knet.group_reactions(net)
 
     def resolve_surface(self):
-        """grain-surface chemistry on the dust population (spec 5.3): every
-        surface(...) reaction becomes a generated rate function.
+        """grain-surface chemistry on the dust population (network-format.md
+        5.3): every surface(...) reaction becomes a generated rate function.
           gas X -> X_dust             adsorption (sticking, HM79)
           X_dust -> X                 thermal (+ cosmic-ray) desorption
           A_dust + B_dust -> products Langmuir-Hinshelwood, with reaction-
@@ -2787,9 +2795,14 @@ class Codegen:
             knet.group_reactions(net)
         miss = sorted(x for x in need_eb if x not in eb)
         if miss:
+            other = ("SEMENOV" if self.binding_energies == "KROME"
+                     else "KROME")
             raise ValueError("surface chemistry: no binding energy (%s set) "
-                             "for %s" % (self.binding_energies,
-                                         ", ".join(miss)))
+                             "for %s: the network may need the other set "
+                             "(surface.binding_energies = \"%s\"; its "
+                             "header says), or `ebind X = E_bare, E_ice` "
+                             "lines" % (self.binding_energies,
+                                        ", ".join(miss), other))
         self._surf_eb = eb
         if any(s["kind"] == "des" for s in self._surf) and self.cr_desorption \
                 and self.cr_desorption not in net.params and \
@@ -2816,6 +2829,8 @@ class Codegen:
             c = nasa.get(sp)
             if c is None:
                 return None
+            # c: [Tlow, Tcommon, Thigh, 7 upper-range, 7 lower-range
+            # coefficients] (load_thermo); the range that holds 300 K
             a = c[10:17] if 300.0 <= c[1] else c[3:10]
             T = 300.0
             return T * (a[0] + a[1] * T / 2 + a[2] * T * T / 3
@@ -2853,8 +2868,8 @@ class Codegen:
         sp_sorted = sorted(net.species)
         eb = self._surf_eb
         base = {s: self.surf_base(s) for s in sp_sorted}
-        w("// ---- grain-surface chemistry (spec 5.3; binding energies %s,"
-          % self.binding_energies)
+        w("// ---- grain-surface chemistry (network-format.md 5.3; binding "
+          "energies %s," % self.binding_energies)
         w("// nu %s, E_diff = %.4g E_bind, reaction-diffusion competition %s)"
           % (self.surface_nu, self.FDIFF[self.binding_energies],
              "on" if self.surface_competition else "off"))
@@ -3321,9 +3336,20 @@ class Codegen:
         out.append("  }")
         out.append("  return nullptr;")
         out.append("}")
+        out.append("// a parameter row (param_names order: the C interface's "
+                   "par[] rows) into a")
+        out.append("// Params, on the host or the device (device-resident "
+                   "calls build each")
+        out.append("// cell's parameters from its row on the device)")
+        out.append("KROME_HD inline void params_from_row(const double* row, "
+                   "Params& p) {")
+        out.append("  (void)row; (void)p;")
+        for i, s_ in enumerate(self.pnames):
+            out.append("  p.%s = row[%d];" % (s_, i))
+        out.append("}")
         out.append("// index of the first REQUIRED parameter still unset "
                    "(NaN), or -1")
-        out.append("inline int params_missing(const Params& p) {")
+        out.append("KROME_HD inline int params_missing(const Params& p) {")
         out.append("  (void)p;")
         for i, s in enumerate(self.pnames):
             if s in self.param_required:
@@ -3348,8 +3374,8 @@ class Codegen:
         return flag
 
     def resolve_rate_scale(self):
-        """network `rate_scale = expr` (spec 6.2): fold the factor into
-        every expression rate, after auto/surface resolution, so the
+        """network `rate_scale = expr` (network-format.md 6.2): fold the factor
+        into every expression rate, after auto/surface resolution, so the
         Jacobian, the piecewise groups and the GPU path see ordinary
         expressions. The unscaled AST is kept for selfcheck."""
         net = self.net
@@ -3738,16 +3764,17 @@ class Codegen:
         w("")
 
     def emit_freeze(self, w):
-        """network `freeze` directives (spec 6.2) -> frozen_species(): the
-        solver zeroes those rows of the full RHS (chemistry, secondary
-        ionization, radiation coupling) and of the analytic Jacobian, as
+        """network `freeze` directives (network-format.md 6.2) ->
+        frozen_species(): the solver zeroes those rows of the full RHS
+        (chemistry, secondary ionization, radiation coupling) and of the
+        analytic Jacobian, as
         legacy @ODEmodifier dn(idx) = 0 did after the ODE evaluation."""
         net = self.net
         nmax = sum(len(f["species"]) for f in net.freeze)
         w("// freeze directives: species whose dn/dt is held at zero while")
         w("// the condition holds (the condition is constant during a call)")
         w("constexpr int NFREEZE_MAX = %d;" % nmax)
-        w("inline int frozen_species(const Params& p, int* idx) {")
+        w("KROME_HD inline int frozen_species(const Params& p, int* idx) {")
         w("  (void)p; (void)idx;")
         w("  int m = 0;")
         for f in net.freeze:
@@ -4031,6 +4058,8 @@ class Codegen:
         description from the library."""
         net = self.net
         sp_sorted = sorted(net.species)
+        nelem = len({e for x in sp_sorted
+                     for e in (net.species[x]["composition"] or {})})
         pnames = self.pnames
         head = ("generated by codegen.py from network '%s' -- do not edit"
                 % net.name)
@@ -4048,6 +4077,8 @@ class Codegen:
              "#define KROME_NSPEC %d" % len(sp_sorted),
              "#define KROME_NREA %d" % len(net.reactions),
              "#define KROME_NPAR %d" % len(pnames),
+             "#define KROME_NELEM %d  /* elements (krome_element_name)"
+             " */" % nelem,
              "/* species indices into n[cell][KROME_NSPEC] (0-based) */"]
         for i, s in enumerate(sp_sorted):
             h.append("#define KROME_IDX_%s %d  /* %s */"
@@ -4083,7 +4114,8 @@ class Codegen:
              % net.name,
              "  integer, parameter :: krome_nspec = %d" % len(sp_sorted),
              "  integer, parameter :: krome_nrea = %d" % len(net.reactions),
-             "  integer, parameter :: krome_npar = %d" % len(pnames)]
+             "  integer, parameter :: krome_npar = %d" % len(pnames),
+             "  integer, parameter :: krome_nelem = %d" % nelem]
         for i, (s, ident) in enumerate(zip(sp_sorted, sp_ids)):
             if ident in ok:
                 f.append("  integer, parameter :: %s = %d  ! %s"
@@ -4103,7 +4135,60 @@ class Codegen:
         out["krome_net.f90"] = "\n".join(f) + "\n"
         return out
 
+    def _emit_unrolled_fluxes_rhs(self, w):
+        """fluxes() (the reaction rates k * prod(n) [cm^-3 s^-1]) and rhs(),
+        one statement per reaction"""
+        net = self.net
+        w("void inline fluxes(const double* n, const double* k, "
+          "double* fl) {")
+        w("  (void)n; (void)k; (void)fl;")
+        for rx in net.reactions:
+            i = rx["id"] - 1
+            fac = ["k[%d]" % i] + [self.nden(r["sp"])
+                                   for r in rx["reactants"] if r["kinetic"]]
+            w("  fl[%d] = %s;" % (i, "*".join(fac)))
+        w("}")
+        w("")
+
+        # rhs()
+        w("void inline rhs(const double* n, const double* k, double* dn) {")
+        w("  for (int i = 0; i < NSPEC; ++i) dn[i] = 0.0;")
+        w("  double flux;")
+        w("  (void)n; (void)k; (void)flux;  // an empty network")
+        for rx in net.reactions:
+            i = rx["id"] - 1
+            fac = ["k[%d]" % i] + [self.nden(r["sp"])
+                                   for r in rx["reactants"] if r["kinetic"]]
+            w("  flux = %s;  // %s" % ("*".join(fac), rx["eq"]))
+            if self.gas_total:
+                # net increments: a gas member also updates its total
+                # slot; exact freezeout/evaporation cancellations on the
+                # total are dropped instead of emitted as -=/+= noise
+                for sp, v in self.stoich_net(rx):
+                    op = "+=" if v > 0 else "-="
+                    mag = "" if abs(v) == 1 else "%d.0*" % abs(v)
+                    w("  dn[IDX_%s] %s %sflux;" % (self.cid(sp), op, mag))
+            else:
+                for r in rx["reactants"]:
+                    w("  dn[IDX_%s] -= flux;" % self.cid(r["sp"]))
+                for pr in rx["products"]:
+                    w("  dn[IDX_%s] += flux;" % self.cid(pr["sp"]))
+        w("}")
+
     def _generate_sections(self):
+        """the generated C++, as lines per section (SECTIONS, each a file of
+        the split output, net_<name>_<section>.hpp, chained in this order)
+        plus the big tables (data): the network is resolved first (auto,
+        nucleation, reverse, surface, ...), then the sections are written in
+        turn, `w` appending to the current one:
+          core      species and parameter tables, the summing helpers, the
+                    photo / LW / dust declarations and the externs
+          rates     the rate functions, rates_fixed / rates_var, fluxes()
+                    and rhs()
+          thermal   the network's own heating and cooling terms (custom,
+                    nuclear, cosmic rays, chemical, free-free, ...)
+          jacobian  the analytic Jacobian (jacobian_split), its scaling and
+                    the dk/dn difference quotients"""
         net = self.net
         self.resolve_auto()
         self.resolve_nucleation()
@@ -4118,6 +4203,8 @@ class Codegen:
         sec = {s: [] for s in self.SECTIONS}
         sec["data"] = []
         self._data_w = sec["data"].append
+
+        # ==== core section ===================================================
         w = sec["core"].append
 
         w('inline const char* NETWORK_NAME = "%s";' % net.name)
@@ -4196,11 +4283,12 @@ class Codegen:
         w("inline const double species_natoms_H[NSPEC] = {%s};"
           % ", ".join(self.cnum((net.species[s]["composition"] or {})
                                 .get("H", 0)) for s in sp_sorted))
-        # gas+total abundance representation (docs/solver-design.md sect. 4):
-        # when enabled, a surface slot stores the TOTAL (gas+surface)
-        # abundance and the summing helpers below must weight species so
-        # nothing is counted twice. The pairs are detected here; the mode
-        # itself is not implemented yet, so all weights are 1.
+        # gas+total abundance representation (dust.gas_total;
+        # docs/solver-design.md sect. 4): the surface slot of each
+        # gas/surface pair stores the TOTAL (gas + surface) abundance, so
+        # the summing helpers below weight the gas member 0 (state_weight)
+        # and nothing is counted twice. Without dust.gas_total, or without
+        # pairs, every weight is 1 and no state_weight table is emitted.
         pairs = []
         for s in sp_sorted:
             sp = net.species[s]
@@ -4211,7 +4299,8 @@ class Codegen:
         if pairs:
             w("// gas<->surface pairs (for the gas+total representation): %s"
               % ", ".join("%s/%s" % p for p in pairs))
-        if self.gas_total and self.pair_gas:
+        weighted = self.gas_total and bool(self.pair_gas)
+        if weighted:
             w("// GAS+TOTAL representation: the surface slot of each pair")
             w("// stores TOTAL = gas + surface, so summing over all slots")
             w("// must skip the gas member (weight 0) to avoid double")
@@ -4272,7 +4361,7 @@ class Codegen:
         w("// d aggregate_a / d y_j, the weights of the summing helpers")
         w("constexpr int NAGG = 3;")
         w("static inline double agg_w_(int a, int j) {")
-        sw = " * state_weight[j]" if self.gas_total else ""
+        sw = " * state_weight[j]" if weighted else ""
         w("  return (a == 0 ? 1.0 : a == 1 ? species_natoms_H[j] "
           ": species_mass_g[j])%s;" % sw)
         w("}")
@@ -4411,6 +4500,7 @@ class Codegen:
         w("double table_Tdust(double Tgas, const double* n, const P& p);")
         w("")
 
+        # ==== rates section ==================================================
         w = sec["rates"].append
         # Tdust as state symbol: the p.Tdust parameter, or the live
         # table_Tdust(Tgas, n) when --dust-tables is generated (undef'd
@@ -4553,52 +4643,21 @@ class Codegen:
                 w("  }")
                 w("}")
                 w("")
-        # fluxes(): the reaction rates k * prod(n) [cm^-3 s^-1]
-        w = (lambda *a: None) if loop else sec["rates"].append
-        w("void inline fluxes(const double* n, const double* k, "
-          "double* fl) {")
-        w("  (void)n; (void)k; (void)fl;")
-        for rx in net.reactions:
-            i = rx["id"] - 1
-            fac = ["k[%d]" % i] + [self.nden(r["sp"])
-                                   for r in rx["reactants"] if r["kinetic"]]
-            w("  fl[%d] = %s;" % (i, "*".join(fac)))
-        w("}")
-        w("")
-
-        # rhs()
-        w("void inline rhs(const double* n, const double* k, double* dn) {")
-        w("  for (int i = 0; i < NSPEC; ++i) dn[i] = 0.0;")
-        w("  double flux;")
-        w("  (void)n; (void)k; (void)flux;  // an empty network")
-        for rx in net.reactions:
-            i = rx["id"] - 1
-            fac = ["k[%d]" % i] + [self.nden(r["sp"])
-                                   for r in rx["reactants"] if r["kinetic"]]
-            w("  flux = %s;  // %s" % ("*".join(fac), rx["eq"]))
-            if self.gas_total:
-                # net increments: a gas member also updates its total
-                # slot; exact freezeout/evaporation cancellations on the
-                # total are dropped instead of emitted as -=/+= noise
-                for sp, v in self.stoich_net(rx):
-                    op = "+=" if v > 0 else "-="
-                    mag = "" if abs(v) == 1 else "%d.0*" % abs(v)
-                    w("  dn[IDX_%s] %s %sflux;" % (self.cid(sp), op, mag))
-            else:
-                for r in rx["reactants"]:
-                    w("  dn[IDX_%s] -= flux;" % self.cid(r["sp"]))
-                for pr in rx["products"]:
-                    w("  dn[IDX_%s] += flux;" % self.cid(pr["sp"]))
-        w("}")
+        # fluxes() and rhs(), one statement per reaction (--rhs=loop: the
+        # loops over the index tables above instead)
+        if not loop:
+            self._emit_unrolled_fluxes_rhs(sec["rates"].append)
         w = sec["rates"].append
         w("#undef Tdust")
 
+        # ==== thermal section ================================================
         w = sec["thermal"].append
         w(self._tdust_define())
         w("")
-        # network-defined cooling/heating terms (spec 6.1): volumetric
-        # [erg cm^-3 s^-1]; standard thermal processes (atomic, H2, ...)
-        # come from runtime modules and are added by the thermal solver
+        # network-defined cooling/heating terms (network-format.md 6.1):
+        # volumetric [erg cm^-3 s^-1]; standard thermal processes (atomic,
+        # H2, ...) come from runtime modules and are added by the thermal
+        # solver
         w("double inline cooling_custom(double Tgas, const double* n, "
           "const Params& p) {")
         w("  (void)Tgas; (void)n; (void)p;")
@@ -4658,6 +4717,10 @@ class Codegen:
                  and any(nd.get("kind") == "param" and nd.get("s") == "crate"
                          for nd in self.deep_walk(rx["rate"]["ast"]))
                  and len(rx["reactants"]) == 1]
+        # Q_H2 [eV] in log n_H2 (legacy's branches): the quartic crc for
+        # 1e5 <= n_H2 <= 1e10, its value at n_H2 = 1e10 (log 10) above;
+        # the line cr_lin below 1e5, down to minH2 where it reaches 0;
+        # 0 below that
         crc = [9.1462198642562, -0.443120145068494, 0.601271617560071,
                -0.0710284101055109, 0.00242079494592405]
         cr_lin = (1.4510849135088, 7.23277032061136)
@@ -4826,6 +4889,7 @@ class Codegen:
         self.emit_recomb_cooling(w)
         w("#undef Tdust")
 
+        # ==== jacobian section ===============================================
         w = sec["jacobian"].append
         w(self._tdust_define())
         w("")
@@ -5193,7 +5257,7 @@ class Codegen:
         """embed one uniform-grid 3D table as <name>_* arrays plus the
         <name>_tab MolCoolTab descriptor."""
         ax1, ax2, ax3, flat = data
-        n1, n2, n3 = len(ax1), len(ax2), len(ax3)
+        n2, n3 = len(ax2), len(ax3)
         w("// " + comment)
         for nm, ax in (("x1", ax1), ("x2", ax2), ("x3", ax3)):
             w("inline const double %s_%s[%d] = {%s};"
@@ -5741,10 +5805,11 @@ class Codegen:
         populate: those reachable from the ground level through collisional
         excitation / de-excitation, radiative decay and (with pumping)
         absorption. The others have zero population; a level with no
-        transition at all makes the system singular (O2 of data/coolO2.dat:
-        levels 36-47 have no collisional data). Legacy dropped every level
-        above the last one excited directly from the ground (its nmax),
-        which also cut levels fed by cascades (Fe+ of coolZ.dat)."""
+        transition at all makes the system singular (O2 of
+        data/cooling/coolO2.dat: levels 36-47 have no collisional data).
+        Legacy dropped every level above the last one excited directly from
+        the ground (its nmax), which also cut levels fed by cascades (Fe+ of
+        coolZ.dat)."""
         lev = md["levels"]
         edges = {k: set() for k in lev}
         for c in md["coll"]:
@@ -6949,7 +7014,6 @@ class Codegen:
         (the fits hold for 10 <= T <= 1e4 K and 1e2 <= psi <= 1e6; eq. 45
         for T >= 1e3 K: psi is clamped at 1e2 there, where its D1 / ln psi
         diverges at psi = 1). PHOTOAV stays the BT94-era formula."""
-        th = self.thermal
         (c0, c1, c2, c3, c4, c5, c6), (d0, d1, d2, d3, d4) = \
             WD01_TABLE[self.wd01]
         cn = self.cnum
@@ -7431,15 +7495,16 @@ class Codegen:
         return c
 
     def emit_rad_channels(self, w, photo):
-        """spec 5.4: shielded photo reactions (photo(shield=...)), the
-        photons absorbed per event (; pdiss=), and the J_LW channel. A J_LW
-        rate k = khat(T, n) J_LW acts on the photon bins as a photo
-        reaction with cross section khat w_b per bin (w_b the band weight,
-        J_LW = sum_b w_b Phi_b); every channel removes rate/pdiss photons."""
+        """network-format.md 5.4: shielded photo reactions
+        (photo(shield=...)), the photons absorbed per event (; pdiss=), and
+        the J_LW channel. A J_LW rate k = khat(T, n) J_LW acts on the photon
+        bins as a photo reaction with cross section khat w_b per bin (w_b the
+        band weight, J_LW = sum_b w_b Phi_b); every channel removes
+        rate/pdiss photons."""
         net = self.net
         n = len(photo)
         m1 = max(n, 1)
-        w("// ---- radiative channels (spec 5.4)")
+        w("// ---- radiative channels (network-format.md 5.4)")
         w("// photons absorbed per photo event: 1/pdiss")
         w("inline const double photo_pdiss[%d] = {%s};"
           % (m1, ", ".join(self.cnum(p["rx"].get("pdiss", 1.0))
@@ -8213,12 +8278,6 @@ def list_tests():
         if TESTS_DIR.is_dir() else []
 
 
-def test_driver(name):
-    """the language of test NAME's driver: "cpp" (test.cpp, the C++ API)
-    or "f90" (test.f90, the Fortran binding)"""
-    return "f90" if (TESTS_DIR / name / "test.f90").is_file() else "cpp"
-
-
 def is_legacy_network(path):
     """a legacy react_* file: its first statement is not the KROME-X header"""
     try:
@@ -8344,7 +8403,8 @@ def build_parser():
                          "(C,Si,Fe,O,S,C+,O+,Si+,Fe+; default: all present)")
     ap.add_argument("--cool-file", default="", metavar="FILE[,FILE]",
                     help="coolant files in the legacy coolZ.dat format "
-                         "(LAMDA / CHIANTI conversions, e.g. data/coolO2.dat;"
+                         "(LAMDA / CHIANTI conversions, e.g. "
+                         "data/cooling/coolO2.dat;"
                          " legacy -coolFile), added to the embedded "
                          "coolZ.dat; select their coolants with thermal.cooling="
                          "<name> (CII, FeII for atoms and ions, the species "
@@ -8514,7 +8574,7 @@ def build_parser():
 OPTION_EXAMPLES = {
     "network": "networks/primordial.knet", "outdir": "myproject",
     "cooling": "ATOMIC,H2", "heating": "CHEM,COMPRESS",
-    "metal_cooling": "C,C+,O,Si,Fe", "cool_file": "data/coolO2.dat",
+    "metal_cooling": "C,C+,O,Si,Fe", "cool_file": "data/cooling/coolO2.dat",
     "cool_levels": "10", "secondary_ionization": "H,He",
     "evolve_dust": "GROWTH,SPUTTER,EVAP", "gamma": "EXACT",
     "wd01": WD01_DEFAULT, "surface_bins": "10", "cr_desorption": "crate",
@@ -8827,20 +8887,6 @@ test: test.cpp krome_test_utils.hpp net_$(NET)_data.o $(HDRS)
 \t$(CXX) $(CXXFLAGS) $(INC) test.cpp net_$(NET)_data.o $(LIBS) -o $@
 """
 
-MAKEFILE_TEST_F90 = """
-# the test driver (python3 -m kromex --test @TEST@, the Fortran binding):
-# make && ./test; with a C++ counterpart test_cpp.cpp, make builds it too
-TEST_SRC = krome_test_utils.f90 test.f90
-TEST_CPP = $(basename $(wildcard test_cpp.cpp))
-
-test: $(TEST_SRC) libkrome.a krome.mod $(TEST_CPP)
-\t$(FC) $(FFLAGS) $(TEST_SRC) krome.o krome_net.o libkrome.a $(LIBS) \\
-\t  $(CXXLIB) -o $@
-
-test_cpp: test_cpp.cpp krome_test_utils.hpp net_$(NET)_data.o $(HDRS)
-\t$(CXX) $(CXXFLAGS) $(INC) test_cpp.cpp net_$(NET)_data.o $(LIBS) -o $@
-"""
-
 MAKEFILE_TAIL = """
 # make check: build every target, then compare the rate coefficients of
 # this build (compiler and flags) with reference values computed when the
@@ -8865,8 +8911,7 @@ def makefile(netname, fortran=False, python=False, test=None):
     body = MAKEFILE_HEAD.replace("@EXAMPLE@", "" if test else
                                  MAKEFILE_EXAMPLE)
     if test:
-        f90 = test_driver(test) == "f90"
-        default = "the test driver (test.%s)" % ("f90" if f90 else "cpp")
+        default = "the test driver (test.cpp)"
     else:
         default = "the C++ example (example.cpp)"
         targets += "\n#   make example     the C++ example"
@@ -8878,8 +8923,7 @@ def makefile(netname, fortran=False, python=False, test=None):
         body += MAKEFILE_FORTRAN.replace(
             "@EXAMPLE_F90@", "" if test else MAKEFILE_EXAMPLE_F90)
     if test:
-        body += (MAKEFILE_TEST_F90 if f90 else MAKEFILE_TEST).replace(
-            "@TEST@", test)
+        body += MAKEFILE_TEST.replace("@TEST@", test)
     # the shared library is always a target (a Python binding added later,
     # e.g. by kromex.Preprocessor.build, needs no new Makefile); with
     # --python make builds it too
@@ -8888,7 +8932,7 @@ def makefile(netname, fortran=False, python=False, test=None):
     body += MAKEFILE_PYTHON
     if python:
         alls.append("shared")
-    body += MAKEFILE_TAIL.replace("@CLEAN@", "test test_cpp " if test
+    body += MAKEFILE_TAIL.replace("@CLEAN@", "test " if test
                                   else "example example_f90 ")
     targets += ("\n#   make check       build everything and check the "
                 "rates of this build\n#                    against "
@@ -9082,13 +9126,9 @@ def write_test(outdir, name):
     driver, the plot script, data; never overwriting)"""
     import shutil
     made = []
-    # the helpers of the driver's language (a Fortran test may also have
-    # a C++ counterpart)
-    skip = None if test_driver(name) == "f90" else ".f90"
     for src in (TESTS_DIR / "common", TESTS_DIR / name):
         for f in sorted(src.iterdir()) if src.is_dir() else []:
-            if f.name == "options.toml" or not f.is_file() or (
-                    src.name == "common" and f.suffix == skip):
+            if f.name == "options.toml" or not f.is_file():
                 continue
             if not (outdir / f.name).exists():
                 shutil.copy2(f, outdir / f.name)

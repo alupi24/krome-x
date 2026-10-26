@@ -823,7 +823,7 @@ class Converter:
 
     def apply_rate_modifiers(self):
         """translate the legacy @reactionModifier patterns found in the
-        corpus (Jacobian-consistent, spec 6.2):
+        corpus (Jacobian-consistent, network-format.md 6.2):
           k(:) = k(:) / C          -> network line `rate_scale = 1 / (C)`
           if (cond) k(a:b) = 0     -> rates a..b wrapped in
                                       where(cond, 0.0, rate)
@@ -882,7 +882,7 @@ class Converter:
 
     def apply_ode_modifiers(self):
         """translate legacy @ODEmodifier blocks that only zero species
-        derivatives into `freeze` directives (spec 6.2):
+        derivatives into `freeze` directives (network-format.md 6.2):
           if (cond) then; dn(idx_X) = 0; ...; end if -> freeze X, ... where cond
           if (cond) dn(idx_X) = 0                   -> freeze X where cond
           dn(idx_X) = 0                             -> freeze X

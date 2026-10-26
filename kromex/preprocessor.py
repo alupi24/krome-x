@@ -218,9 +218,6 @@ class Preprocessor:
                               % (name, ", ".join(codegen.list_tests())))
         kp = cls.from_file(codegen.TESTS_DIR / name / "options.toml",
                            base=ROOT)
-        if codegen.test_driver(name) == "f90" and \
-                "fortran" not in kp.project.bindings:
-            kp.project.bindings = kp.project.bindings + ["fortran"]
         object.__setattr__(kp, "_test", name)
         return kp
 

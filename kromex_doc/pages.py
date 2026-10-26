@@ -9,6 +9,9 @@ from html import escape
 
 import numpy as np
 
+import balance
+import paths
+
 from . import evaluate, graph, latex, missing, photo, svgplot
 
 CSS = """
@@ -22,6 +25,8 @@ table { border-collapse: collapse; margin: 8px 0 16px; }
 th, td { border-bottom: 1px solid #ddd; padding: 3px 8px; text-align: left;
          vertical-align: top; font-size: 14px; }
 th { background: #f0f0f0; }
+.three { color: #b03a2e; font-size: 12px; }
+.bad { color: #b03a2e; font-weight: bold; }
 tr:nth-child(even) td { background: #fafafa; }
 code, pre { background: #f4f4f4; padding: 1px 4px; font-size: 13px; }
 pre { padding: 8px; overflow-x: auto; }
@@ -57,7 +62,8 @@ def page(title, body, depth=0, net_name=""):
         ("reactions.html", "Reactions"), ("photo.html", "Photo"),
         ("piecewise.html", "Piecewise rates"),
         ("missing.html", "Missing reactions"),
-        ("branches.html", "Missing branches"), ("graphs.html", "Graphs"),
+        ("branches.html", "Missing branches"),
+        ("reverse.html", "Reverse reactions"), ("graphs.html", "Graphs"),
         ("latex.html", "LaTeX")))
     return ("<!doctype html><html><head><meta charset='utf-8'>"
             "<meta name='viewport' content='width=device-width, "
@@ -194,7 +200,7 @@ class Site:
 
     # -- the pages ------------------------------------------------------------
 
-    def build(self, miss, graphs, latex_files):
+    def build(self, miss, graphs, latex_files, rev):
         self.w("style.css", CSS)
         self.index(miss, graphs)
         self.species_pages()
@@ -202,6 +208,7 @@ class Site:
         self.photo_page()
         self.piecewise_page()
         self.missing_pages(miss)
+        self.reverse_page(rev)
         self.graphs_page(graphs)
         self.latex_page(latex_files)
 
@@ -569,6 +576,237 @@ class Site:
             "<th>reaction</th><th>pieces</th><th>k left / right at the "
             "bounds</th><th>largest jump</th></tr>%s</table>"
             % "".join(rows)))
+
+    def k_sum(self, ids, T):
+        """the rate of a reaction's pieces (and channels) at T, summed, or
+        None where none is evaluated"""
+        ks = [self.k_at(self.rx_by_id[i], T) for i in ids]
+        ks = [k for k in ks if k is not None]
+        return sum(ks) if ks else None
+
+    def reverse_page(self, rev):
+        """detailed balance (kromex/balance.py): the one-way reactions
+        whose reverse is not negligible, the endothermic ones, the
+        consistency of the pairs written out, the radiative ones"""
+        self.rx_by_id = {rx["id"]: rx for rx in self.net.reactions}
+        tables = balance.load_tables(paths.ROOT / "data")
+        lo, hi = self.ranges["Tgas"]
+        dens = balance.DENSITIES
+
+        def link(e, depth=0):
+            return self.rlink(self.rx_by_id[e["ids"][0]], depth)
+
+        def rev_cell(e):
+            # the missing reverse, products -> reactants; three reactants
+            # or more: a three-body reaction (flagged)
+            txt = "%s &rarr; %s" % (
+                " + ".join(self.slink(x, 0) for x in e["P"]),
+                " + ".join(self.slink(x, 0) for x in e["R"]))
+            if len(e["P"]) >= 3:
+                txt += " <b class='three'>three-body</b>"
+            return txt
+
+        def dh(e):
+            v = self.thermo.dH(list(e["R"]), list(e["P"]))
+            return "%.0f" % v if v is not None else "–"
+
+        def tcell(v):
+            return "%.0f" % v if v is not None else "–"
+
+        body = ["<h1>Reverse reactions</h1>",
+                "<p>A reaction that runs one way only cannot reach "
+                "chemical equilibrium: where its reverse is fast, the "
+                "network pushes the species one way. By detailed balance "
+                "the reverse of the same collision has k<sub>rev</sub> = "
+                "k<sub>fwd</sub> / K<sub>c</sub>(T), and the reverse over "
+                "the forward flux, with every species at the density n, "
+                "is B/F = n<sup>&Delta;n</sup> / K<sub>c</sub> = "
+                "n<sup>&Delta;n</sup> exp(&Delta;G/RT) (k<sub>B</sub>T / "
+                "1 bar)<sup>&Delta;n</sup>, &Delta;n = products &minus; "
+                "reactants: the thermochemistry alone (Burcat, NIST-JANAF; "
+                "the electron from its Sackur-Tetrode entropy), the rate "
+                "coefficients cancel. Below, the temperatures (%g&ndash;%g "
+                "K, within each reaction's range) from which B/F &ge; %g "
+                "%%. Only collisions of the gas are analysed: a reaction "
+                "with one reactant (cosmic rays, photons) has no reverse "
+                "of this kind; the reverse of a radiative association or "
+                "recombination is a photo-process.</p>"
+                % (lo, hi, 100 * balance.THRESHOLD)]
+        n1, nhi = dens[0], dens[-1]
+
+        def tcol(e):
+            # the temperature at n = 1 cm^-3; with dn != 0 it depends on
+            # the density (dn = 0: the densities cancel)
+            t = tcell(e["cross"][n1])
+            if e["dn"] != 0:
+                t += " (%s at %g cm<sup>-3</sup>)" % (tcell(e["cross"][nhi]),
+                                                      nhi)
+            return t
+        fl = sorted(rev["flagged"], key=lambda e: min(
+            v for v in e["cross"].values() if v is not None))
+        body.append(
+            "<h2>One-way reactions whose reverse becomes important (%d)"
+            "</h2><p>Each runs only forward in the network. Its reverse, "
+            "which detailed balance ties to it, grows with the temperature "
+            "and reaches %g %% of the forward flux at the temperature "
+            "given: above it the network lacks a process that matters. "
+            "Where the network is used there, write the reverse "
+            "(<code>A &lt;-&gt; B</code>: its rate from detailed balance). "
+            "The temperature is for every species at 1 cm<sup>-3</sup>; "
+            "it does not depend on the density when the reaction keeps "
+            "the number of particles (&Delta;n = 0: the densities cancel), "
+            "and is also given at %g cm<sup>-3</sup> where it does.</p>"
+            % (len(fl), 100 * balance.THRESHOLD, nhi))
+        if fl:
+            body.append(
+                "<table><tr><th>reaction</th><th>its reverse</th>"
+                "<th>process</th><th>&Delta;n</th><th>&Delta;H<sub>298"
+                "</sub> [K]</th><th>reverse &ge; %g %% above T [K]</th>"
+                "</tr>%s</table>" % (100 * balance.THRESHOLD, "".join(
+                    "<tr><td>%s</td><td>%s</td><td>%s</td><td>%+d</td>"
+                    "<td>%s</td><td>%s</td></tr>" % (
+                        link(e), rev_cell(e), e["kind"], e["dn"], dh(e),
+                        tcol(e))
+                    for e in fl)))
+        en = rev["endothermic"]
+        body.append(
+            "<h2>Endothermic reactions without their reverse (%d)</h2>"
+            "<p>The reverse is the dominant direction at every temperature "
+            "and density examined: an exothermic association or "
+            "recombination the network lacks (three-body where the "
+            "forward makes more particles: important at high density). "
+            "Its rate coefficient from detailed balance, k<sub>fwd</sub> "
+            "/ K<sub>c</sub> [cm<sup>3</sup> s<sup>-1</sup>, or cm"
+            "<sup>6</sup> s<sup>-1</sup> for a three-body reverse, "
+            "flagged], where T &ge; |&Delta;H|/30 (colder, the forward "
+            "rate is the far tail of its fit, and the factor "
+            "1/K<sub>c</sub> above e<sup>30</sup> would multiply its "
+            "error: &ndash;). Two-body reverses first, then the "
+            "three-body ones, each by k<sub>rev</sub> at the highest "
+            "temperature.</p><p><b>In red: the forward rate is too large."
+            "</b> No two particles react faster than about 10<sup>-9</sup>"
+            "&ndash;10<sup>-8</sup> cm<sup>3</sup> s<sup>-1</sup> (the "
+            "capture rate of an ion and a molecule), so a reverse rate "
+            "above 10<sup>-8</sup> cannot be real. It is not computed "
+            "independently: k<sub>rev</sub> = k<sub>fwd</sub> / "
+            "K<sub>c</sub> follows from the network's own forward rate. "
+            "For an endothermic reaction K<sub>c</sub> &asymp; "
+            "exp(&minus;&Delta;H/kT) is small, and a forward rate can be "
+            "at most about 10<sup>-9</sup> exp(&minus;&Delta;H/kT): a rate "
+            "written without that factor (a constant, say) is too large by "
+            "about k<sub>rev</sub>/10<sup>-9</sup> at that temperature, "
+            "and the network makes the products of the endothermic "
+            "reaction that much too fast. Check the rate's source and its "
+            "validity range.</p>" % len(en))
+        if en:
+            temps = [T for T in (10.0, 1e2, 1e3, 1e4)
+                     if lo <= T <= hi] or [hi]
+
+            def krev(e, T):
+                h = self.thermo.dH(list(e["R"]), list(e["P"]))
+                if h is not None and abs(h) > 30.0 * T:
+                    return None
+                k = self.k_sum(e["ids"], T)
+                ik = balance.inv_kc(tables, e["R"], e["P"], T)
+                if k is None or ik is None or k == 0.0:
+                    return None
+                return k * ik
+
+            KGAS = 1e-8   # cm^3 s^-1: above any two-body collision rate
+
+            def kcell(v, e):
+                if v is None:
+                    return "–"
+                if len(e["P"]) == 2 and v > KGAS:
+                    return ("<span class='bad' title='above any collision "
+                            "rate: the forward rate is about %.0e times "
+                            "too large here'>%.2e</span>" % (v / 1e-9, v))
+                return "%.2e" % v
+            # the two-body reverses (dn = 0, cm^3 s^-1) before the
+            # three-body ones (cm^6 s^-1), each the largest first (at the
+            # highest temperature, where most have a value; those without
+            # one last)
+            en = sorted(en, key=lambda e: (e["dn"],
+                                           -(krev(e, temps[-1]) or 0.0)))
+            body.append(
+                "<table><tr><th>reaction</th><th>missing reverse</th>"
+                "<th>process</th><th>&Delta;n</th><th>&Delta;H<sub>298"
+                "</sub> [K]</th>%s</tr>%s</table>"
+                % ("".join("<th>k<sub>rev</sub>(%g K)</th>" % T
+                           for T in temps), "".join(
+                    "<tr><td>%s</td><td>%s</td><td>%s</td><td>%+d</td>"
+                    "<td>%s</td>%s</tr>" % (
+                        link(e), rev_cell(e), e["kind"], e["dn"], dh(e),
+                        "".join("<td>%s</td>" % kcell(krev(e, T), e)
+                                for T in temps))
+                    for e in en)))
+        # the pairs written out: detailed-balance consistency, where both
+        # rates matter (above KMIN for their number of reactants)
+        KMIN = {1: 1e-25, 2: 1e-25, 3: 1e-45}
+        pairs = [e for e in rev["present"]
+                 if e["reverse_ids"] and e["ids"][0] < e["reverse_ids"][0]]
+        ptemps = [T for T in (1e2, 1e3, 1e4) if lo <= T <= hi]
+        rows = []
+        for e in pairs:
+            if not all(balance.has_data(tables, x) for x in e["R"] + e["P"]):
+                continue
+            kmf = KMIN.get(len(e["R"]), 1e-45)
+            kmr = KMIN.get(len(e["P"]), 1e-45)
+            devs = []
+            for T in ptemps:
+                kf = self.k_sum(e["ids"], T)
+                kr = self.k_sum(e["reverse_ids"], T)
+                ik = balance.inv_kc(tables, e["R"], e["P"], T)
+                devs.append(math.log10(kr / (kf * ik))
+                            if kf and kr and ik and kf >= kmf
+                            and kr >= kmr else None)
+            if any(d is not None for d in devs):
+                rows.append((max(abs(d) for d in devs if d is not None),
+                             e, devs))
+        rows.sort(key=lambda r: -r[0])
+        body.append(
+            "<h2>Pairs written out (%d)</h2><p>A reaction and its reverse "
+            "written as two reactions: the deviation of k<sub>rev</sub> / "
+            "k<sub>fwd</sub> from 1/K<sub>c</sub> [dex], where both rates "
+            "matter (above 10<sup>-25</sup> cm<sup>3</sup> s<sup>-1</sup>, "
+            "10<sup>-45</sup> cm<sup>6</sup> s<sup>-1</sup> for three "
+            "bodies). Far from 0 the pair drives the gas to a wrong "
+            "equilibrium; a reverse written with <code>&lt;-&gt;</code> is "
+            "consistent by construction (%d reactions).</p>"
+            % (len(rows),
+               sum(1 for e in rev["present"] if not e["reverse_ids"])))
+        if rows:
+            body.append(
+                "<table><tr><th>reaction</th><th>reverse</th>%s</tr>%s"
+                "</table>" % ("".join("<th>%g K</th>" % T for T in ptemps),
+                              "".join(
+                    "<tr><td>%s</td><td>%s</td>%s</tr>" % (
+                        link(e), self.rlink(
+                            self.rx_by_id[e["reverse_ids"][0]], 0),
+                        "".join("<td>%s</td>" % (
+                            "%+.2f" % d if d is not None else "–")
+                            for d in devs))
+                    for _, e, devs in rows)))
+        rad = rev["radiative"]
+        body.append(
+            "<h2>Radiative reactions (%d)</h2><p>Two reactants, one "
+            "product, no third body: radiative association or "
+            "recombination, whose reverse (photodissociation, "
+            "photoionization) the radiation field sets, not detailed "
+            "balance with the gas.</p>" % len(rad))
+        if rad:
+            body.append("<p>%s</p>" % ", ".join(link(e) for e in rad))
+        nd = rev["nodata"]
+        body.append(
+            "<h2>Not analysed</h2><p>Without thermochemical data (%d): %s."
+            "</p><p>%d reactions with one reactant (cosmic rays, photons, "
+            "decays), %d whose reverse stays below %g %% throughout, and "
+            "the photo, surface and tabulated reactions.</p>"
+            % (len(nd), ", ".join(
+                "%s (%s)" % (link(e), ", ".join(map(escape, e["missing"])))
+                for e in nd) or "none", rev["driven"], rev["negligible"],
+               100 * balance.THRESHOLD))
+        self.page("reverse.html", "Reverse reactions", "\n".join(body))
 
     def missing_pages(self, miss):
         def cand_rows(lst):

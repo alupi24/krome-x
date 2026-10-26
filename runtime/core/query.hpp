@@ -157,6 +157,18 @@ inline void get_element_totals(const double* n, double* tot) {
       tot[e] += species_elements[i * NELEM + e] * n[i];
 }
 
+// the same per gram of gas [atoms g^-1] from the mass fractions x (legacy
+// krome_conserveLinGetRef_x): sum_i x_i / m_i times the atoms of species i
+inline void get_element_totals_x(const double* x, double* tot) {
+  for (int e = 0; e < NELEM; ++e) tot[e] = 0.0;
+  for (int i = 0; i < NSPEC; ++i) {
+    if (!(species_mass_g[i] > 0.0)) continue;
+    const double ni = x[i] / species_mass_g[i];
+    for (int e = 0; e < NELEM; ++e)
+      tot[e] += species_elements[i * NELEM + e] * ni;
+  }
+}
+
 // free-fall time sqrt(3 pi / (32 G rho)) [s] and Jeans length
 // sqrt(pi kB T / (G rho mu m_p)) [cm] (legacy get_free_fall_time,
 // get_jeans_length); get_free_fall_time_rho from the mass density rho
@@ -238,7 +250,7 @@ inline int get_opacity(const double* n, double Tgas, const Params& p,
                        const SolverOpts& o, double d2g, const double* kdust,
                        double* tau) {
   if (o.photo == nullptr) return -1;
-  if (params_missing(p) >= 0) return -105;
+  if (params_missing(p) >= 0) return FLAG_PARAM_UNSET;
   const PhotoModule& ph = *o.photo;
   const int B = ph.B;
   RadChannels_ rc(n, Tgas, p);
@@ -295,7 +307,7 @@ inline int get_absorption(const double* n, double Tgas, const Params& p,
                           const SolverOpts& o, const double* kdust,
                           double* kabs) {
   if (o.photo == nullptr) return -1;
-  if (params_missing(p) >= 0) return -105;
+  if (params_missing(p) >= 0) return FLAG_PARAM_UNSET;
   const int B = o.photo->B;
   RadChannels_ rc(n, Tgas, p);
   o.photo->absorption(n, rc.sh, rc.kh, kabs);
@@ -328,8 +340,8 @@ inline int get_absorption(const double* n, double Tgas, const Params& p,
 inline int get_photo_heating(const double* n, double Tgas, const Params& p,
                              const SolverOpts& o, double* heat) {
   if (o.photo == nullptr) return -1;
-  if (o.Phi == nullptr) return -103;
-  if (params_missing(p) >= 0) return -105;
+  if (o.Phi == nullptr) return FLAG_NO_FIELD;
+  if (params_missing(p) >= 0) return FLAG_PARAM_UNSET;
   const PhotoView v = o.photo->view();
   RadChannels_ rc(n, Tgas, p);
   const double eV_to_erg = constants::eV_to_erg;
@@ -411,7 +423,7 @@ inline int get_coolant_populations(const double* n, double Tgas,
 // legacy krome_stars_energy (in MeV cm^-3 s^-1).
 inline int get_qeff(const double* n, double Tgas, const Params& p,
                     double* q) {
-  if (params_missing(p) >= 0) return -105;
+  if (params_missing(p) >= 0) return FLAG_PARAM_UNSET;
   reaction_qeff(std::fmin(std::fmax(Tgas, p.Tcmb), 1e9), n, p, q);
   return 0;
 }

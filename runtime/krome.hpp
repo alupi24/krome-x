@@ -134,6 +134,15 @@ constexpr int FLAG_NONPOSITIVE_T = -110;   // the integration reached a
                                            // Tgas: inputs untouched
 constexpr int FLAG_DEVICE_MEMORY = -111;   // PATH_DEVICE: not even one cell
                                            // fits in the device memory
+constexpr int FLAG_CONSERVE_UNREACHED = -112;  // consistent advection: the
+                                           // reference or neutrality cannot
+                                           // be reached (no free carriers)
+constexpr int FLAG_HOST_RECOVERED = 1;     // device-resident calls: the
+                                           // cell failed on the device and
+                                           // was solved on the host
+constexpr int FLAG_CONSERVE_LARGE = 2;     // consistent advection: reached,
+                                           // a species changed by > 50 %
+                                           // (a warning)
 
 // a one-line description of a flag, never nullptr
 inline const char* flag_message(int flag);
@@ -155,8 +164,11 @@ enum JacMode {
 
 // linear solver of the Newton systems
 enum LinSol {
-  LINSOL_AUTO,    // LAPACK from LAPACK_MIN_NEQ equations when built with
-                  // it, else the integrator's own LU
+  LINSOL_AUTO,    // the sparse LU when the network's factors are sparse
+                  // enough (sparse_auto_: at most a tenth of the dense
+                  // flops, a small border), else LAPACK from
+                  // LAPACK_MIN_NEQ equations when built with it, else the
+                  // integrator's own dense LU
   LINSOL_DENSE,   // the integrator's own dense LU (SUNDIALS', ported)
   LINSOL_LAPACK,  // LAPACK (vendor BLAS); FLAG_NO_LAPACK without it
   LINSOL_SPARSE   // a sparse LU with static pivots in the generated
@@ -376,6 +388,36 @@ inline int solve_cells_x(int ncell, double* x, const double* rho,
                          const Params* params, const SolverOpts& o,
                          const CellsOpts& co = CellsOpts());
 
+// Consistent advection (legacy krome_conserveLin_x; Grassi et al. 2017,
+// App. E): after the host code advects the species, move each cell back
+// to its reference element totals and to zero net charge. Negatives are
+// clipped; the elements are restored by the minimal relative correction
+// of SolverOpts::conserve = 2 (a species at zero stays zero; opaque
+// species and those the freeze directives hold do not move), without
+// touching the ionization; then the electrons neutralize the ions (as
+// legacy; only when they cannot, the charge by the same projection).
+// ref: element totals [atoms cm^-3] (get_element_totals) for n, per gram
+// [atoms g^-1] (get_element_totals_x) for the mass fractions x; one row
+// per cell (ref_stride 1) or one row for all (0). params: the cells'
+// parameters, for the freeze directives (nullptr: the defaults; par_stride
+// as for solve_cells). Flags: 0; FLAG_CONSERVE_UNREACHED when the
+// reference or neutrality cannot be reached (an element whose free
+// carriers are all zero: the cell is corrected as far as possible);
+// FLAG_CONSERVE_LARGE, a warning (> 0), when some species changed by more
+// than 50 % (a large advection error, or a frozen species carrying most
+// of an element). The one-cell calls return it; the many-cell calls fill
+// flags[ncell] (optional) and return the lowest failing cell's flag, or 0
+inline int conserve(double* n, const double* ref,
+                    const Params& p = Params());
+inline int conserve_x(double* x, const double* ref,
+                      const Params& p = Params());
+inline int conserve_cells(int ncell, double* n, const double* ref,
+                          int ref_stride, const Params* params = nullptr,
+                          int par_stride = 0, int* flags = nullptr);
+inline int conserve_cells_x(int ncell, double* x, const double* ref,
+                            int ref_stride, const Params* params = nullptr,
+                            int par_stride = 0, int* flags = nullptr);
+
 // Integrate to steady state (legacy krome_equilibrium): outputs at
 // t0 * factor^k, each interval a solve() from the current state;
 // converged when the relative change between outputs is below e.ertol
@@ -452,8 +494,11 @@ inline double get_Hnuclei(const double* n);
 // make the cell neutral, max(sum over ions q n, 0) (legacy get_electrons)
 inline double get_charge(const double* n);
 inline double get_electrons_neutral(const double* n);
-// element totals tot[NELEM] [atoms cm^-3], in element_names order
+// element totals tot[NELEM] [atoms cm^-3], in element_names order; per
+// gram of gas [atoms g^-1] from the mass fractions x (legacy
+// krome_conserveLinGetRef_x)
 inline void get_element_totals(const double* n, double* tot);
+inline void get_element_totals_x(const double* x, double* tot);
 // free-fall time sqrt(3 pi / (32 G rho)) [s], from n or from the mass
 // density rho [g cm^-3]; Jeans length [cm]
 inline double get_free_fall_time(const double* n);

@@ -1,13 +1,16 @@
 ---
 name: kromex-coupling
-description: "Couple KROME-X chemistry and microphysics to a hydrodynamics code (the host code, named by the user, e.g. RAMSES, ENZO, GIZMO, AREPO, FLASH, Athena++, PLUTO, Phantom, or a custom code). Use when the user asks to add KROME-X to a simulation code, to replace its cooling or chemistry module with KROME-X, or to check or debug an existing KROME-X coupling: units, passive scalars, energy and temperature, adiabatic index, radiation, cosmic rays, dust, time-stepping, CPU/GPU, build system and tests."
+description: "Couple KROME-X chemistry and microphysics to a hydrodynamics code whose fields are in host memory (the host code, named by the user, e.g. RAMSES, ENZO, GIZMO, AREPO, FLASH, Athena++, PLUTO, Phantom, or a custom code; CPU-only, or using the GPU through KROME-X's host-array calls). Use when the user asks to add KROME-X to a simulation code, to replace its cooling or chemistry module with KROME-X, or to check or debug an existing KROME-X coupling: units, passive scalars, energy and temperature, adiabatic index, radiation, cosmic rays, dust, time-stepping, CPU/GPU, build system and tests. For a code whose fields live in GPU memory (GPU-resident), use kromex-coupling-gpu."
 ---
 
 # Coupling KROME-X to a hydrodynamics code
 
 The host code is the hydrodynamics code the user names (if they did not
 name it, ask). This skill turns KROME-X into the host code's chemistry
-and cooling step. Read the general skill `skills/kromex/SKILL.md` first:
+and cooling step, for a host code whose fields are in host memory during
+its step. When they live in GPU memory (CUDA, CUDA Fortran, HIP,
+OpenACC or Kokkos device data), follow `skills/kromex-coupling-gpu/SKILL.md`
+instead (it refers back to section 2 here for the physics). Read the general skill `skills/kromex/SKILL.md` first:
 it covers generating and building a KROME-X project. Paths are relative
 to the KROME-X folder; the manual is `docs/manual.md`.
 
@@ -75,9 +78,12 @@ advected field of the host code. Find out what the host advects:
 
 Species indices and masses come from the generated project
 (`krome_net.h`, `krome_net.f90`, `krome.hpp`, `NETWORK.md`), never
-hard-coded. Advection errors break element conservation: KROME-X's
-`conserve` option (manual section 5) can restore the charge, or the
-element totals and charge, after each call.
+hard-coded. Advection errors (slope limiters, AMR interpolation) break
+the consistency of a cell's species: after the advection step, move the
+cells back to a reference element composition and to neutrality with the
+consistent-advection call (`conserve_cells` / `krome_conserve_cells` and
+their `_x` forms, manual section 6.7; the reference from the initial
+conditions, or one row per cell, e.g. scaled with the metallicity).
 
 **Energy and temperature.** KROME-X evolves Tgas (`evolve_T`). Find out
 which energy the host evolves: specific internal energy e [erg g^-1],
@@ -158,11 +164,12 @@ MPI runs give each rank its own file (`error_file`).
   each host thread calls KROME-X on its own cells (the project built
   without OpenMP); not both, which would nest the parallelism.
 - **GPU:** build the project with Kokkos (`make KOKKOS=...`, manual
-  section 6.5) and initialize the device once. Calls of at least
-  `min_device` cells (default 10^4) go to the GPU. KROME-X takes
-  host-memory arrays and copies them to the device itself: a GPU-resident
-  host code must copy its fields back to host memory for the call, or
-  ask the user how they want to handle it.
+  section 6.5) and initialize the device once
+  (`krome_device_initialize_id` with the rank's GPU under MPI). With
+  host-memory arrays, calls of at least `min_device` cells (default
+  10^4) go to the GPU, KROME-X copying them. A GPU-resident host code
+  (its fields in device memory) is coupled with the device-resident calls
+  instead: `skills/kromex-coupling-gpu/SKILL.md`.
 - In every case, **gather many cells per call** (a whole patch, block or
   rank domain), never one call per cell.
 

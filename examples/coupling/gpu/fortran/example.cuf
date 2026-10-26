@@ -1,0 +1,203 @@
+!################################################################
+! KROME-X in a GPU-resident host code (CUDA Fortran, in the style of
+! mini-ramses): the hydro state uold(8, nvar, noct) stays on the GPU for
+! the whole run. Each step the chemistry
+!  1. gathers the leaf cells into contiguous arrays (a kernel): mass
+!     fractions x(ncell, nspec) from the passive scalars rho x, Tgas from
+!     the internal energy (cgs: a real code converts its units here);
+!  2. restores each cell's element composition after the advection
+!     (consistent advection, on the device);
+!  3. integrates every cell over dt on the device (KROME-X, one call);
+!  4. scatters the results back (a kernel): rho x, and the internal energy
+!     from the new Tgas and composition (the chemistry changes the number
+!     of particles).
+! The grid: 4096 octs of 8 cells, n_H from 1 to 1e6 cm-3 at 100 K, the
+! free-fall time of each density. One cell is the quick start's (n_H =
+! 1e4 cm-3): its history goes to abundances.dat, as in the C, C++ and
+! Fortran examples (README.md), from 1 yr to 1e6 yr in steps 10 % longer
+! each time.
+!################################################################
+module chemistry_kernels
+  use cudafor
+  implicit none
+  integer, parameter :: twotondim = 8
+  ! the hydro variables: density, internal energy density, passive
+  ! scalars (rho x of each species)
+  integer, parameter :: irho = 1, ieint = 2, ipass = 3
+  real(8), parameter :: kB = 1.380649d-16   ! erg / K (krome_constants)
+contains
+
+  ! leaf k of the list is cell ind of oct ioct
+  attributes(device) subroutine locate(icell, ind, ioct)
+    integer, value :: icell
+    integer :: ind, ioct
+    ind = mod(icell - 1, twotondim) + 1
+    ioct = (icell - 1) / twotondim + 1
+  end subroutine locate
+
+  ! uold -> x(ncell, nspec) (species-major: KROME-X's default layout),
+  ! rho, Tgas = (gamma - 1) rho e / (kB n_tot)
+  attributes(global) subroutine gather(uold, ileaf, m, gam, x, rho, T, &
+       nleaf, nvar, noct, nspec)
+    integer, value :: nleaf, nvar, noct, nspec
+    real(8), value :: gam
+    real(8), device :: uold(twotondim, nvar, noct), m(nspec)
+    integer, device :: ileaf(nleaf)
+    real(8), device :: x(nleaf, nspec), rho(nleaf), T(nleaf)
+    integer :: k, ind, ioct, i
+    real(8) :: ntot
+    k = (blockIdx%x - 1) * blockDim%x + threadIdx%x
+    if (k > nleaf) return
+    call locate(ileaf(k), ind, ioct)
+    rho(k) = uold(ind, irho, ioct)
+    ntot = 0d0
+    do i = 1, nspec
+      x(k, i) = uold(ind, ipass - 1 + i, ioct) / rho(k)
+      ntot = ntot + uold(ind, ipass - 1 + i, ioct) / m(i)
+    end do
+    T(k) = (gam - 1d0) * uold(ind, ieint, ioct) / (kB * ntot)
+  end subroutine gather
+
+  ! back into uold; a failed cell (flag < 0) keeps its state
+  attributes(global) subroutine scatter(uold, ileaf, m, gam, x, rho, T, &
+       flags, nleaf, nvar, noct, nspec)
+    integer, value :: nleaf, nvar, noct, nspec
+    real(8), value :: gam
+    real(8), device :: uold(twotondim, nvar, noct), m(nspec)
+    integer, device :: ileaf(nleaf), flags(nleaf)
+    real(8), device :: x(nleaf, nspec), rho(nleaf), T(nleaf)
+    integer :: k, ind, ioct, i
+    real(8) :: ntot
+    k = (blockIdx%x - 1) * blockDim%x + threadIdx%x
+    if (k > nleaf) return
+    if (flags(k) < 0) return
+    call locate(ileaf(k), ind, ioct)
+    ntot = 0d0
+    do i = 1, nspec
+      uold(ind, ipass - 1 + i, ioct) = rho(k) * x(k, i)
+      ntot = ntot + rho(k) * x(k, i) / m(i)
+    end do
+    uold(ind, ieint, ioct) = kB * ntot * T(k) / (gam - 1d0)
+  end subroutine scatter
+end module chemistry_kernels
+
+program example
+  use cudafor
+  use chemistry_kernels
+  use krome            ! the binding: krome_solve_cells_x_device, ...
+  use krome_net        ! krome_nspec, krome_idx_*, krome_par_*, krome_nelem
+  implicit none
+  real(8), parameter :: spy = 3.15d7       ! seconds per year
+  integer, parameter :: noct = 4096, ncell = twotondim * noct
+  integer, parameter :: nvar = ipass - 1 + krome_nspec
+  integer, parameter :: iref = ncell / 2   ! the quick start's cell
+  real(8), allocatable :: uold(:, :, :), par(:, :)
+  real(8) :: m(krome_nspec), n(krome_nspec), xref(krome_nspec, 1)
+  real(8) :: ref(krome_nelem, 1), uc(nvar), nH, gam, t, dt, ntot, Tref
+  integer, allocatable :: ileaf(:)
+  ! the host code's device data
+  real(8), device, allocatable :: uold_d(:, :, :), m_d(:)
+  integer, device, allocatable :: ileaf_d(:)
+  ! KROME-X's arguments: device arrays (their addresses: c_loc)
+  real(8), device, allocatable, target :: x_d(:, :), rho_d(:), T_d(:), &
+       dt_d(:), par_d(:, :), ref_d(:)
+  integer(c_int), device, allocatable, target :: flags_d(:)
+  type(krome_device_summary) :: s
+  type(c_ptr) :: h
+  integer :: icell, ind, ioct, i, istep, ierr, nb, out, nfailed
+  integer(8) :: c0, c1, crate
+
+  ! one GPU per MPI rank: krome_device_initialize_id(mod(rank, ngpu))
+  ierr = krome_device_initialize_id(0_c_int)
+
+  ! solver options: Tgas evolved with the chemistry
+  h = krome_opts_new()
+  call krome_set(h, "evolve_T", 1d0)
+
+  ! the grid (on the host only to set it up)
+  do i = 1, krome_nspec
+    m(i) = krome_species_mass_f(i)
+  end do
+  allocate(uold(twotondim, nvar, noct), ileaf(ncell), par(krome_npar, ncell))
+  call krome_params_default(par)
+  gam = par(krome_par_gamma_ad, 1)   ! the adiabatic index of the network
+  do icell = 1, ncell
+    ind = mod(icell - 1, twotondim) + 1
+    ioct = (icell - 1) / twotondim + 1
+    nH = 10d0**(6d0 * (icell - 1) / (ncell - 1))
+    if (icell == iref) nH = 1d4
+    n = 0d0
+    n(krome_idx_H) = nH
+    n(krome_idx_Hj) = 1d-4 * nH
+    n(krome_idx_E) = 1d-4 * nH
+    n(krome_idx_He) = 0.0775d0 * nH
+    uold(ind, irho, ioct) = sum(m * n)
+    uold(ind, ipass:, ioct) = m * n
+    uold(ind, ieint, ioct) = kB * sum(n) * 1d2 / (gam - 1d0)   ! 100 K
+    ileaf(icell) = icell              ! here every cell is a leaf
+    par(krome_par_tff, icell) = 1d14 * sqrt(1d4 / nH)   ! free-fall time
+  end do
+
+  ! the reference element composition (per gram: the same for every cell
+  ! here), for the consistent advection
+  xref(:, 1) = uold(1, ipass:, 1) / uold(1, irho, 1)
+  ierr = krome_get_element_totals_x(xref, ref)
+
+  allocate(uold_d(twotondim, nvar, noct), m_d(krome_nspec), ileaf_d(ncell), &
+       x_d(ncell, krome_nspec), rho_d(ncell), T_d(ncell), dt_d(ncell), &
+       par_d(krome_npar, ncell), ref_d(krome_nelem), flags_d(ncell))
+  uold_d = uold
+  m_d = m
+  ileaf_d = ileaf
+  par_d = par
+  ref_d = ref(:, 1)
+  nb = (ncell + 127) / 128
+
+  open(newunit=out, file="abundances.dat", status="replace")
+  write(out, '(a)') "#t_yr Tgas " // trim(krome_names_header())
+  print '(a5,2a11)', "step", "t(yr)", "Tgas(K)"
+
+  t = 0d0
+  dt = spy
+  istep = 0
+  nfailed = 0
+  call system_clock(c0, crate)
+  do while (t < 1d6 * spy)
+    ! ... the hydro step (advection of rho, rho e, rho x) would be here
+    call gather<<<nb, 128>>>(uold_d, ileaf_d, m_d, gam, x_d, rho_d, T_d, &
+         ncell, nvar, noct, krome_nspec)
+    ierr = krome_conserve_cells_x_device(int(ncell, c_int), c_loc(x_d), &
+         krome_layout_species_major, int(ncell, c_long), c_loc(ref_d), &
+         0_c_int, c_loc(par_d), int(krome_npar, c_int), c_null_ptr)
+    dt_d = dt
+    ierr = krome_solve_cells_x_device(int(ncell, c_int), c_loc(x_d), &
+         c_loc(rho_d), krome_layout_species_major, int(ncell, c_long), &
+         c_loc(T_d), c_loc(dt_d), c_loc(par_d), int(krome_npar, c_int), &
+         krome_cells_c(), c_loc(flags_d), s, h)
+    ! s: cells solved on the device, recovered on the host, failed. A
+    ! failed cell (flags_d < 0) is left as it was: retry it (a smaller dt,
+    ! a larger max_steps), or accept it unchanged for this step
+    nfailed = nfailed + int(s%failed)
+    call scatter<<<nb, 128>>>(uold_d, ileaf_d, m_d, gam, x_d, rho_d, T_d, &
+         flags_d, ncell, nvar, noct, krome_nspec)
+
+    t = t + dt
+    dt = dt * 1.1d0
+    istep = istep + 1
+    ! the quick start's cell, to the host for the output
+    uc = uold_d(mod(iref - 1, twotondim) + 1, :, (iref - 1) / twotondim + 1)
+    n = uc(ipass:) / m
+    ntot = sum(n)
+    Tref = (gam - 1d0) * uc(ieint) / (kB * ntot)
+    write(out, '(99E17.8e3)') t / spy, Tref, n / 1d4   ! n_i / n_H
+    if (mod(istep, 20) == 0) print '(I5,99E11.3)', istep, t / spy, Tref
+  end do
+  ierr = cudaDeviceSynchronize()
+  call system_clock(c1)
+  close(out)
+  print '(a,i0,a,i0,a,f8.2,a)', "wrote abundances.dat; ", istep, &
+       " steps of ", ncell, " cells in ", real(c1 - c0) / crate, " s"
+  print '(a,i0)', "cells failed (left unchanged for that step): ", nfailed
+  call krome_opts_free(h)
+  ierr = krome_device_finalize()
+end program example

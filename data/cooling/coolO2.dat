@@ -1,4 +1,4 @@
-# converted from LAMDA tools/o2.dat by tools/lamda2krome.py
+# converted from LAMDA o2.dat by kromex_convert/lamda2krome.py
 metal:O2
 # level n: energy (K), degeneracy g
 level 0: 0.0, 1.0

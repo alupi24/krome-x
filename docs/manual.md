@@ -141,6 +141,7 @@ python3 -m kromex myrun.toml --set thermal.gamma=CONST --set project.outdir=othe
   | `--set SECTION.KEY=VALUE` | override an option (repeatable); VALUE in TOML syntax (`1e-6`, `true`, `["H2", "Z"]`), a bare word is a string (`--set thermal.gamma=EXACT`) |
   | `python3 -m kromex --test NAME` | a shipped test (section 6.6); `--tests` lists them |
   | `python3 -m kromex --check FILE.toml` | check the network, write nothing (below) |
+  | `python3 -m kromex [--check] NETWORK.knet` | a network instead of a configuration: generate (or check) it with the default options (`--set` still applies); also a KROME-X network without the extension, or a legacy `react_*` network |
   | `python3 -m kromex --template FILE` | write the commented template |
   | `python3 -m kromex --version` | the KROME-X version (`v2/VERSION` plus the git revision, e.g. `2.0.0+g04bb53f`; the generated code carries it: C++ `krome::KROME_VERSION`, C `krome_version()`, Fortran `krome_version_f()`, Python `net.version`) |
 
@@ -192,6 +193,12 @@ with, and writes nothing. It reports:
   never formed, or in no reaction; the same reaction written more than
   once with the same rate (counted twice). Reactions written more than
   once with different rates are summed as channels (a note).
+- **Detailed balance:** the collisional reactions that run one way
+  although their reverse, missing from the network, reaches 1 % of the
+  forward flux inside their T range (a warning naming those whose
+  reverse sets in coldest), and the endothermic ones whose exothermic
+  reverse is missing (a note). `kromex-doc` lists them all, with the
+  temperatures and the rates (its Reverse reactions page, below).
 
 Parameters are set to a probe value (1.3e-17, Tdust 10 K): a problem
 with a rate that depends on a parameter is a warning only. The exit
@@ -240,6 +247,32 @@ script; `--serve` forces serving); `DIR/index.html` also opens as a file:
   its reaction enthalpy (negative: exothermic) when the tables have
   every species. A lead for the author, not a verdict. Above
   `--max-missing` species per phase (150) only the branches are listed.
+- **Reverse reactions** (detailed balance, `kromex/balance.py`): a
+  reaction that runs one way only cannot reach chemical equilibrium,
+  and where its reverse is fast the network pushes its species one way.
+  The reverse of the same collision has k_rev = k_fwd / K_c(T), so the
+  reverse over the forward flux, with every species at the density n, is
+  B/F = n^dn exp(dG/RT) (kB T / 1 bar)^dn (dn = products - reactants):
+  thermodynamics alone (Burcat, NIST-JANAF; the electron from its
+  Sackur-Tetrode entropy; ortho and para H2 from H2 and their rotational
+  partition sums, the tables' records being those of normal H2; beyond
+  the tables a constant heat capacity).
+  The page lists the one-way collisions whose reverse reaches 1 % of the
+  forward flux inside their T range, with the temperature from which it
+  does, every species at 1 cm^-3 (the same at any density when dn = 0;
+  also at 1e12 cm^-3 otherwise): add the reverse, `A <-> B`, where the
+  network is used there; the endothermic ones, whose exothermic reverse
+  (a recombination or association, three-body for dn > 0) is missing,
+  with the missing reverse written out (three-body ones flagged) and its
+  rate from detailed balance at 10, 100, 1000 and 1e4 K, the largest
+  first (two-body before three-body; in red a two-body rate above any
+  collision's, 1e-8 cm^3 s^-1: the forward rate lacks the exp(-dH/kT)
+  of an endothermic reaction); the pairs
+  written out as two reactions, with the deviation of k_rev / k_fwd from
+  1/K_c (far from 0: a wrong equilibrium); the radiative associations
+  and recombinations, whose reverse is a photo-process (not flagged).
+  Reactions with one reactant (cosmic rays, photons, decays) have no
+  reverse of this kind.
 - **Graphs:** one per element, from each reactant to each product with
   it (`graphs/*.dot`; rendered by Graphviz when installed, else in the
   browser).
@@ -307,7 +340,7 @@ formula, giving k = 1 cm^3 s^-1): check them before use.
 | file | what | regenerated |
 |---|---|---|
 | `krome.hpp` | the C++ API (the only header a C++ caller includes) | yes |
-| `krome.h`, `krome_net.h` | the C API; the network constants (`KROME_NSPEC`, `KROME_IDX_<sp>`, `KROME_PAR_<p>`) | yes |
+| `krome.h`, `krome_net.h` | the C API; the network constants (`KROME_NSPEC`, `KROME_NELEM`, `KROME_IDX_<sp>`, `KROME_PAR_<p>`) | yes |
 | `krome.f90`, `krome_net.f90` | Fortran modules `krome`, `krome_net` (`project.bindings` with `fortran`) | yes |
 | `krome.py` | Python module (`project.bindings` with `python`, or added by `Preprocessor.build()`) | yes |
 | `krome_network.hpp`, `net_<name>*.hpp`, `net_<name>_data.cpp` | the generated network | yes |
@@ -978,6 +1011,9 @@ net.device_finalize()                  # before exiting
   runs the contiguous kernel.
 - **Failures:** only the cells that fail on the device are re-solved on
   the host, so only cells that really fail report.
+- **Data already on the GPU:** a host code whose fields live in device
+  memory calls the device-resident functions of section 6.8 instead,
+  without copies through the host.
 
 ### 6.6 Examples: the shipped tests and the coupling examples
 
@@ -1009,9 +1045,163 @@ start's cell (primordial gas at 1e4 cm^-3 and 100 K, followed in time to
 1e6 yr): `c/` (the C interface, `krome_solve_cells`), `cpp/` (the C++
 API, `solve`), `fortran/` (the binding, `krome_solve`), each with a
 Makefile against a project generated from `examples/coupling/options.toml`,
-and `python/`, the README's examples as Jupyter notebooks. The compiled
+and `python/`, the README's examples as Jupyter notebooks; `gpu/fortran/`
+(CUDA Fortran, in the style of mini-ramses) and `gpu/cuda/` (CUDA C++)
+keep a grid of cells on the GPU and couple it with the device-resident
+calls (section 6.8), the quick start's cell among them. The compiled
 examples write the same `abundances.dat`; `compare.py` checks that they
 agree. Their README gives the commands.
+
+### 6.7 Consistent advection
+
+A hydro code advects each species as a passive scalar. Non-linear
+operations (slope limiters, the interpolation of new AMR cells) break
+the consistency of a cell's species with each other: its element totals
+drift, and the cell is no longer neutral (Plewa & Müller 1999; Grassi et
+al. 2017, App. E). After the advection step, and before the chemistry,
+KROME-X moves each cell back to a **reference** element composition and
+to zero net charge (legacy `krome_conserveLin_x`):
+
+- **The reference:** the element totals of a reference cell,
+  `get_element_totals` (atoms cm^-3, for number densities) or
+  `get_element_totals_x` (atoms per gram, for mass fractions: the legacy
+  convention, independent of the density). One row for every cell (the
+  legacy case: the composition of the initial conditions), or one row
+  per cell (e.g. scaled with each cell's metallicity).
+- **The correction**, in two stages:
+  1. negatives are clipped, and the element totals are restored by the
+     minimal relative change of the species, the projection of
+     `conserve = 2` (section 5) on the elements alone: a species at zero
+     stays zero, and the ionization is not changed;
+  2. the electrons neutralize the ions, n(e-) = the ions' charge (as
+     legacy). Only when they cannot (anions dominate, or e- is frozen or
+     absent) is the charge restored by the same projection on the ions.
+
+  Opaque species, and those the network's freeze directives hold for the
+  cell's parameters, do not move. It is not legacy's per-element scaling,
+  so the numbers differ from legacy's within the correction.
+- **Flags** (per cell): 0; `FLAG_CONSERVE_UNREACHED` (-112) when the
+  reference or neutrality cannot be reached, because an element's free
+  carriers are all zero (e.g. He and He+ clipped to zero by an
+  overshoot): the cell is corrected as far as possible and flagged, and
+  the host code decides; `FLAG_CONSERVE_LARGE` (2, a warning) when the
+  reference was reached by changing some species by more than 50% (a
+  large advection error, or a frozen species carrying most of an element,
+  whose free carriers then absorb the whole correction). The one-cell
+  calls return the flag; the many-cell calls fill an optional `flags`
+  array and return the lowest failing cell's flag; Python raises on
+  `FLAG_CONSERVE_UNREACHED` unless `check=False`.
+- **A shared reference** assumes the same element composition everywhere:
+  with gas of a different composition (e.g. regions of different
+  metallicity) it forces the cells to the wrong composition without any
+  flag. Give one row per cell then.
+
+| | C++ | C | Fortran | Python |
+|---|---|---|---|---|
+| one cell | `conserve(n, ref, p)`, `conserve_x(x, ref, p)` | the many-cell calls with ncell = 1 | the same | `net.conserve(n, ref)`, `net.conserve_x(x, ref)` |
+| many cells | `conserve_cells(ncell, n, ref, ref_stride, params, par_stride, flags)`, `conserve_cells_x` | `krome_conserve_cells(ncell, n, ref, ref_stride, par, par_stride, flags)`, `krome_conserve_cells_x` | `krome_conserve(n, ref, par, flags)`, `krome_conserve_x` | `n[ncell, nspec]`, `ref[nelem]` or `[ncell, nelem]`, `flags=`, `check=` |
+
+The reference stride: one row for every cell (C++ 0, C 0, Fortran
+`ref(nelem, 1)`, Python `ref[nelem]`) or one per cell (C++ 1, C
+`KROME_NELEM`, Fortran `ref(nelem, ncell)`, Python `ref[ncell, nelem]`).
+The parameters only select the freeze directives (C `par` NULL, C++
+`nullptr`: the defaults). The C and Fortran element count is `KROME_NELEM`
+/ `krome_nelem` (`krome_net.h`, `krome_net.f90`). Example (C), the
+reference from the initial conditions, the correction after each
+advection step:
+
+```c
+double ref[KROME_NELEM];
+krome_get_element_totals_x(1, x_init, ref);           /* once */
+/* ... after advecting x[ncell][KROME_NSPEC] ... */
+int flags[NCELL];
+if (krome_conserve_cells_x(ncell, x, ref, 0, NULL, 0, flags) < 0)
+  /* some cells flagged KROME_FLAG_CONSERVE_UNREACHED */;
+```
+
+### 6.8 Device-resident data
+
+A host code whose fields live in GPU memory (CUDA, CUDA Fortran, HIP,
+OpenACC, Kokkos) calls KROME-X on its device arrays directly: the call
+reads and writes them on the device, and only the cells that fail there
+travel to the host. The conventions are KROME-X's (cgs, Tgas, the
+network's species and parameters); the host code gathers its cells into
+contiguous arrays first (e.g. the leaf cells of an AMR level) and does
+its own conversions (code units, energy, floors) in its own kernels.
+Needs a project built with Kokkos (`make KOKKOS=...`, section 6.5) for
+the same GPU runtime as the host code (a CUDA Kokkos build takes CUDA
+device pointers).
+
+- **The arrays**, every one in the device's memory: the species (number
+  densities n, or mass fractions x with the density rho), Tgas, dt, the
+  parameter rows (one row for every cell, or one per cell: the stride 0
+  or `NPAR`, in doubles; none: the defaults), the optional Phi, Td and
+  adust rows (`[ncell][bins]`, as in section 6.5), the per-cell flags.
+- **The layout of the species:** species-major (the default), one array
+  per species `n[i * ld + c]`, i.e. a Fortran `n(ld, nspec)` with a
+  leading dimension `ld >= ncell` (0: ncell); or cell-major
+  `n[c * nspec + i]`, as the host-array calls.
+- **What happens:** the device is fenced (the host code's kernels on the
+  arrays are complete); the cells are gathered into KROME-X's buffers on
+  the device (the parameters built from the rows there; a REQUIRED
+  parameter unset in any row rejects the call with -105), integrated by
+  the kernel of section 6.5 (layouts, buffer cache, memory budget and
+  chunking included), and written back on the device, with the clipping
+  and the `conserve` option. The device is fenced again before the call
+  returns, so the host code's next kernels see the results.
+- **Failed cells:** a cell that fails on the device is re-solved on the
+  host from its inputs (they are untouched on the device) and its result
+  copied back. The flags: 0, solved on the device;
+  `FLAG_HOST_RECOVERED` (+1), failed on the device and solved on the
+  host; negative, failed on both (the host's flag; the cell is left
+  untouched). A summary on the host counts the three cases. The return
+  value is 0, the lowest failing cell's flag, or a flag of the call
+  (-103, -105, -106, -107, -109, -111, as in section 10).
+- **Consistent advection** (section 6.7) on device arrays: the same
+  correction, one thread per cell, in either layout.
+- **The device:** `krome_device_initialize_id(id)` initializes Kokkos on
+  the GPU `id`: a code with one GPU per MPI rank passes the device it
+  uses (e.g. `rank % ngpu`). A code that initializes Kokkos itself does
+  not call it.
+
+| | C++ (`krome::kk`) | C | Fortran |
+|---|---|---|---|
+| solve | `solve_cells_device(ncell, a, opts, cells_opts, &summary)`, `a` a `DeviceCells` (n, rho, layout, ld, Tgas, dt, par, par_stride, Phi, Td, adust, flags) | `krome_solve_cells_device(ncell, n, layout, ld, Tgas, dt, par, par_stride, extra, flags, &summary, h)`, `krome_solve_cells_x_device(ncell, x, rho, ...)` | the same names, every array a `type(c_ptr)`; `extra` a `krome_cells_c` of device pointers, `summary` a `krome_device_summary` |
+| consistent advection | `conserve_cells_device(ncell, v, mass, layout, ld, ref, ref_stride, par, par_stride, flags)` | `krome_conserve_cells_device(ncell, n, layout, ld, ref, ref_stride, par, par_stride, flags)`, `_x_device` | the same names |
+| layouts | `LAYOUT_SPECIES_MAJOR`, `LAYOUT_CELL_MAJOR` | `KROME_LAYOUT_SPECIES_MAJOR`, `KROME_LAYOUT_CELL_MAJOR` | `krome_layout_species_major`, `krome_layout_cell_major` |
+
+The C and Fortran names: `krome_solve_cells_device`,
+`krome_solve_cells_x_device`, `krome_conserve_cells_device`,
+`krome_conserve_cells_x_device`, `krome_device_initialize_id`, and the
+summary type `krome_device_summary` (C struct and Fortran derived type,
+the counts `device`, `host`, `failed`). The reference stride here is in
+doubles too (0 or `NELEM`). In Fortran
+the device address of an array comes from the GPU language: CUDA Fortran
+`c_loc(a)` of a `device` array (as mini-ramses passes its device arrays
+to CUB; `c_devloc` gives a `c_devptr` instead), OpenACC `c_loc(a)` inside
+`!$acc host_data use_device(a)`. Example (CUDA Fortran, the cells already
+gathered into device arrays `n(ncell, krome_nspec)`, `T`, `dt` and the
+parameter rows `par(krome_npar, ncell)`):
+
+```fortran
+use cudafor
+use krome
+use krome_net
+real(8), device, allocatable, target :: n(:, :), T(:), dt(:), par(:, :)
+integer(c_int), device, allocatable, target :: flags(:)
+type(krome_device_summary) :: s
+ierr = krome_device_initialize_id(mod(rank, ngpu))    ! once
+...
+ierr = krome_solve_cells_device(ncell, c_loc(n),                    &
+     krome_layout_species_major, int(ncell, c_long), c_loc(T),      &
+     c_loc(dt), c_loc(par), krome_npar, krome_cells_c(),            &
+     c_loc(flags), s, h)
+if (s%failed > 0) ...                  ! cells with flags < 0
+```
+
+The Python interface takes host arrays only. Complete programs:
+`examples/coupling/gpu/` (section 6.6); the coupling of a GPU-resident
+code step by step: `skills/kromex-coupling-gpu/SKILL.md`.
 
 ## 7. Queries
 
@@ -1031,7 +1221,7 @@ temperature capped to [Tcmb, 1e9 K], the thermal terms and gamma capped to
 | mean molecular weight | `get_mu` | `krome_get_mu` | `mu` |
 | mass density, total density, H nuclei | `get_rho`, `get_ntot`, `get_Hnuclei` | `krome_get_rho`, `krome_get_ntot`, `krome_get_Hnuclei` | `rho`, `ntot`, `hnuclei` |
 | net charge; electrons for neutrality | `get_charge`, `get_electrons_neutral` | `krome_get_charge`, `krome_get_electrons` | `charge`, `electrons` |
-| element totals | `get_element_totals` | `krome_get_element_totals` | `element_totals` |
+| element totals [atoms cm^-3]; per gram [atoms g^-1] from mass fractions | `get_element_totals`, `get_element_totals_x` | `krome_get_element_totals`, `krome_get_element_totals_x` | `element_totals`, `element_totals_x` |
 | free-fall time, Jeans length | `get_free_fall_time`, `get_jeans_length` | `krome_get_free_fall_time`, `krome_get_jeans_length` | `free_fall_time`, `jeans_length` |
 | free-fall time from a mass density | `get_free_fall_time_rho` | `krome_get_free_fall_time_rho` | `free_fall_time_rho` |
 | column density of a number density (the `radiation.num2col` estimator) | `num2col` | `krome_num2col` | `num2col` |
@@ -1328,9 +1518,13 @@ Every solver call returns 0 on success.
 | `FLAG_NO_KOKKOS` | `KROME_FLAG_NO_KOKKOS` | `krome_flag_no_kokkos` | -109 | device path before Kokkos is initialized |
 | `FLAG_NONPOSITIVE_T` | `KROME_FLAG_NONPOSITIVE_T` | `krome_flag_nonpositive_t` | -110 | the integration ended at a non-positive or non-finite Tgas; the cell is untouched |
 | `FLAG_DEVICE_MEMORY` | `KROME_FLAG_DEVICE_MEMORY` | `krome_flag_device_memory` | -111 | `PATH_DEVICE`: not even one cell fits in the device memory; the cell is untouched |
+| `FLAG_CONSERVE_UNREACHED` | `KROME_FLAG_CONSERVE_UNREACHED` | `krome_flag_conserve_unreached` | -112 | consistent advection (section 6.7): the reference or neutrality cannot be reached (an element without free carriers); the cell is corrected as far as possible |
+| `FLAG_CONSERVE_LARGE` | `KROME_FLAG_CONSERVE_LARGE` | `krome_flag_conserve_large` | 2 | consistent advection: reached, but a species changed by more than 50% (a warning) |
+| `FLAG_HOST_RECOVERED` | `KROME_FLAG_HOST_RECOVERED` | `krome_flag_host_recovered` | 1 | device-resident calls (section 6.8): failed on the device, solved on the host |
 
-`solve_equilibrium` returns +1 when t_max comes before convergence. The
-state at t_max is returned.
+`solve_equilibrium` returns +1 when t_max comes before convergence (the
+value of `FLAG_HOST_RECOVERED`, which only the device-resident calls
+give). The state at t_max is returned.
 
 ### The error report
 
@@ -1615,8 +1809,9 @@ generated) and its KROME-X form. Conventions:
 | `krome_num2col` | the column-density estimator | `num2col` | `krome_num2col` | `krome_num2col` | `net.num2col` |
 | `krome_n2x` / `krome_x2n` | number densities <-> mass fractions | `n2x`, `x2n` | `krome_n2x`, `krome_x2n` | `krome_n2x`, `krome_x2n` | `net.n2x`, `net.x2n` |
 | `krome_consistent_x` | renormalize x, electrons for neutrality | after a solve: `o.renormalize_x`, `o.conserve = 3` | keys `renormalize_x`, `conserve` | `krome_set` | `opts[...]` |
-| `krome_conserve`, `krome_conserveLin_x` | force element and charge conservation | after a solve: `o.conserve = 2` (against the input totals) | key `conserve` | `krome_set(h, "conserve", 2d0)` | `opts["conserve"] = 2` |
-| `krome_conserveLinGetRef_x` | the reference element totals | `get_element_totals` | `krome_get_element_totals` | `krome_get_element_totals` | `net.element_totals` |
+| `krome_conserve` | force element and charge conservation | after a solve: `o.conserve = 2` (against the input totals) | key `conserve` | `krome_set(h, "conserve", 2d0)` | `opts["conserve"] = 2` |
+| `krome_conserveLin_x` | consistent advection: back to a reference after advection (section 6.7) | `conserve_x`, `conserve_cells_x` (`conserve`, `conserve_cells` for n) | `krome_conserve_cells_x` (`krome_conserve_cells`) | `krome_conserve_x` (`krome_conserve`) | `net.conserve_x` (`net.conserve`) |
+| `krome_conserveLinGetRef_x` | the reference element totals | `get_element_totals_x` (per gram; `get_element_totals` per cm^3) | `krome_get_element_totals_x` (`krome_get_element_totals`) | `krome_get_element_totals_x` (`krome_get_element_totals`) | `net.element_totals_x` (`net.element_totals`) |
 | `krome_scale_Z` | metals at Asplund+09 x 10^Z | `scale_Z` | `krome_scale_Z` | `krome_scale_Z` | `net.scale_Z` |
 
 **Photon bins and radiation** (the field is the caller's photon flux per

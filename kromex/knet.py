@@ -10,15 +10,25 @@ piecewise-group and additive-channel structure.
 CLI:
     python3 knet.py file1.knet [file2.knet ...] [-o ir_dir] [-v]
 
-AST node forms (JSON dicts):
+AST node forms (JSON dicts; codegen.Codegen.diff and _cx walk them):
     {"n": 1.3e-32}                      number
-    {"s": "Tgas", "kind": "state|param|var"}
+    {"s": "Tgas", "kind": KIND}         symbol; KIND: "state" (Tgas, E_eV,
+                                        ...), "const", "param", "var";
+                                        codegen adds "ncol" (the column
+                                        argument of a column-form shield)
+                                        and "unclamped": True (the actual
+                                        gas T, not the rate's clamped one)
     {"sp": "H2"}                        species literal (n() and extern args)
+    {"sps": ["H", "H2"]}                species list (extern args)
     {"str": "swri"}                     string literal
     {"u": "-", "x": AST}                unary
     {"b": "+", "l": AST, "r": AST}      binary (+ - * / **)
     {"c": ">", "l": AST, "r": AST}      comparison (only as where() arg 1)
-    {"f": "exp", "a": [AST, ...], "kind": "builtin|table|extern"}
+    {"f": "exp", "a": [AST, ...], "kind": FKIND}
+                                        call; FKIND: "builtin", "table",
+                                        "extern", "density" (n(species));
+                                        codegen adds "tfunc" (a generated
+                                        function of Tgas and constants)
 """
 
 import argparse
@@ -34,12 +44,13 @@ import constants as _constants  # noqa: E402
 STATE_SYMBOLS = {"Tgas", "Tgas_eV", "Tdust", "ntot", "Hnuclei", "J_LW"}
 # J_LW: mean intensity of the photon bins in the Lyman-Werner band
 # (11.2-13.6 eV) [eV s^-1 cm^-2 Hz^-1 sr^-1]; a rate linear in it removes
-# rate/pdiss photons from those bins (spec 5.4)
+# rate/pdiss photons from those bins (network-format.md 5.4)
 LW_BAND = (11.2, 13.6)
 # externs linear in their first argument (a J_LW rate may pass J_LW
 # through them)
 LINEAR_EXTERNS = {"H2_solomonLW"}
-# runtime parameters every network has without declaring them (spec 4.3)
+# runtime parameters every network has without declaring them
+# (network-format.md 4.3)
 IMPLICIT_PARAMS = {"G0": 0.0, "d2g": 1.0e-2, "Av": 0.0,
                    "gamma_ad": 5.0 / 3.0, "Tcmb": 2.725, "tff": 0.0,
                    "zredshift": 0.0, "hubble0": 0.0, "omega0": 0.3153,
@@ -335,7 +346,8 @@ class Network:
         self.cooling = []
         self.heating = []
         self.reactions = []
-        self.rate_scale = None     # AST multiplying every rate (spec 6.2)
+        # AST multiplying every rate (network-format.md 6.2)
+        self.rate_scale = None
         self.freeze = []           # [{species, cond (AST or None), line}]
         self.ebind = {}            # gas name -> (E_bare, E_ice) [K] (5.3)
         # grain population of the surface chemistry (5.3): None = the
@@ -432,7 +444,8 @@ def parse_rate(rate, ann, net, lineno):
         return {"kind": "auto"}
     if re.match(r"^h2pd\s*\(\s*\)$", rate):
         # H2 photodissociation from the H2pdB.dat line data on the photon
-        # bins (legacy @next_H2photodissociation, kpd_H2); spec 5.4
+        # bins (legacy @next_H2photodissociation, kpd_H2;
+        # network-format.md 5.4)
         return {"kind": "photo", "xsec": {"kind": "h2pd"}}
     call = re.match(r"^(photo|surface)\s*\((.*)\)$", rate, flags=re.S)
     if call:
@@ -440,7 +453,8 @@ def parse_rate(rate, ann, net, lineno):
         if kind == "surface":
             # surface(auto): the surface model resolves the process;
             # surface(Ea=K | prob=p [, branch=f]): a two-body reaction with
-            # its barrier [K] or reaction probability given (spec 5.3)
+            # its barrier [K] or reaction probability given
+            # (network-format.md 5.3)
             if inner == "auto":
                 return {"kind": kind, "xsec": {"kind": "auto"}}
             node = parse_expr(rate, lineno)
@@ -476,7 +490,8 @@ def parse_rate(rate, ann, net, lineno):
         else:
             xsec = {"kind": "expr", "ast": x}
         out = {"kind": "photo", "xsec": xsec}
-        if "shield" in kw:  # shielding factor of the rate (spec 5.4)
+        # shielding factor of the rate (network-format.md 5.4)
+        if "shield" in kw:
             out["shield"] = kw["shield"]
         for k in ("Emin", "Emax"):
             if k in kw:
@@ -756,8 +771,8 @@ def jlw_degree(node, net):
 
 
 def check_reverse(net):
-    """`<->` reactions (spec 3.2): an expression or `auto` rate between
-    kinetic species only; the reverse must not also be written out."""
+    """`<->` reactions (network-format.md 3.2): an expression or `auto` rate
+    between kinetic species only; the reverse must not also be written out."""
     def key(rx):
         return (tuple(sorted(r["sp"] for r in rx["reactants"])),
                 tuple(sorted(p["sp"] for p in rx["products"])))
@@ -783,9 +798,10 @@ def check_reverse(net):
 
 
 def check_radiative(net):
-    """J_LW rates (spec 5.4): linear in J_LW, one kinetic reactant (the
-    absorber), no temperature range, pdiss given. pdiss is allowed on
-    photo() and J_LW rates only; J_LW appears in reaction rates only."""
+    """J_LW rates (network-format.md 5.4): linear in J_LW, one kinetic
+    reactant (the absorber), no temperature range, pdiss given. pdiss is
+    allowed on photo() and J_LW rates only; J_LW appears in reaction rates
+    only."""
     for k, v in net.vars.items():
         if any(nd.get("s") == "J_LW" for nd in walk(v)):
             net.errors.append("J_LW used in var %s: write it in the rate "
@@ -831,8 +847,8 @@ def check_radiative(net):
 
 
 def resolve_modifiers(net):
-    """rate_scale / freeze checks (spec 6.2). Both are evaluated with the
-    rates, so they may use what a rate may use, except that a freeze
+    """rate_scale / freeze checks (network-format.md 6.2). Both are evaluated
+    with the rates, so they may use what a rate may use, except that a freeze
     condition must be constant during a solver call (parameters and
     constants only): a switch on the evolving state would make the RHS
     discontinuous."""

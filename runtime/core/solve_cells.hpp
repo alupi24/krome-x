@@ -1,5 +1,5 @@
-// KROME-X cells frontend (Step 3): integrate many independent resolution
-// elements through one call,
+// KROME-X cells frontend: integrate many independent resolution elements
+// through one call,
 //
 //   solve_cells(ncell, n[ncell][NSPEC], Tgas[ncell], dt[ncell], params,
 //               opts, cells_opts)
@@ -27,6 +27,7 @@
 // declares solve_cells(), solve_cells_x() and CellsOpts.
 #pragma once
 #include <cmath>
+#include <algorithm>
 #include <vector>
 #ifdef _OPENMP
 #include <omp.h>
@@ -38,6 +39,11 @@ namespace krome {
 // ---------------------------------------------------------------------------
 // per-cell backend
 
+// every cell by its own solve(), in an OpenMP loop: cell c with the
+// parameters P[c * pstride] (pstride 0: one Params for all), its own dt[c],
+// and CellsOpts' optional rows (Phi, Td, adust, each [ncell][bins]) and
+// outputs (flags[ncell], stats[ncell]); a failed cell keeps its inputs.
+// Returns 0 or the flag of the lowest failing cell
 inline int solve_cells_percell(int ncell, double* n, double* Tgas,
                                const double* dt, const Params* P,
                                int pstride, const SolverOpts& o,
@@ -128,10 +134,10 @@ inline int solve_cells_(int ncell, double* n, double* Tgas,
   bool missing = false;
   for (int c = 0; c < ncell; ++c) {
     const bool m = params_missing(P[static_cast<size_t>(c) * pstride]) >= 0;
-    if (co.flags != nullptr) co.flags[c] = m ? -105 : 0;
+    if (co.flags != nullptr) co.flags[c] = m ? FLAG_PARAM_UNSET : 0;
     missing |= m;
   }
-  if (missing) return -105;
+  if (missing) return FLAG_PARAM_UNSET;
   BatchPath path = co.path;
   const bool automatic = path == PATH_AUTO;
   if (automatic)
@@ -140,8 +146,8 @@ inline int solve_cells_(int ncell, double* n, double* Tgas,
   if (path == PATH_DEVICE) {
     if (device_cells_ == nullptr) {  // no device backend in this build
       if (co.flags != nullptr)
-        for (int c = 0; c < ncell; ++c) co.flags[c] = -104;
-      return -104;
+        for (int c = 0; c < ncell; ++c) co.flags[c] = FLAG_UNSUPPORTED;
+      return FLAG_UNSUPPORTED;
     }
     const int f = device_cells_(ncell, n, Tgas, dt, P, pstride, o, co);
     // -104: a configuration the device backend does not support; solved
@@ -149,7 +155,7 @@ inline int solve_cells_(int ncell, double* n, double* Tgas,
     // PATH_AUTO the cells run on the host too, while an explicit
     // PATH_DEVICE reports it. Otherwise final (the cells that failed on
     // the device were already re-solved on the host)
-    if (f != -104 && !(f == -109 && automatic)) return f;
+    if (f != FLAG_UNSUPPORTED && !(f == FLAG_NO_KOKKOS && automatic)) return f;
   }
   return solve_cells_percell(ncell, n, Tgas, dt, P, pstride, o, co);
 }
@@ -205,6 +211,53 @@ inline int solve_cells_x(int ncell, double* x, const double* rho,
                          const Params* params, const SolverOpts& o,
                          const CellsOpts& co) {
   return solve_cells_x_(ncell, x, rho, Tgas, dt, params, 1, o, co);
+}
+
+// consistent advection (see conserve_to_n_): each cell moved to its
+// reference row ref[c * ref_stride * NELEM] (ref_stride 1: one row per
+// cell, 0: one row for all) and to zero charge; params as for solve_cells
+// (nullptr: the defaults), for the freeze directives. flags[ncell]
+// (optional): each cell's flag (0, FLAG_CONSERVE_UNREACHED, or the
+// warning FLAG_CONSERVE_LARGE). Returns the flag of the lowest failing
+// cell (negative), else 0
+template <bool X>
+inline int conserve_cells_(int ncell, double* v, const double* ref,
+                           int ref_stride, const Params* params,
+                           int par_stride, int* flags) {
+  const Params dflt = Params();
+  std::vector<int> local(flags == nullptr ? std::max(ncell, 0) : 0);
+  int* fl = flags != nullptr ? flags : local.data();
+#ifdef _OPENMP
+#pragma omp parallel for schedule(static)
+#endif
+  for (int c = 0; c < ncell; ++c) {
+    double* vc = v + static_cast<size_t>(c) * NSPEC;
+    const double* rc = ref + static_cast<size_t>(c) * ref_stride * NELEM;
+    const Params& pc = params != nullptr
+        ? params[static_cast<size_t>(c) * par_stride] : dflt;
+    fl[c] = X ? conserve_to_x_(vc, rc, pc) : conserve_to_(vc, rc, pc);
+  }
+  for (int c = 0; c < ncell; ++c)  // the lowest failing cell
+    if (fl[c] < 0) return fl[c];
+  return 0;
+}
+inline int conserve_cells(int ncell, double* n, const double* ref,
+                          int ref_stride, const Params* params,
+                          int par_stride, int* flags) {
+  return conserve_cells_<false>(ncell, n, ref, ref_stride, params,
+                                par_stride, flags);
+}
+inline int conserve_cells_x(int ncell, double* x, const double* ref,
+                            int ref_stride, const Params* params,
+                            int par_stride, int* flags) {
+  return conserve_cells_<true>(ncell, x, ref, ref_stride, params,
+                               par_stride, flags);
+}
+inline int conserve(double* n, const double* ref, const Params& p) {
+  return conserve_to_(n, ref, p);
+}
+inline int conserve_x(double* x, const double* ref, const Params& p) {
+  return conserve_to_x_(x, ref, p);
 }
 
 } // namespace krome

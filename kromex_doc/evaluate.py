@@ -169,18 +169,6 @@ def in_range(T, trange):
     return (T >= trange[0]) & (T < trange[1])
 
 
-def runtime_rate(T, k, pieces):
-    """KROME-X's rate of a piecewise group on the grid T: each piece in its
-    range, zero below the lowest bound, the value at the highest bound
-    above it (the default; docs/network-format.md 3.1). pieces: [(trange,
-    k on T)] sorted; k on the bounds from evaluate at the bounds"""
-    out = np.zeros_like(T, dtype=float)
-    for trange, kp in pieces:
-        m = in_range(T, trange)
-        out[m] = kp[m]
-    return out
-
-
 def joints(net, group, values):
     """the relative jumps of a piecewise rate at its interior bounds:
     [(T, k_left, k_right, |dk| / k_left)]"""

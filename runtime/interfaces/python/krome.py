@@ -50,19 +50,14 @@ _ENUMS = {"jac": ("auto", "analytic", "fd"),
           "path": ("auto", "percell", "device")}
 _BOOLS = ("evolve_T", "clip_negative", "error_report", "renormalize_x",
           "device_cache")
-_INTS = ("max_steps", "min_device", "device_memory",
-         "min_interleave",
-         "max_restarts",
-         "max_err_fails",
-         "max_conv_fails", "conserve")
+_INTS = ("max_steps", "min_device", "device_memory", "min_interleave",
+         "max_restarts", "max_err_fails", "max_conv_fails", "conserve")
 _KEYS = ("evolve_T", "jac", "linsol", "rtol", "atol_n", "atol_T", "atol_u",
-
          "max_steps", "max_err_fails", "max_conv_fails", "max_restarts",
          "clip_negative", "error_report", "renormalize_x", "conserve",
-         "path", "device_cache", "device_memory",
-         "min_device", "min_interleave",
-         "eq_t0",
-         "eq_tmax", "eq_factor", "eq_rtol", "eq_atol")
+         "path", "device_cache", "device_memory", "min_device",
+         "min_interleave", "eq_t0", "eq_tmax", "eq_factor", "eq_rtol",
+         "eq_atol")
 
 
 class _Constants:
@@ -300,6 +295,14 @@ class Network:
             "krome_lw_reactant": (ctypes.c_int, [ctypes.c_int]),
             "krome_lw_pdiss": (ctypes.c_double, [ctypes.c_int]),
             "krome_opts_lw_weights": (ctypes.c_int, [ctypes.c_void_p, _D]),
+            "krome_get_element_totals_x": (ctypes.c_int, [ctypes.c_int, _D,
+                                                          _D]),
+            "krome_conserve_cells": (ctypes.c_int, [ctypes.c_int, _D, _D,
+                                                    ctypes.c_int, _D,
+                                                    ctypes.c_int, _I]),
+            "krome_conserve_cells_x": (ctypes.c_int, [ctypes.c_int, _D, _D,
+                                                      ctypes.c_int, _D,
+                                                      ctypes.c_int, _I]),
             "krome_get_absorption": (ctypes.c_int, [ctypes.c_int, _D, _D, _D,
                                                     ctypes.c_int,
                                                     ctypes.c_void_p, _D,
@@ -847,6 +850,78 @@ class Network:
         self._lib.krome_get_element_totals(ncell, _dptr(n), _dptr(out))
         out = out[:, :len(self.elements)]
         return out[0] if single else out
+
+    def element_totals_x(self, x):
+        """element totals per gram of gas [atoms g^-1] from the mass
+        fractions, [..., nelem] (legacy krome_conserveLinGetRef_x)"""
+        single, x, ncell = self._cells(x)
+        out = np.zeros((ncell, max(len(self.elements), 1)))
+        self._lib.krome_get_element_totals_x(ncell, _dptr(x), _dptr(out))
+        out = out[:, :len(self.elements)]
+        return out[0] if single else out
+
+    def conserve(self, n, ref, par=None, flags=None, check=True):
+        """consistent advection (legacy krome_conserveLin_x; manual 6.7):
+        the cells n ([nspec] or [ncell, nspec], cm^-3) moved back to the
+        reference element totals ref ([nelem]: one row for all, or [ncell,
+        nelem]; element_totals of a reference cell) and to zero net charge
+        (negatives clipped, the elements by the minimal relative correction
+        of the conserve option, then the electrons from neutrality). par:
+        the parameters as for solve (for the freeze directives). flags: an
+        int array [ncell] receiving each cell's flag (0,
+        FLAG_CONSERVE_UNREACHED -112, the warning FLAG_CONSERVE_LARGE 2).
+        Returns the corrected densities (the input is not modified); raises
+        KromeError when a cell cannot reach its reference, unless
+        check=False"""
+        return self._conserve(n, ref, par, flags, check,
+                              "krome_conserve_cells")
+
+    def conserve_x(self, x, ref, par=None, flags=None, check=True):
+        """conserve() for mass fractions, ref per gram (element_totals_x)"""
+        return self._conserve(x, ref, par, flags, check,
+                              "krome_conserve_cells_x")
+
+    def _conserve(self, v, ref, par, flags, check, fname):
+        single, v, ncell = self._cells(v)
+        v = v.copy()
+        nel = len(self.elements)
+        R = np.ascontiguousarray(ref, dtype=float)
+        if R.shape == (nel,):
+            rs = 0
+        elif R.shape == (ncell, nel):
+            rs = nel
+        else:
+            raise KromeError("ref must have shape (%d,) or (%d, %d), got %s"
+                             % (nel, ncell, nel, R.shape))
+        if nel == 0:
+            R = np.zeros(1)
+        # the parameters only select the freeze directives: no REQUIRED check
+        P, ps = None, 0
+        if isinstance(par, dict):
+            P, ps = self.param_rows(ncell, **par), self.npar
+        elif par is not None:
+            P = np.ascontiguousarray(par, dtype=float)
+            if P.shape == (ncell, self.npar):
+                ps = self.npar
+            elif P.shape != (self.npar,):
+                raise KromeError("par must have shape (%d,) or (%d, %d), got "
+                                 "%s" % (self.npar, ncell, self.npar,
+                                         P.shape))
+        fl = np.zeros(ncell, dtype=np.intc)
+        r = getattr(self._lib, fname)(ncell, _dptr(v), _dptr(R), rs,
+                                      None if P is None else _dptr(P), ps,
+                                      fl.ctypes.data_as(_I))
+        if r == -1:
+            raise KromeError("%s: bad arguments" % fname)
+        if flags is not None:
+            flags[...] = fl.reshape(np.shape(flags))
+        if check and r != 0:
+            bad = np.flatnonzero(fl < 0)
+            raise KromeError("%s: %s (cells %s); pass check=False to get "
+                             "the result anyway" % (fname,
+                                                    self.flag_message(r),
+                                                    bad.tolist()))
+        return v[0] if single else v
 
     def n2x(self, n):
         """mass fractions from number densities"""

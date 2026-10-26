@@ -1,5 +1,6 @@
-// KROME-X: a per-cell BDF integrator, ported from CVODE (SUNDIALS 7.9.0)
-// for the per-cell device path (docs/gpu-percell-design.md).
+// KROME-X: a per-cell BDF integrator, ported from CVODE (SUNDIALS 7.9.0):
+// the integrator of every path, the host solve() and the per-cell device
+// kernels (docs/gpu-percell-design.md).
 //
 // One cell, one integrator, no allocation, no library: the state lives in a
 // caller-provided workspace (work_doubles(N) doubles, N ints) and every
@@ -153,14 +154,15 @@ struct Opts {
   // c . y stays at its predicted value; the difference-quotient Jacobian
   // breaks this at roundoff over tiny increments (trace species), and the
   // error, conserved from then on, can outgrow a species the invariant
-  // ties (the electrons of a collapsing cloud). With inv_row >= 0 every
-  // correction's component inv_row is set so that c . delta = -c . G
-  // over the first inv_n components (the Jacobian itself is untouched:
-  // the fixed point is the same), while component inv_row (a density)
-  // carries at least 1e-6 of sum_{i != r} |c_i y_i| and stays
-  // non-negative: below that its value from the invariant would be lost
-  // to cancellation (and a state whose invariant it cannot carry, KROME:
-  // an input with more net charge than electrons, would need it
+  // ties (the electrons of a collapsing cloud). With inv_row >= 0 and the
+  // difference-quotient Jacobian (dq_jac; an analytic one keeps the
+  // invariant itself) every correction's component inv_row is set so
+  // that c . delta = -c . G over the first inv_n components (the Jacobian
+  // itself is untouched: the fixed point is the same), while component
+  // inv_row (a density) carries at least 1e-6 of sum_{i != r} |c_i y_i|
+  // and stays non-negative: below that its value from the invariant would
+  // be lost to cancellation (and a state whose invariant it cannot carry,
+  // KROME: an input with more net charge than electrons, would need it
   // negative); there the correction stays the solver's own. inv_row < 0:
   // off (CVODE's iteration)
   int inv_row = -1, inv_n = 0;
@@ -237,7 +239,6 @@ enum : int {
 enum : int { NO_FAILURES = 0, FAIL_BAD_J = 1, FAIL_OTHER = 2 };
 
 // cvode.c / cvode_impl.h / cvode_ls_impl.h / cvode_nls.c constants
-constexpr double FUZZ_FACTOR = 100.0;
 constexpr double HLB_FACTOR = 100.0;
 constexpr double HUB_FACTOR = 0.1;
 constexpr double H_BIAS = 0.5;
@@ -457,13 +458,35 @@ KROME_HD inline void getrs_(const double* a, int n, const int* p, double* b,
 
 }  // namespace detail_
 
-// The integrator of one cell (CVODE's CVodeMem, BDF, dense direct solver,
-// Newton). reinit() starts an integration at (t0, y0); solve() is one
-// CVode(tout, CV_NORMAL) call from there.
+// The integrator of one cell (CVODE's CVodeMem, BDF, Newton, a direct
+// linear solver: dense, LAPACK or static-pivot sparse). reinit() starts an
+// integration at (t0, y0); solve() is one CVode(tout, CV_NORMAL) call from
+// there.
 // U = false: every vector and matrix of the cell has stride S in its
 // workspace (the interleaved device layout: element i of cell c at
 // c + i S, coalesced across threads), the problem's rhs / jac see the same
-// strides; U = true: unit stride (S unused), the host layout.
+// strides; U = true: unit stride (S unused), the host solve() and the
+// contiguous device kernel.
+//
+// The members, in CVODE's order (each carries its CVODE name):
+//   reinit, solve                 CVodeReInit, CVode (CV_NORMAL)
+//   ewt_set_, hin_, ydd_norm_     error weights, the initial step (cvHin)
+//   step_                         cvStep: one step with its retries
+//   adjust_params_ ... rescale_   order and step-size changes of the
+//                                 history array zn (cvAdjustParams, ...)
+//   predict_, restore_, set_      the predictor, its undo, the BDF
+//                                 coefficients (cvSet, cvSetTqBDF)
+//   nls_, residual_, conv_test_   the Newton iteration (cvNls, ...)
+//   nls_lsetup_, ls_setup_,       the linear system A = I - gamma J: setup
+//   lsolve_, sp_*                 and solve (dense, LAPACK, sparse LU)
+//   inv_dot_, inv_set_            KROME's invariant (Opts::inv_row)
+//   dq_jac_                       the difference-quotient Jacobian
+//   handle_nflag_,                the failure paths (convergence, error
+//   do_error_test_                test)
+//   complete_step_,               the accepted step and the next step size
+//   prepare_next_step_, set_eta_,  and order (cvCompleteStep, ...)
+//   choose_eta_
+//   get_dky_                      the interpolated output (CVodeGetDky)
 template <class Prob, bool U = true>
 class Cell {
 
@@ -1106,8 +1129,8 @@ class Cell {
     return getrf_<U>(A, N, piv, S) > 0 ? LS_LUFACT_FAIL : 0;
   }
 
-  // cvLsSolve (dense): x = A^-1 b, scaled by 2 / (1 + gamrat) when gamma
-  // changed since the setup
+  // cvLsSolve (dense, LAPACK or sparse): x = A^-1 b, scaled by
+  // 2 / (1 + gamrat) when gamma changed since the setup
   KROME_HD int lsolve_(double* b) {
     if (o.sparse) {
       sp_solve_(b);

@@ -30,6 +30,7 @@ import sys
 from pathlib import Path
 
 import kromex  # noqa: F401 (puts the kromex modules on the path)
+import balance  # noqa: E402
 import codegen  # noqa: E402
 import knet  # noqa: E402
 import paths  # noqa: E402
@@ -88,6 +89,10 @@ def document(network, outdir=None, ranges=None, values=None, tref=100.0,
     say("NOTE: " + codegen.BURCAT_TERMS)
     say("missing chemistry ...")
     miss = missing.analyse(net, thermo, max_species=max_missing)
+    say("detailed balance ...")
+    lo, hi = ranges["Tgas"]
+    rev = balance.analyse(net, balance.load_tables(paths.ROOT / "data"),
+                          tgrid=(lo, hi, balance.TGRID[2]))
     say("graphs ...")
     graphs = graph.write(net, out / "graphs", max_graph)
     say("LaTeX table ...")
@@ -99,7 +104,7 @@ def document(network, outdir=None, ranges=None, values=None, tref=100.0,
     site = Site(net, src, out, values, ranges, float(tref), thermo,
                 max_graph=max_graph, plots=plots, outside=outside,
                 interactive=not static)
-    site.build(miss, graphs, files)
+    site.build(miss, graphs, files, rev)
     say("wrote %s" % (out / "index.html"))
     return out / "index.html"
 

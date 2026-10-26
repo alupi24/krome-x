@@ -7,7 +7,6 @@ others)."""
 import paths
 import tomlio
 
-T298 = 298.15
 R_KJ = 8.314462618e-3          # kJ / (mol K)
 KJMOL_TO_K = 1.0 / R_KJ        # an enthalpy [kJ/mol] as a temperature [K]
 

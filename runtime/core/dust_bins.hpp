@@ -8,10 +8,11 @@
 //                       = pre * (Tgas - Td),   pre = 0.5 fact vgas kB ntot
 //   cooling = 4 pi Sum_bins (intBB(Td) - intBB(Tcmb) - intJ) besc xdust a^2
 //
-// Tdust is solved by bisection at every call (legacy default); the
-// per-bin dTdust-as-state variant (legacy -usedTdust) is a planned
-// option. Include the generated net_<name>.hpp BEFORE this header (uses
-// rho_/ntot_); photo coupling (intJ) takes the Radiation bins + Phi.
+// Tdust is solved by bisection at every call (legacy default), or, with
+// dust.evolve_Td, evolved per bin by the grains' energy equation
+// (dust_dTdust below). Include the generated net_<name>.hpp BEFORE this
+// header (uses rho_/ntot_); photo coupling (intJ) takes the Radiation bins
+// + Phi.
 //
 // Physical constants from krome::constants (kromex/constants.py); grain
 // bulk densities C 2.25 / Si 3.13 g/cm3 (Zhukovska), key-element
@@ -436,7 +437,9 @@ struct DustBins {
   // configuration (legacy krome_init_dust arguments and -dust option)
   int nd = 10;                    // bins per grain type
   bool useSi = true, useC = true;  // legacy -dust=...,Si,C
-  double alow = 5e-7, aup = 2.5e-5, phi = -3.5;  // MRN
+  // the MRN size distribution (Mathis, Rumpl & Nordsieck 1977): radii
+  // alow..aup [cm], dn/da ~ a^phi (phi: the slope, not a photon flux)
+  double alow = 5e-7, aup = 2.5e-5, phi = -3.5;
   int nT = 100000;                // intBB Tbb samples (legacy dust_nT 1e5)
   double TbbMin = 1.0, TbbMax = 1e4;
 
@@ -468,13 +471,12 @@ struct DustBins {
   // intBB tables [bin][nT]: read-only after init(), shared by the copies
   // (solve_cells gives every cell its own bins for its Td; copying these
   // ~3 nb nT doubles per cell would cost ~48 MB each with the defaults)
-  struct IntBB { std::vector<double> ibb, ibb_dT, ibb_sig; };
+  struct IntBB { std::vector<double> ibb, ibb_sig; };
   std::shared_ptr<const IntBB> tab_;
   double TbbMult = 0.0;
 
   static constexpr double PI_ = constants::pi;
   static constexpr double KB_EV = constants::boltzmann_eV;
-  static constexpr double KB_ERG_ = constants::boltzmann_erg;
   static constexpr double H_EV = constants::planck_eV;
   static constexpr double CL_ = constants::clight;
   static constexpr double SB_ = constants::stefboltz_erg;
@@ -485,14 +487,6 @@ struct DustBins {
     if (xexp >= 3e2 || x <= 1e-10) return 0.0;
     return 2.0 * x * x * x / (H_EV * H_EV) / (CL_ * CL_)
         / (std::exp(xexp) - 1.0);
-  }
-  static double planckBB_dT_(double x, double T) {
-    const double b = 1.0 / KB_EV;
-    const double xexp = b * x / T;
-    if (xexp >= 3e2) return 0.0;
-    const double a = 2.0 / (H_EV * H_EV) / (CL_ * CL_);
-    const double e = std::exp(xexp);
-    return a * b * x * x * x * x / (T * T) * e / ((e - 1.0) * (e - 1.0));
   }
 
   // per-bin energy grid: the Si and C data files sample the same layout
@@ -572,12 +566,10 @@ struct DustBins {
     // (legacy dust_init_intBB); Planck weights shared per grid
     auto tb = std::make_shared<IntBB>();
     std::vector<double>& ibb = tb->ibb;
-    std::vector<double>& ibb_dT = tb->ibb_dT;
     std::vector<double>& ibb_sig = tb->ibb_sig;
     ibb.assign(static_cast<size_t>(nb) * nT, 0.0);
-    ibb_dT.assign(static_cast<size_t>(nb) * nT, 0.0);
     ibb_sig.assign(static_cast<size_t>(nb) * nT, 0.0);
-    std::vector<double> wB(nE), wBdT(nE);
+    std::vector<double> wB(nE);
     const double pre = PI_ / H_EV * EV2ERG_;
     for (int i = 0; i < nT; ++i) {
       const double Tbb = i / TbbMult + TbbMin;
@@ -585,26 +577,17 @@ struct DustBins {
       for (int b = 0; b < nb; ++b) {
         if (eg[b] != wgrid) {  // recompute trapezoid weights per grid
           wgrid = eg[b];
-          for (int j = 0; j < nE; ++j) {
-            wB[j] = 0.0;
-            wBdT[j] = 0.0;
-          }
+          for (int j = 0; j < nE; ++j) wB[j] = 0.0;
           for (int j = 1; j < nE; ++j) {
             const double dE = wgrid[j] - wgrid[j - 1];
             wB[j] += 0.5 * dE * planckBB_(wgrid[j], Tbb);
             wB[j - 1] += 0.5 * dE * planckBB_(wgrid[j - 1], Tbb);
-            wBdT[j] += 0.5 * dE * planckBB_dT_(wgrid[j], Tbb);
-            wBdT[j - 1] += 0.5 * dE * planckBB_dT_(wgrid[j - 1], Tbb);
           }
         }
-        double s = 0.0, sdT = 0.0;
+        double s = 0.0;
         const double* q = &qb[static_cast<size_t>(b) * nE];
-        for (int j = 0; j < nE; ++j) {
-          s += wB[j] * q[j];
-          sdT += wBdT[j] * q[j];
-        }
+        for (int j = 0; j < nE; ++j) s += wB[j] * q[j];
         ibb[static_cast<size_t>(b) * nT + i] = s * pre;
-        ibb_dT[static_cast<size_t>(b) * nT + i] = sdT * pre;
         ibb_sig[static_cast<size_t>(b) * nT + i] =
             s * pre / (SB_ * Tbb * Tbb * Tbb * Tbb);
       }
@@ -638,29 +621,12 @@ struct DustBins {
   }
 
   // the methods: the DustView functions on this population (see there)
-  double tabT_(const std::vector<double>& tab, int b, double T) const {
-    return dust_tabT_(view(), tab.data(), b, T);
-  }
   double get_intBB(int b, double T) const { return dust_intBB(view(), b, T); }
-  double intBB_slope_(int b, double T) const {
-    return dust_intBB_slope_(view(), b, T);
-  }
-  double get_intBB_dT(int b, double T) const { return tabT_(tab_->ibb_dT, b, T); }
-  double a_(int b) const { return dust_a_(view(), b); }
-  double a2_(int b) const { return dust_a2_(view(), b); }
   // the radii the physics sees: av (a solve's state slice), or nullptr =
   // the population's own a[]; refreshes the area weights of the hook
   void set_radii(const double* av) {
     acur = av;
     dust_area_weights(view(), awcur.data());
-  }
-  double kpla_dust(double Tdust, int b) const {
-    return dust_kpla(view(), Tdust, b);
-  }
-  double besc_(double Tgas, double xd_scale, double lj,
-               const double* Tds = nullptr) const {
-    return dust_besc(view(), Tgas, xd_scale, lj,
-                     Tds != nullptr ? Tds : Td.data());
   }
 
   // dust-chemistry coupling: install this population into the generated
@@ -681,11 +647,6 @@ struct DustBins {
     p.hk.dust = DustBinsHook();
   }
 
-  template <class P>
-  void pre_(double Tgas, const double* n, double& pre, double& lj,
-            double& xd_scale, const P& p) const {
-    dust_pre(view(), Tgas, n, pre, lj, xd_scale, p);
-  }
   template <class P>
   double cooling_state(double Tgas, const double* n, const P& p,
                        const double* Tds, const double* Phi = nullptr)
@@ -723,13 +684,6 @@ struct DustBins {
       }
     }
   }
-  double intJ_(int b, const double* Phi) const {
-    return dust_intJ(view(), b, Phi);
-  }
-  double solve_bin_(int b, double Tgas, double pre, double be, double intCMB,
-                    double iJ) const {
-    return dust_solve_bin_(view(), b, Tgas, pre, be, intCMB, iJ);
-  }
   template <class P>
   void balance(double Tgas, const double* n, const P& p, const double* Phi,
                double* Td_out) const {
@@ -743,14 +697,8 @@ struct DustBins {
     balance(Tgas, n, p, Phi, Td.data());
     return cooling_state(Tgas, n, p, Td.data(), Phi);
   }
-  static double fnprime_(int nn, double x) { return dust_fnprime_(nn, x); }
   double heat_capacity(int b, double T) const {
     return dust_heat_capacity(view(), b, T);
-  }
-  double key_mass_(int b) const { return dust_key_mass_(view(), b); }
-  static double rho0_(int isc) { return isc ? 2.25 : 3.13; }
-  double atoms_per_a3_(int b, double xds) const {
-    return dust_atoms_per_a3(view(), b, xds);
   }
   double radius_of_atoms(int b, double N, double xds) const {
     return dust_radius_of_atoms(view(), b, N, xds);
@@ -758,20 +706,10 @@ struct DustBins {
   double atoms_of_radius(int b, double ab, double xds) const {
     return dust_atoms_of_radius(view(), b, ab, xds);
   }
-  static constexpr double NU0_EVAP = DUST_NU0_EVAP;
-  static constexpr double E0_C_K = DUST_E0_C_K;
-  static constexpr double E0_SI_K = DUST_E0_SI_K;
-  static constexpr double SIGMA_C = DUST_SIGMA_C;
-  static constexpr double SIGMA_SI = DUST_SIGMA_SI;
   template <class P>
   void dadt(double Tgas, const double* n, const P& p, const double* Tds,
             double* da, double* dn) const {
     dust_dadt(view(), Tgas, n, p, Tds, da, dn);
-  }
-  template <class P>
-  double cooling_exchange(double Tgas, const double* n, const P& p,
-                          const double* Tds) const {
-    return dust_cooling_exchange(view(), Tgas, n, p, Tds);
   }
 };
 

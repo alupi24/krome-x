@@ -6,13 +6,19 @@
     python3 -m kromex --tests                        list the shipped tests
     python3 -m kromex --template FILE                the commented template
     python3 -m kromex --check run.toml               check the network only
+    python3 -m kromex --check network.knet           ... with the default options
     python3 -m kromex --version
+
+The positional file is the configuration (TOML), or a network: a KROME-X
+network (its first statement krome_format) or a legacy react_* network,
+taken with the default options (the --set overrides apply).
 
 --set SECTION.KEY=VALUE: VALUE in TOML syntax (1e-6, true, ["H2", "Z"]);
 a bare word is a string (--set thermal.gamma=EXACT)."""
 
 import argparse
 import sys
+from pathlib import Path
 
 if sys.version_info < (3, 8):
     sys.exit("KROME-X needs Python 3.8 or newer (this is %d.%d)"
@@ -35,6 +41,25 @@ def parse_set(item):
     return name.strip(), value
 
 
+def is_network(path):
+    """a network file rather than a configuration: its first statement is
+    the KROME-X header (krome_format), or a legacy react_* one (an @
+    directive or a numbered reaction line); a .toml file never is"""
+    import re
+    path = Path(path)
+    if path.suffix == ".toml":
+        return False
+    try:
+        for ln in path.read_text(errors="replace").splitlines():
+            t = ln.strip()
+            if t and not t.startswith("#"):
+                return (t.startswith("krome_format") or t.startswith("@")
+                        or re.match(r"\d+\s*,", t) is not None)
+    except OSError:
+        return False
+    return False
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(
         prog="kromex", description="KROME-X: generate a project from a "
@@ -42,7 +67,9 @@ def main(argv=None):
         epilog="--set SECTION.KEY=VALUE overrides an option (VALUE in TOML "
                "syntax; a bare word is a string). The options: "
                "options_template.toml, or --template FILE.")
-    ap.add_argument("config", nargs="?", help="the configuration (TOML)")
+    ap.add_argument("config", nargs="?",
+                    help="the configuration (TOML), or a network (.knet or "
+                         "legacy react_*) with the default options")
     ap.add_argument("--set", action="append", default=[],
                     metavar="SECTION.KEY=VALUE", help="override an option")
     ap.add_argument("--test", metavar="NAME",
@@ -70,6 +97,8 @@ def main(argv=None):
             ap.error("give a configuration file or --test, not both")
         if a.test:
             kp = Preprocessor.from_test(a.test)
+        elif a.config and is_network(a.config):
+            kp = Preprocessor(network=a.config)
         elif a.config:
             kp = Preprocessor.from_file(a.config)
         else:
