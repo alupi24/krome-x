@@ -1001,6 +1001,12 @@ def parse_network(path):
                 "rate": parse_rate(rate, ann, net, lineno),
                 "line": lineno,
             }
+            if rx["rate"]["kind"] == "auto" and any(
+                    net.species[x["sp"]]["phase"] != "gas"
+                    for x in rx["reactants"] + rx["products"]):
+                # a bare auto on a surface reaction is surface(auto), as
+                # convert_legacy writes legacy's (5.3)
+                rx["rate"] = {"kind": "surface", "xsec": {"kind": "auto"}}
             rx["eq"] = "%s -> %s" % (
                 " + ".join(r["sp"] + ("" if r["kinetic"] else "{}")
                            for r in rx["reactants"]),

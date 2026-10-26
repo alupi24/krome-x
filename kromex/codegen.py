@@ -513,7 +513,9 @@ def resolve_data_path(path, data_dir):
 
 def load_photo_db(path):
     """Legacy photoionization database -> list of entries with canonical
-    species names, energy limits [eV] and the sigma_v96(...) rate string."""
+    species names, energy limits [eV] and the rate string: sigma_v96(...)
+    (Verner et al. 1996, the outer shell), or above the inner-shell edge
+    a sum of sigma_vy95(...) (Verner & Yakovlev 1995, one per shell)."""
     def canon(name):
         n = name.strip()
         return "e-" if n.upper() == "E" else n
@@ -880,7 +882,7 @@ class Codegen:
                         self.total_of[base] = s
         self.data_dir = Path(data_dir)
         self.photo_db = load_photo_db(self.data_dir /
-                                      "photoioniziation.dat")
+                                      "photoionization.dat")
         self.warnings = []
         # per-species defaults (--custom-atol / --custom-rtol, legacy
         # -customATOL / -customRTOL): {species: value}, the starting
@@ -1864,8 +1866,10 @@ class Codegen:
         order) with legacy's rules: the first matching entry without T
         limits wins; entries with limits are range pieces of one piecewise
         rate; an unlimited entry after limited ones is an overlap error.
-        Entries needing machinery KROME-X lacks (reverse reactions, legacy
-        dust variables) stay stubbed with a warning naming the cause."""
+        A reaction without an entry, or whose entry needs machinery
+        KROME-X lacks (reverse reactions, legacy dust variables), is an
+        error naming the cause (surface reactions never get here: knet
+        makes their bare auto surface(auto))."""
         if getattr(self, "_auto_done", False):
             return
         self._auto_done = True
@@ -1903,10 +1907,12 @@ class Codegen:
                     break
                 asts.append((e, ast))
             if problem is not None:
-                self.warnings.append("auto rate %s: %s, stubbed to 0"
-                                     % (rx["eq"], problem))
-                out.append(rx)
-                continue
+                # an error, as in legacy: a rate of 0 would silently drop
+                # the reaction
+                raise ValueError(
+                    "auto rate %s (line %s): %s. Give the reaction an "
+                    "explicit rate, remove it, or add it to "
+                    "data/database" % (rx["eq"], rx["line"], problem))
             if rx["trange"] and any(e["limits"] for e, _ in asts):
                 self.warnings.append("auto rate %s: database T limits "
                                      "replace the network's range"
@@ -2676,15 +2682,16 @@ class Codegen:
                     elif ent is not None:
                         spec["prob"] = ent[0]
                     else:
-                        self.warnings.append("surface(auto) %s: not in "
-                                             "surface_2body.dat, stubbed"
-                                             % rx["eq"])
-                        continue
+                        raise ValueError(
+                            "surface(auto) %s (line %s): not in "
+                            "data/database/surface_2body.dat; give "
+                            "surface(Ea=...) or surface(prob=...)"
+                            % (rx["eq"], rx["line"]))
                     spec["gas_prod"] = not any(surf(x) for x in P)
             if kind is None:
-                self.warnings.append("surface(...) %s: not a recognized "
-                                     "surface process, stubbed" % rx["eq"])
-                continue
+                raise ValueError(
+                    "surface(...) %s (line %s): not a recognized surface "
+                    "process (network-format.md 5.3)" % (rx["eq"], rx["line"]))
             q = len(self._surf)
             spec["kind"] = kind
             self._surf.append(spec)
@@ -4484,9 +4491,9 @@ class Codegen:
                 w("inline " + PLAIN_EXTERNS[name])
             elif name in GENERATED_EXTERNS or name in self._gen_ext:
                 pass  # defined in the rates section (emit_generated_externs)
-            elif name == "sigma_v96" and any(
+            elif name in ("sigma_v96", "sigma_vy95") and any(
                     rx["rate"]["kind"] == "photo" for rx in net.reactions):
-                pass  # the Verner fit is generated with the photo tables
+                pass  # the Verner fits are generated with the photo tables
             else:
                 self.warnings.append("extern %s() stubbed to 0" % name)
                 w("template <class... A> static inline double %s(A...) "
@@ -7305,10 +7312,9 @@ class Codegen:
             segs.sort(key=lambda e: e["limits"][0])
             if segs:
                 # piecewise-in-E: each segment applies from its own threshold
-                # up to the next segment's threshold; the LAST segment is
-                # extrapolated upward — the database upper limits mark where
-                # legacy KROME stopped (usually the next inner-shell edge),
-                # not where the cross section ends
+                # up to the next segment's threshold (the outer-shell fit,
+                # then the sum over the shells above the inner-shell edge);
+                # the LAST segment is extrapolated above its upper limit
                 code = None
                 for e in segs:
                     expr = re.sub(r"\benergy_ev\b", "E_eV", d2e(e["rate"]),
@@ -7368,6 +7374,19 @@ class Codegen:
             w("      * std::pow(y, 0.5*P - 5.5)")
             w("      * std::pow(1.0 + std::sqrt(y/ya), -P);")
             w("  return 1e-18 * s0 * Fy;")
+            w("}")
+            w("")
+            w("// Verner & Yakovlev 1995 fit of one shell [cm^2], 0 below its")
+            w("// threshold Eth; above the inner-shell edge the database sums")
+            w("// them over the shells (Verner's phfit2.f)")
+            w("static inline double sigma_vy95(double E, double Eth, "
+              "double E0, double s0, double ya, double P, double yw, "
+              "double l) {")
+            w("  if (E < Eth) return 0.0;")
+            w("  const double y = E/E0;")
+            w("  return 1e-18 * s0 * ((y - 1.0)*(y - 1.0) + yw*yw)")
+            w("      * std::pow(y, 0.5*P - 5.5 - l)")
+            w("      * std::pow(1.0 + std::sqrt(y/ya), -P);")
             w("}")
             w("")
         if any("table" in ph for ph in photo):
@@ -8712,6 +8731,8 @@ def generate(args, ap=None):
             raise GenerationError(str(exc)) from exc
         finally:
             shutil.rmtree(check_tmp, ignore_errors=True)
+        # including those raised while generating the probe's code
+        info["warnings"] = sorted(set(gen.warnings))
         netcheck.report(net, res, info["warnings"])
         info["check"] = res
         return info

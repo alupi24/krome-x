@@ -12,7 +12,9 @@ import codegen
 import paths
 
 from . import evaluate
-from .evaluate import sigma_v96
+from .evaluate import sigma_v96, sigma_vy95
+
+FITS = {"sigma_v96": sigma_v96, "sigma_vy95": sigma_vy95}
 
 DB = paths.ROOT / "data" / "database"
 DRAINE = (5.0, 13.6)   # eV
@@ -60,17 +62,21 @@ class Xsec:
                     and e.get("prods") == prods]
             segs.sort(key=lambda e: e["limits"][0])
             self.source = ("Verner et al. 1996 fits "
-                           "(data/database/photoioniziation.dat)")
+                           "(data/database/photoionization.dat)")
             if not segs:
                 self.ok = False
                 self.reason = "no entry in the photoionization database"
             else:
                 self.segs = []
                 for e in segs:
-                    m = re.match(r"sigma_v96\(\s*energy_ev\s*,(.*)\)$",
-                                 codegen.d2e(e["rate"]).strip(), re.I)
+                    # sigma_v96(...), or a sum of sigma_vy95(...) (one per
+                    # shell, above the inner-shell edge)
+                    rate = codegen.d2e(e["rate"]).strip()
+                    terms = re.findall(r"(sigma_v96|sigma_vy95)\(\s*"
+                                       r"energy_ev\s*,([^)]*)\)", rate, re.I)
                     self.segs.append((e["limits"][0], [
-                        float(v) for v in m.group(1).split(",")]))
+                        (FITS[f.lower()], [float(v) for v in a.split(",")])
+                        for f, a in terms]))
                 if "Emin" not in r:
                     self.Emin = segs[0]["limits"][0]
         else:
@@ -108,9 +114,9 @@ class Xsec:
                                     E.shape).astype(float)
         elif self.segs is not None:
             s = np.zeros_like(E)
-            for lo, args in self.segs:     # each from its own threshold
+            for lo, terms in self.segs:    # each from its own threshold
                 with np.errstate(all="ignore"):
-                    v = sigma_v96(E, *args)
+                    v = sum(fit(E, *args) for fit, args in terms)
                 s = np.where(E >= lo, v, s)
         else:
             tE, tS = self.table
@@ -145,7 +151,7 @@ class Xsec:
 def xsecs(net):
     """{reaction id: Xsec} for the photo reactions, and the generator's
     warnings on the data files"""
-    db = codegen.load_photo_db(DB / "photoioniziation.dat")
+    db = codegen.load_photo_db(DB / "photoionization.dat")
     warnings = []
     out = {rx["id"]: Xsec(rx, net, db, warnings) for rx in net.reactions
            if rx["rate"]["kind"] == "photo"}

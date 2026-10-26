@@ -175,6 +175,10 @@ H3O+ + e- -> OH + H + H     []             where(ntot>1e14, 0.0, 6.50e-7*(T32)**
 OH+ + e- -> O + H           []             where(ntot>1e14, 0.0, 6.3e-9*(T32)**(-0.48))
 
 O+ + e- -> O                []             auto
-CO+ + e- -> CO              []             auto
+# Radiative recombination of CO+: no rate known (not in UMIST RATE22 or
+# KIDA; legacy's auto matched it, case-insensitively, to cobalt's
+# Co+ + e- -> Co). Kept at 0: the dissociative channel below (2.75e-7)
+# is the recombination of CO+.
+CO+ + e- -> CO              []             0.0
 CO+ + e- -> C + O           []             auto
 

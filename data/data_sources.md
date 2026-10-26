@@ -19,7 +19,7 @@ sources named.
 |---|---|---|
 | `thermo_burcat.toml` | NASA 7-coefficient polynomials and formation enthalpies of the gas-phase species of the shipped networks (selected records, reformatted) | E. Goos, A. Burcat & B. Ruscic, *Extended Third Millennium Ideal Gas and Condensed Phase Thermochemical Database for Combustion with Updates from Active Thermochemical Tables*, THERM.DAT of 25 May 2021, https://respecth.elte.hu/burcat/; A. Burcat & B. Ruscic 2005, ANL-05/20 and TAE 960 |
 | `thermoNIST.dat` *(legacy)* | Shomate fits, the fallback when a species has no Burcat record | NIST Chemistry WebBook; M. W. Chase, *NIST-JANAF Thermochemical Tables*, 4th ed. (1998) |
-| `thermochemistry/*.gfe` *(legacy)* | Gibbs free energy against temperature of Al, Mg, Si and Ti oxide clusters and small molecules (nucleation networks) | not recorded in legacy KROME |
+| `thermochemistry/*.gfe` *(legacy)* | Gibbs free energy against temperature of Al, Mg, Si and Ti oxide clusters and small molecules (nucleation networks; legacy's ALO3.gfe, a copy of ALO3H3.gfe, removed) | not recorded in legacy KROME |
 
 **Terms of the Burcat database**, as stated by its authors: the data are
 free of charge on condition that proper quotation is given to the
@@ -39,12 +39,12 @@ coefficients in the generated code.
 | `database/recombination_badnell.dat` | radiative and dielectronic recombination rate fits for whole isoelectronic sequences | N. R. Badnell 2006, ApJS 167, 334 (RR); N. R. Badnell et al. 2003, A&A 406, 1151 (DR); tables RR 2023-05-11 and DR 2023-05-12 from http://amdpp.phys.strath.ac.uk/tamoc/ |
 | `database/sources/badnell_RR_clist_K.txt`, `badnell_DR_clist_K.txt` (*verbatim*) | the original coefficient tables behind the file above | © 2023 N. R. Badnell, Department of Physics, University of Strathclyde; free to use with citation of the papers above |
 | `database/radiative_recombination.dat`, `database/sources/verner_radiative_recombination.txt` *(legacy)* | radiative recombination fits | D. A. Verner's atomic data, www.pa.uky.edu/~verner/atom.html |
-| `database/photoioniziation.dat` *(legacy)* | photoionization cross-section fits | Verner et al. 1996 |
+| `database/photoionization.dat` *(legacy)* | photoionization cross-section fits: the outer shell, and above the inner-shell edge the sum over the shells (from `phfit2.f`) | Verner et al. 1996, ApJ 465, 487; Verner & Yakovlev 1995, A&AS 109, 125; `phfit2.f` version 2 (25 March 1996), web.archive.org/web/2016/http://www.pa.uky.edu/~verner/dima/photo/phfit2.f |
 | `database/collisional_ionization.dat` *(legacy)* | collisional ionization fits | Voronov 1997, ADNDT 65, 1, via Verner's `cfit.f` |
 | `database/KIDAchemistry.dat` *(legacy)* | gas-phase reactions in legacy KROME's database format | the KIDA database (Wakelam et al. 2012, 2015) |
 | `database/hydroHe.dat` *(legacy)* | H and He reactions | not recorded in legacy KROME |
 | `database/Alchemistry.dat` *(legacy)* | aluminium chemistry | Starik et al. 2014, Combust. Flame 161, 1659 |
-| `database/surface_*.dat` *(legacy)* | grain-surface reactions, adsorption, desorption and chemisorption | Hollenbach & McKee 1979; Cazaux et al. 2004, 2010; Iqbal et al. 2010; Hocuk et al. 2014 (cited block by block in the files) |
+| `database/surface_2body.dat` *(legacy)* | grain-surface two-body reactions: the barriers and escape probabilities of `surface(auto)` | Hollenbach & McKee 1979; Cazaux et al. 2010; Hocuk et al. 2014 (cited block by block in the file) |
 | `surface_chemisorption_rates.dat` *(legacy)* | tabulated H chemisorption rates | not recorded in legacy KROME |
 | `Ebare_ice.dat` *(legacy)* | binding energies on bare grains and water ice | arXiv:1408.5029, Table 2 |
 | `Ebare_ice_Semenov.dat` *(legacy)* | binding energies for the Semenov et al. 2010 benchmark | the OSU network |

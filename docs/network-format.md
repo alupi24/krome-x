@@ -424,6 +424,14 @@ H2 -> H + H           []    photo(xsec = H2_sigmaLW(E_eV), Emin=14.159, Emax=17.
   columns where a binned cross section does not: give the self-shielding
   as `shield=`, e.g. the Visser et al. (2009) functions of
   `data/shield_CO_unigrid.dat` (a network `table`).
+- `auto` photoionizations (`data/database/photoionization.dat`): the
+  total cross section of Verner's `phfit2.f` (version 2, 1996): the
+  Verner et al. (1996) outer-shell fit up to the next inner-shell edge,
+  above it the sum over the shells of the Verner & Yakovlev (1995) fits,
+  each from its own threshold (`sigma_vy95`), up to 5e4 eV and
+  extrapolated above. All the shells count towards the one reaction
+  X -> X+ + e- (the Auger electrons of an inner-shell vacancy are not
+  followed).
 - `Emin`/`Emax` (eV) bound the integration window for **any** source,
   `auto` included; `Emin` defaults to the database threshold when available.
 - The `[]` range field on photo lines refers to `Tgas` as usual (photo rates
@@ -694,7 +702,10 @@ The bare rate token `auto` asks the preprocessor to resolve the rate from the
 bundled rate database (photoionization, collisional ionization, radiative
 recombination, KIDA, ...) by matching reactants and products, exactly as
 legacy `auto`. The resolved rate is dumped into the build report so it is
-never a black box.
+never a black box. A reaction the database lacks, or whose entry needs
+machinery KROME-X does not have, stops the generation with an error (as
+in legacy), never a rate of 0. On a surface reaction (a species with an
+`_ice` / `_dust` label) a bare `auto` is `surface(auto)` (§5.3).
 
 The database is `data/database/*.dat`, read as `hydroHe.dat` (the
 primordial H/He set), then `recombination_badnell.dat`, then the other

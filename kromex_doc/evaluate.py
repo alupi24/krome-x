@@ -29,8 +29,17 @@ def sigma_v96(E, E0, s0, ya, P, yw, y0, y1):
         * (1.0 + np.sqrt(y / ya)) ** (-P)
 
 
+def sigma_vy95(E, Eth, E0, s0, ya, P, yw, l):
+    """Verner & Yakovlev 1995 fit of one shell [cm^2], 0 below its
+    threshold, as the generated code (codegen.py emit_photo)"""
+    y = E / E0
+    s = 1e-18 * s0 * ((y - 1.0) ** 2 + yw * yw) * y ** (0.5 * P - 5.5 - l) \
+        * (1.0 + np.sqrt(y / ya)) ** (-P)
+    return np.where(E >= Eth, s, 0.0)
+
+
 # extern functions that are pure formulas, evaluated here too
-PURE_EXTERNS = {"sigma_v96": sigma_v96}
+PURE_EXTERNS = {"sigma_v96": sigma_v96, "sigma_vy95": sigma_vy95}
 
 
 def ast_deps(node, net, seen=None):
