@@ -821,7 +821,9 @@ ref \cite{LeTeuff2000,1969RSPSA.312..207F,1976JChPh..64..228S}
 C + C -> C2                 [0, 5e3]          5.99e-33*(Tgas/5e3)**(-1.6)*ntot
 
 ref \cite{LeTeuff2000,1969RSPSA.312..207F,1976JChPh..64..228S}
-C + C -> C2                 [5e3, inf]        5.99e-33*(Tgas/5e3)**(-0.64)*exp(5255./Tgas)*ntot
+# high-T fit rescaled from 5.99e-33 to 2.094e-33 = 5.99e-33*exp(-5255/5e3):
+# as published the two fits differ by exp(5255/5e3) = 2.86 at 5000 K
+C + C -> C2                 [5e3, inf]        2.094e-33*(Tgas/5e3)**(-0.64)*exp(5255./Tgas)*ntot
 
 ref \cite{Baulch1992JPCRD}
 C + O -> CO                 [0, 2e3]          6.16e-29*(Tgas/3e2)**(-3.08)*ntot
