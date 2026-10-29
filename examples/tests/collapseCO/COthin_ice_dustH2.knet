@@ -364,7 +364,8 @@ H2O + H3+ -> H2 + H3O+      [1e1, inf]        1.73e-9*(0.62e0 + 2.578947e0*(3e2*
 H2O + C+ -> HOC+ + H        []                1.8e-9
 H2O + C+ -> HCO+ + H        [0, 1e1]          5.027e-9
 H2O + C+ -> HCO+ + H        [1e1, inf]        3.4093e-10*(0.62e0 + 2.578947e0*(3e2*invT)**.5)
-H2O + C+ -> H2O+ + C        []                2.4e-10
+# H2O + C+ -> H2O+ + C (2.4e-10, Anicich 1993, at 300 K) removed: endothermic
+# by 1.36 eV; KIDA removed it in Nov 2020, UMIST RATE22 never had it
 
 #Glover+2010
 H3O+ + C -> HCO+ + H2       []                1e-11
