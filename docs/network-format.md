@@ -429,9 +429,26 @@ H2 -> H + H           []    photo(xsec = H2_sigmaLW(E_eV), Emin=14.159, Emax=17.
   Verner et al. (1996) outer-shell fit up to the next inner-shell edge,
   above it the sum over the shells of the Verner & Yakovlev (1995) fits,
   each from its own threshold (`sigma_vy95`), up to 5e4 eV and
-  extrapolated above. All the shells count towards the one reaction
-  X -> X+ + e- (the Auger electrons of an inner-shell vacancy are not
-  followed).
+  extrapolated above.
+- Auger channels: `X -> X^(q+k) + k e-` with `photo(xsec=auto)` (k > 1,
+  next to `X -> X^(q+1) + e-`, which the network must have) takes the
+  multiple ionizations of the inner shells: a vacancy in shell s ends
+  with j electrons out in all (the photoelectron included) with the
+  probability P_s(j) of Kaastra & Mewe (1993,
+  `data/database/auger_yields.dat`), and each j goes to the network's
+  largest k not above j. So the channels share the total cross section
+  (the opacity is the same whichever are present), a network with
+  `X -> X+ + e-` only keeps it all (as before), and the outer-shell fit
+  below the edge is single ionization. Shells without a yield (outer
+  shells, inner ones without Auger decay) have P(1) = 1; an ion with no
+  inner shell (H- and He-like) cannot have an Auger channel (an error).
+  A k no shell reaches has a rate of 0 (a warning).
+- The energy an `auto` absorption deposits (photoheating, secondary
+  ionization) is, below the inner-shell edge, the photoelectron's
+  E - Emin; above it, averaged over the shells by their share of the
+  cross section, each shell's photoelectron E - Eth_s plus the mean
+  energy of its Auger electrons (Kaastra & Mewe; the fluorescence photons
+  escape), whichever channels the network has.
 - `Emin`/`Emax` (eV) bound the integration window for **any** source,
   `auto` included; `Emin` defaults to the database threshold when available.
 - The `[]` range field on photo lines refers to `Tgas` as usual (photo rates

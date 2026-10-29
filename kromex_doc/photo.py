@@ -4,7 +4,6 @@ photoionization database for xsec=auto, the Leiden and SWRI files), and
 their unshielded rate in the Draine (1978) interstellar field."""
 
 import math
-import re
 
 import numpy as np
 
@@ -32,7 +31,7 @@ class Xsec:
     window [Emin, Emax], and sigma on an array of energies (zero outside
     the window); ok False with a reason when the data are missing"""
 
-    def __init__(self, rx, net, photo_db, warnings):
+    def __init__(self, rx, net, photo_db, warnings, auger=None):
         r = rx["rate"]
         x = r["xsec"]
         self.rx, self.net = rx, net
@@ -55,30 +54,26 @@ class Xsec:
             self.reason = ("H2 photodissociation from its lines: computed "
                            "on the photon bins by the generated code")
         elif self.kind == "auto":
-            reacts = sorted(q["sp"] for q in rx["reactants"])
-            prods = sorted(p["sp"] for p in rx["products"])
-            segs = [e for e in photo_db if e.get("type") == "photoion"
-                    and e.get("reacts") == reacts
-                    and e.get("prods") == prods]
-            segs.sort(key=lambda e: e["limits"][0])
             self.source = ("Verner et al. 1996 fits "
                            "(data/database/photoionization.dat)")
-            if not segs:
-                self.ok = False
-                self.reason = "no entry in the photoionization database"
+            if auger is None:
+                auger = codegen.load_auger_yields(DB / "auger_yields.dat")
+            # the generator's segments: with Auger channels in the
+            # network, each takes its share of the inner shells
+            segs, why = codegen.photo_auto_segments(
+                photo_db, auger, rx, codegen.photo_auto_family(net, rx))
+            if segs is None:
+                self.ok, self.reason = False, why
             else:
-                self.segs = []
-                for e in segs:
-                    # sigma_v96(...), or a sum of sigma_vy95(...) (one per
-                    # shell, above the inner-shell edge)
-                    rate = codegen.d2e(e["rate"]).strip()
-                    terms = re.findall(r"(sigma_v96|sigma_vy95)\(\s*"
-                                       r"energy_ev\s*,([^)]*)\)", rate, re.I)
-                    self.segs.append((e["limits"][0], [
-                        (FITS[f.lower()], [float(v) for v in a.split(",")])
-                        for f, a in terms]))
+                if codegen.photo_auto_k(rx) not in (None, 1):
+                    self.source += ", Auger yields of Kaastra & Mewe 1993"
+                self.segs = [(lo, [(FITS[fit], args, w)
+                                   for fit, args, w, _, _ in ts])
+                             for lo, ts in segs]
                 if "Emin" not in r:
-                    self.Emin = segs[0]["limits"][0]
+                    self.Emin = min((max(lo, min(t[3] for t in ts))
+                                     for lo, ts in segs if ts),
+                                    default=segs[-1][0])
         else:
             ref = (x.get("ref") or "").lower()
             self.kind = ref
@@ -116,7 +111,7 @@ class Xsec:
             s = np.zeros_like(E)
             for lo, terms in self.segs:    # each from its own threshold
                 with np.errstate(all="ignore"):
-                    v = sum(fit(E, *args) for fit, args in terms)
+                    v = sum(w * fit(E, *args) for fit, args, w in terms)
                 s = np.where(E >= lo, v, s)
         else:
             tE, tS = self.table
@@ -152,7 +147,9 @@ def xsecs(net):
     """{reaction id: Xsec} for the photo reactions, and the generator's
     warnings on the data files"""
     db = codegen.load_photo_db(DB / "photoionization.dat")
+    auger = codegen.load_auger_yields(DB / "auger_yields.dat")
     warnings = []
-    out = {rx["id"]: Xsec(rx, net, db, warnings) for rx in net.reactions
+    out = {rx["id"]: Xsec(rx, net, db, warnings, auger)
+           for rx in net.reactions
            if rx["rate"]["kind"] == "photo"}
     return out, warnings

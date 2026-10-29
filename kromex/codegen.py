@@ -535,10 +535,149 @@ def load_photo_db(path):
         elif s.startswith("@limits:"):
             cur["limits"] = [float(d2e(x))
                              for x in s.split(":", 1)[1].split(",")]
+        elif s.startswith("@shells:"):
+            cur["shells"] = [x.strip()
+                             for x in s.split(":", 1)[1].split(",")]
         elif s.startswith("@rate:"):
             cur["rate"] = s.split(":", 1)[1].strip()
             entries.append(cur)
     return entries
+
+
+# photo(xsec=auto) with Auger yields (network-format.md 5.4): the atomic
+# ions of the database, the shells of its sigma_vy95 terms (@shells)
+PHOTO_ELEMENTS = ("H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc "
+                  "Ti V Cr Mn Fe Co Ni Cu Zn").split()
+SHELL_NL = {"1s": (1, 0), "2s": (2, 0), "2p": (2, 1), "3s": (3, 0),
+            "3p": (3, 1), "3d": (3, 2), "4s": (4, 0)}
+
+
+def load_auger_yields(path):
+    """data/database/auger_yields.dat (Kaastra & Mewe 1993) -> {(Z, stage,
+    n, l): (Eaug [eV], [P1, ..., P10])}: for a vacancy in shell (n, l) of
+    the ion of stage `stage` (1: neutral), the mean total energy of the
+    Auger electrons (their E_A - eps I) and the probability that 1, 2, ...
+    electrons leave in all (the photoelectron included)"""
+    out = {}
+    if not path.exists():
+        return out
+    for line in path.read_text().splitlines():
+        t = line.split()
+        if not t or t[0].startswith("#"):
+            continue
+        z, stage, n, l = (int(x) for x in t[:4])
+        p = [float(x) for x in t[6:16]]
+        out[(z, stage, n, l)] = (float(t[5]), [x / sum(p) for x in p])
+    return out
+
+
+def photo_ion(name):
+    """'C++' -> (Z, charge); None for a species that is not an atomic ion"""
+    m = re.match(r"^([A-Z][a-z]?)(\+*)$", name)
+    if not m or m.group(1) not in PHOTO_ELEMENTS:
+        return None
+    return PHOTO_ELEMENTS.index(m.group(1)) + 1, len(m.group(2))
+
+
+def photo_auto_k(rx):
+    """k of a photoionization X -> X^(q+k) + k e- of an atomic ion, or None"""
+    if len(rx["reactants"]) != 1:
+        return None
+    x = photo_ion(rx["reactants"][0]["sp"])
+    ions = [p["sp"] for p in rx["products"] if p["sp"] != "e-"]
+    k = len(rx["products"]) - len(ions)
+    if x is None or len(ions) != 1 or k < 1:
+        return None
+    y = photo_ion(ions[0])
+    if y is None or y[0] != x[0] or y[1] - x[1] != k:
+        return None
+    return k
+
+
+def photo_auto_family(net, rx):
+    """the k of the photo(xsec=auto) photoionizations of rx's reactant in
+    net: the Auger channels the network has"""
+    sp = rx["reactants"][0]["sp"]
+    ks = set()
+    for r in net.reactions:
+        if (r["rate"]["kind"] == "photo"
+                and r["rate"]["xsec"]["kind"] == "auto"
+                and len(r["reactants"]) == 1
+                and r["reactants"][0]["sp"] == sp):
+            k = photo_auto_k(r)
+            if k:
+                ks.add(k)
+    return sorted(ks)
+
+
+def photo_auto_segments(db, auger, rx, family):
+    """photo(xsec=auto) of rx as segments (lo [eV], terms), each applying
+    from lo up to the next one's lo (the last extrapolated); a term (fit,
+    args, w, Eth, Eaug) adds w fit(E_eV, *args), and an absorption by it
+    deposits the photoelectron's E - Eth plus Eaug of Auger electrons.
+
+    X -> X^(q+k) + k e- with k > 1 takes the shells of X -> X^(q+1) + e-:
+    shell s contributes P_s(j) of Kaastra & Mewe (j electrons in all) to
+    the largest k of the network's channels (family) not above j, so the
+    channels share the total cross section; shells without a yield (outer
+    shells) have P(1) = 1, and the outer-shell fit (sigma_v96, below the
+    inner-shell edge) is single ionization. Returns (segments, None), or
+    (None, reason)."""
+    k = photo_auto_k(rx) or 1
+    reacts = sorted(q["sp"] for q in rx["reactants"])
+    ion = photo_ion(reacts[0]) if len(reacts) == 1 else None
+    if k == 1:
+        prods = sorted(p["sp"] for p in rx["products"])
+    else:
+        el = PHOTO_ELEMENTS[ion[0] - 1]
+        prods = sorted([el + "+" * (ion[1] + 1), "e-"])
+    entries = sorted((e for e in db if e.get("type") == "photoion"
+                      and e.get("reacts") == reacts
+                      and e.get("prods") == prods),
+                     key=lambda e: e["limits"][0])
+    if not entries:
+        return None, ("no entry in the photoionization database"
+                      if k == 1 else "no entry for %s -> %s + e- in the "
+                      "photoionization database" % (reacts[0], prods[0]))
+    fam = sorted(set(family) | {k}) if family else [k]
+    if k > 1 and 1 not in fam:
+        return None, ("needs %s -> %s + e- [] photo(xsec=auto) in the "
+                      "network too (the single ionization)"
+                      % (reacts[0], prods[0]))
+    if k > 1 and not any(e.get("shells") for e in entries):
+        return None, ("%s has no inner shell (no Auger electrons)"
+                      % reacts[0])
+    segs = []
+    for e in entries:
+        terms = re.findall(r"(sigma_v96|sigma_vy95)\(\s*energy_ev\s*,"
+                           r"([^)]*)\)", d2e(e["rate"]).strip(), re.I)
+        shells = e.get("shells")
+        if shells is not None and len(shells) != len(terms):
+            return None, ("@shells of %s (from %g eV) does not match its "
+                          "terms" % (reacts[0], e["limits"][0]))
+        out = []
+        for i, (fit, a) in enumerate(terms):
+            fit = fit.lower()
+            args = [float(v) for v in a.split(",")]
+            if fit == "sigma_v96":   # the outer shell: single ionization
+                w, Eth, Eaug = (1.0 if k == 1 else 0.0), e["limits"][0], 0.0
+            else:
+                Eth, P, Eaug = args[0], [1.0], 0.0
+                if shells is not None and ion is not None:
+                    y = auger.get((ion[0], ion[1] + 1) + SHELL_NL[shells[i]])
+                    if y is not None:
+                        Eaug, P = y
+                elif k > 1:
+                    return None, ("a term of %s without @shells"
+                                  % reacts[0])
+                # one channel: all of it (not the rounded sum of P)
+                w = 1.0 if len(fam) == 1 else sum(
+                    p for j, p in enumerate(P, 1)
+                    if max(c for c in fam if c <= j) == k)
+            if w > 0.0:
+                out.append((fit, args, w, Eth, Eaug))
+        segs.append((e["limits"][0], out))
+    return segs, None
 
 
 # photo cross sections from data files (the generator and kromex_doc)
@@ -883,6 +1022,7 @@ class Codegen:
         self.data_dir = Path(data_dir)
         self.photo_db = load_photo_db(self.data_dir /
                                       "photoionization.dat")
+        self.auger = load_auger_yields(self.data_dir / "auger_yields.dat")
         self.warnings = []
         # per-species defaults (--custom-atol / --custom-rtol, legacy
         # -customATOL / -customRTOL): {species: value}, the starting
@@ -7310,7 +7450,41 @@ class Codegen:
                     if e.get("type") == "photoion"
                     and e.get("reacts") == reacts and e.get("prods") == prods]
             segs.sort(key=lambda e: e["limits"][0])
-            if segs:
+            fam = photo_auto_family(self.net, rx)
+            k = photo_auto_k(rx) or 1
+            terms, why = photo_auto_segments(self.photo_db, self.auger, rx,
+                                             fam)
+            if terms is None and k > 1:
+                raise ValueError("photo(xsec=auto) %s (line %s): %s"
+                                 % (rx["eq"], rx["line"], why))
+            if terms is not None and any(
+                    t[0] == "sigma_vy95" for _, ts in terms for t in ts):
+                out["edep"] = terms   # per-shell deposits (photo_edep)
+            if terms is not None and len(fam) > 1:
+                # Auger channels: the network's share of each shell
+                code = None
+                for lo, ts in terms:
+                    expr = " + ".join(
+                        ("" if w == 1.0 else "%s*" % self.cnum(w))
+                        + "%s(E_eV, %s)" % (fit, ", ".join(
+                            self.cnum(a) for a in args))
+                        for fit, args, w, _, _ in ts) or "0.0"
+                    code = expr if code is None else \
+                        "(E_eV >= %s ? %s : %s)" \
+                        % (self.cnum(lo), expr, code)
+                out["code"] = code
+                if not any(ts for _, ts in terms):
+                    out.pop("edep", None)
+                    self.warnings.append(
+                        "photo auto %s: no shell of %s ejects %d electrons "
+                        "(Kaastra & Mewe 1993): a rate of 0"
+                        % (rx["eq"], reacts[0], k))
+                    if "Emin" not in r:
+                        out["Emin"] = terms[-1][0]
+                elif "Emin" not in r:
+                    out["Emin"] = min(max(lo, min(t[3] for t in ts))
+                                      for lo, ts in terms if ts)
+            elif segs:
                 # piecewise-in-E: each segment applies from its own threshold
                 # up to the next segment's threshold (the outer-shell fit,
                 # then the sum over the shells above the inner-shell edge);
@@ -7464,6 +7638,9 @@ class Codegen:
             w("  return %s;" % (ph["code"] if ph["code"] else
                                 "0.0;  // STUB (unresolved xsec source)"))
             w("}")
+        for ph in photo:
+            if ph.get("edep"):
+                self.emit_photo_edep(w, ph)
         n = len(photo)
         w("")
         w("constexpr int NPHOTO = %d;" % n)
@@ -7490,8 +7667,53 @@ class Codegen:
           % (max(n, 1), ", ".join(("photo_xsec_int_%d" % p["ch"])
                                   if "table" in p else "nullptr"
                                   for p in photo) or "nullptr"))
+        w("// the mean energy an absorption deposits [eV] (photo(xsec=auto)")
+        w("// above an inner-shell edge); nullptr: the photoelectron's")
+        w("// E - photo_Emin")
+        w("inline const XsecFn photo_edep[%d] = {%s};"
+          % (max(n, 1), ", ".join(("photo_edep_%d" % p["ch"])
+                                  if p.get("edep") else "nullptr"
+                                  for p in photo) or "nullptr"))
         self.emit_h2pd(w, photo)
         w("")
+
+    def emit_photo_edep(self, w, ph):
+        """photo_edep_<ch>(E): the energy an absorption deposits, averaged
+        over the shells weighted by their share of the cross section: each
+        shell's photoelectron E - Eth plus its Auger electrons (Kaastra &
+        Mewe 1993); the fluorescence photons escape. Below the inner-shell
+        edge (the outer-shell fit), E - photo_Emin as without it."""
+        emin = self.cnum(ph["Emin"])
+        w("// deposit per absorption of %s [eV]: photoelectron E - Eth"
+          % ph["rx"]["eq"])
+        w("// of each shell plus its Auger electrons (Kaastra & Mewe 1993)")
+        w("static inline double photo_edep_%d(double E_eV) {" % ph["ch"])
+        segs = ph["edep"]
+        for i in range(len(segs) - 1, -1, -1):
+            lo, ts = segs[i]
+            ts = [t for t in ts if t[0] == "sigma_vy95"]
+            if not ts:
+                continue
+            ind = "  "
+            if i > 0:
+                w("  if (E_eV >= %s) {" % self.cnum(lo))
+                ind = "    "
+            w(ind + "double s, num = 0.0, den = 0.0;")
+            for fit, args, wt, eth, eaug in ts:
+                w(ind + "s = %s%s(E_eV, %s);"
+                  % ("" if wt == 1.0 else "%s*" % self.cnum(wt), fit,
+                     ", ".join(self.cnum(a) for a in args)))
+                w(ind + "num += s*(E_eV - %s%s); den += s;"
+                  % (self.cnum(eth),
+                     "" if eaug == 0.0 else " + %s" % self.cnum(eaug)))
+            w(ind + "return den > 0.0 ? num/den : E_eV - %s;" % emin)
+            if i > 0:
+                w("  }")
+            else:
+                break
+        else:
+            w("  return E_eV - %s;" % emin)
+        w("}")
 
     # shielding externs whose first argument is the absorber column: a
     # factor containing exactly one of them gets a column form (the

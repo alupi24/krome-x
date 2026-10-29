@@ -2,7 +2,8 @@
 // rates from the current radiation field, and per-bin opacity.
 //
 // Include the generated net_<name>.hpp BEFORE this header (it provides
-// NPHOTO, photo_xsec[], photo_reaction[], photo_reactant[], photo_Emin/Emax).
+// NPHOTO, photo_xsec[], photo_reaction[], photo_reactant[], photo_Emin/Emax,
+// photo_edep[]).
 //
 // Conventions:
 //   Phi_b   photon flux in bin b [photons cm^-2 s^-1], flat in E inside bin
@@ -168,8 +169,12 @@ struct PhotoModule {
         for (int q = 0; q < quad_pts; ++q) {
           const double E = a + (q + 0.5) * dE;
           const double x = xs(E) * dE;
-          // photoelectron energy (>= 0: a broadened threshold)
-          const double Ee = std::fmax(E - photo_Emin[r], 0.0);
+          // photoelectron energy (>= 0: a broadened threshold); above an
+          // inner-shell edge, the shells' photoelectrons and Auger
+          // electrons (photo_edep)
+          const double Ee = std::fmax(photo_edep[r] != nullptr
+                                          ? photo_edep[r](E)
+                                          : E - photo_Emin[r], 0.0);
           s += x;
           se += x * Ee;
           if (Ee > Esec) {

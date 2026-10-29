@@ -234,7 +234,7 @@ script; `--serve` forces serving); `DIR/index.html` also opens as a file:
   and, faint, the formula extrapolated.
 - **Photo reactions:** the cross section sigma(E) from the source the
   generator reads (the `xsec` expression, the Verner et al. 1996 and
-  Verner & Yakovlev 1995 fits of `xsec=auto`, the Leiden and SWRI files in `data/database`), its energy
+  Verner & Yakovlev 1995 fits of `xsec=auto`, split among Auger channels with the Kaastra & Mewe 1993 yields, the Leiden and SWRI files in `data/database`), its energy
   window, the shielding factor, and the unshielded rate in the Draine
   (1978) field. A missing data file is flagged: the generated code gives
   that reaction a zero rate.
