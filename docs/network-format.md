@@ -443,6 +443,9 @@ H2 -> H + H           []    photo(xsec = H2_sigmaLW(E_eV), Emin=14.159, Emax=17.
   shells, inner ones without Auger decay) have P(1) = 1; an ion with no
   inner shell (H- and He-like) cannot have an Auger channel (an error).
   A k no shell reaches has a rate of 0 (a warning).
+  Not yet tested in a full network: the cross sections, deposits and
+  rate tables are checked against the data, but no shipped network has
+  Auger channels and none has been integrated with them.
 - The energy an `auto` absorption deposits (photoheating, secondary
   ionization) is, below the inner-shell edge, the photoelectron's
   E - Emin; above it, averaged over the shells by their share of the
