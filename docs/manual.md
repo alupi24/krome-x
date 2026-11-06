@@ -1318,11 +1318,18 @@ array per cell.
     absorption is linear in Phi with kappa_b independent of it, so both
     shares decay by the same factor in every bin: the split is exact.
 
-  Optically thick cells then absorb exactly the inflow Phi_bg dt / L;
-  thin ones see the background at c_red dt / L times Phi_bg, i.e. exact
-  for a call at the transfer's step with Courant number near 1 (else
-  scale the injection by L / (c_red dt) in the bins where kappa_b L << 1,
-  from `get_absorption`). A background that is never absorbed (an
+  With C = c_red dt / L, the Courant number of the call:
+  - optically thick bins (kappa_b L >> 1) absorb exactly the inflow
+    Phi_bg,b dt / L, for any C;
+  - optically thin bins (kappa_b L << 1) see the background at C Phi_bg,b
+    instead of Phi_bg,b, so their rates are off by the factor C: exact
+    only for a call at the transfer's step with C near 1.
+
+  For thin bins at C < 1, inject the background times 1/C, i.e. pass
+  Phi_b = c_red N_b + Phi_bg,b: the field starts at the background
+  itself. Keep the inflow injection, Phi_bg,b dt / L, in thick bins (1/C
+  there would give them too many photons). kappa_b L per bin is
+  `get_absorption` times L. A background that is never absorbed (an
   optically thin field, or one self-shielded by a prescription) is the
   field of a build without `radiation.evolve`.
 
