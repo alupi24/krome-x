@@ -496,7 +496,7 @@ generation.
 | `DUST` | gas-dust thermal exchange with the effective grain population (d2g, Tdust): 2 f v_gas kB (Tgas - Tdust) ntot sum n_d pi a^2, f = 0.5 (Grassi et al. 2017 eqs. 6-7; legacy omitted the pi) |
 | `DUSTTAB` | tabulated dust cooling (`dust.tables`), times d2g / 0.00934 (the tables' dust-to-gas ratio) |
 | `DUSTBINS` | gas-dust exchange of the binned dust (section 9) |
-| `DH` | reaction enthalpies at Tgas from Burcat's NASA polynomials (`data/thermo_burcat.toml`; alternative to CHEM) |
+| `DH` | reaction enthalpies at Tgas from Burcat's NASA polynomials (`data/thermo_burcat.toml`; alternative to CHEM), the endothermic reactions; it leaves out radiative channels (2 -> 1), cosmic-ray and radiation-driven rates and, with ATOMIC, the H/He collisional ionizations, listed among the generator's warnings (network-format.md, `; dh=`). It assumes the energy thermalized at once (not so for excited products at low density) and skips reactions with species Burcat lacks (most ions, ices, excited states) |
 
 | heating | process |
 |---|---|

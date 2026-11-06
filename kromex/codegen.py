@@ -6937,23 +6937,73 @@ class Codegen:
         w("}")
         w("")
 
+    # the radiation field in a rate expression (dh_exclusion)
+    DH_RADIATION_SYMBOLS = ("G0", "J21", "J_LW")
+    DH_RADIATION_FUNCS = ("H2_solomonLW", "get_ratioFluxDraine")
+
+    def dh_exclusion(self, rx):
+        """why the DH terms leave out reaction rx (None: they count it):
+        its energy does not go to (or come from) the gas' heat, or another
+        term already counts it. A reaction's ; dh=0|1 overrides.
+          radiative channel  two reactants, one product (radiative
+                             recombination and association, recombination
+                             and formation on grains): the energy leaves
+                             as a photon or goes to the grain
+          cosmic rays        a rate reading the crate parameter: the CR
+                             supplies the energy (the CR heating term)
+          radiation          a rate reading the radiation field (G0, J21,
+                             J_LW, H2_solomonLW(), get_ratioFluxDraine()):
+                             a photoreaction written as an expression, whose
+                             energy the photon supplies
+          ATOMIC             with thermal.cooling ATOMIC, the collisional
+                             ionizations of H, He, He+ whose cooling Cen
+                             1992's term already holds"""
+        if rx.get("dh") is not None:
+            return None if rx["dh"] else "dh=0"
+        R, P = rx["reactants"], rx["products"]
+        if len(R) == 2 and len(P) == 1:
+            return "radiative channel (2 -> 1)"
+        nodes = list(self.deep_walk(rx["rate"]["ast"]))
+        if any(nd.get("kind") == "param" and nd.get("s") == "crate"
+               for nd in nodes):
+            return "cosmic-ray rate (crate)"
+        if any(nd.get("s") in self.DH_RADIATION_SYMBOLS
+               or nd.get("f") in self.DH_RADIATION_FUNCS for nd in nodes):
+            return "radiation-driven rate"
+        if self.thermal.get("cool_atomic"):
+            rs = sorted(r["sp"] for r in R)
+            for x, xp in (("H", "H+"), ("He", "He+"), ("He+", "He++")):
+                if rs == sorted([x, "e-"]) and sorted(
+                        p["sp"] for p in P) == sorted([xp, "e-", "e-"]):
+                    return "collisional ionization in the ATOMIC cooling"
+        return None
+
     def emit_dh_thermal(self, w):
         """cooling_dH()/heating_dH(): legacy -cooling=DH / -heating=DH, the
         reaction enthalpies at the gas temperature: dH(T) = sum H_reac -
         sum H_prod, H = kB T (H/RT) of Burcat's NASA polynomials
         (the lower block below Tcommon, the upper above, T clamped to the
-        data range; electrons 0). Each reaction contributes
+        data range; electrons 0: an electron's 5/2 kB T at Tgas, unclamped
+        beside species clamped at their data's upper end, ~6000 K, would
+        dominate hot gas: 215 eV at 1e6 K). Each reaction contributes
         k * prod(n_reactants) * |dH(T)| to the cooling (dH < 0) or to the
         heating (dH > 0). Legacy took every species' enthalpy at 300 K
-        from the first-read (upper-range, T > 1000 K) block. Photo-kind
-        rates are excluded as legacy (photoheating is the photo module's);
-        reactions with a species without data are skipped with a
-        warning (legacy silently used H = 0)."""
+        from the first-read (upper-range, T > 1000 K) block and every
+        reaction. Photo-kind rates are excluded as legacy (photoheating
+        is the photo module's), and those of dh_exclusion (radiative
+        channels, cosmic rays, the ATOMIC collisional ionizations; listed
+        in the warnings); reactions with a species without data are
+        skipped with a warning (legacy silently used H = 0)."""
         rxs, species = [], set()
         if self.dh:
             thermo = self.load_thermo()
             for rx in self.net.reactions:
                 if rx["rate"]["kind"] != "expr":
+                    continue
+                why = self.dh_exclusion(rx)
+                if why is not None:
+                    self.warnings.append("dH: '%s' left out: %s"
+                                         % (rx["eq"], why))
                     continue
                 sps = [q["sp"] for q in rx["reactants"] + rx["products"]]
                 miss = [x for x in sps

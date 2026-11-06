@@ -128,7 +128,17 @@ Recognized annotations (all optional): `qeff=<expr>` — energy released per
 reaction event [MeV] (consumed by `thermal.heating = ["NUCLEAR"]`, and returned by the
 `get_qeff` query);
 `pdiss=<number>` in (0, 1] — reaction events per absorbed photon, for
-`photo()` and `J_LW` rates only (§5.4; required for `J_LW` rates).
+`photo()` and `J_LW` rates only (§5.4; required for `J_LW` rates);
+`dh=0|1` — leave the reaction out of (`0`) or count it in (`1`) the `DH`
+cooling and heating (reaction enthalpies), overriding the automatic
+choice: `DH` leaves out a radiative channel (two reactants, one product:
+radiative recombination and association, recombination and formation on
+grains, whose energy leaves as a photon or goes to the grain), a rate
+reading `crate` (the cosmic ray supplies the energy), a rate reading the
+radiation field (`G0`, `J21`, `J_LW`, `H2_solomonLW`,
+`get_ratioFluxDraine`: a photoreaction written as an expression) and,
+with the `ATOMIC` cooling, the collisional ionizations of H, He and He+
+(already in it). The generator lists what it left out among its warnings.
 Reactions preceded by a `ref` directive carry that citation as metadata:
 
 ```

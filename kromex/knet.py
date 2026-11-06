@@ -1014,6 +1014,11 @@ def parse_network(path):
             rx["reverse"] = ann.pop("__reversible__")
             rx["qeff"] = (parse_expr(ann.pop("qeff"), lineno)
                           if "qeff" in ann else None)
+            if "dh" in ann:  # the DH thermal terms: 1 include, 0 exclude
+                v = ann.pop("dh").strip()
+                if v not in ("0", "1"):
+                    raise ParseError("dh must be 0 or 1", lineno)
+                rx["dh"] = v == "1"
             if "pdiss" in ann:
                 try:
                     rx["pdiss"] = float(ann.pop("pdiss"))
