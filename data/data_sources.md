@@ -84,7 +84,7 @@ coefficients in the generated code.
 |---|---|---|
 | `dust_optics/sources/callindex.out_*` (*verbatim*) | dielectric functions of astronomical silicate and graphite | B. T. Draine, https://www.astro.princeton.edu/~draine/dust/dust.diel.html; Draine 2003b, ApJ 598, 1026 |
 | `optC.dat`, `optSi.dat` | absorption and scattering efficiencies and asymmetry parameter, computed with Mie theory from the dielectric functions above | Draine 2003b; Draine & Lee 1984; Mie series after Bohren & Huffman 1983 |
-| `dust_tables/*` *(legacy)* | precomputed dust temperature, H2 formation and dust cooling tables (fields HM2012 and MC, and the 3D tables with Av) | Grassi et al. 2017 |
+| `dust_tables/*` *(legacy)* | precomputed dust temperature, H2 formation and dust cooling tables (fields HM2012 and MC, and the 3D tables with Av), for a dust-to-gas ratio D = 0.00934 (MRN carbon grains); the HM2012 cooling and H2 tables converted from the totals the legacy files stored (for a mean molecular weight 1.277) to the normalization of the others, cooling / (mu ntot^2) and H2 / (mu ntot) | Grassi et al. 2017 |
 
 ## Other
 

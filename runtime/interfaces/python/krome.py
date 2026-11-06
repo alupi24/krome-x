@@ -41,8 +41,7 @@ _CELLWISE = {"mu": "krome_get_mu", "rho": "krome_get_rho",
              "charge": "krome_get_charge",
              "electrons": "krome_get_electrons",
              "free_fall_time": "krome_get_free_fall_time",
-             "element_totals": "krome_get_element_totals",
-             "n2x": "krome_n2x"}
+             "element_totals": "krome_get_element_totals"}
 
 # option values that are enumerations in the C interface
 _ENUMS = {"jac": ("auto", "analytic", "fd"),
@@ -53,7 +52,7 @@ _BOOLS = ("evolve_T", "clip_negative", "error_report", "renormalize_x",
 _INTS = ("max_steps", "min_device", "device_memory", "min_interleave",
          "max_restarts", "max_err_fails", "max_conv_fails", "conserve")
 _KEYS = ("evolve_T", "jac", "linsol", "rtol", "atol_n", "atol_T", "atol_u",
-         "max_steps", "max_err_fails", "max_conv_fails", "max_restarts",
+         "c_red", "max_steps", "max_err_fails", "max_conv_fails", "max_restarts",
          "clip_negative", "error_report", "renormalize_x", "conserve",
          "path", "device_cache", "device_memory", "min_device",
          "min_interleave", "eq_t0", "eq_tmax", "eq_factor", "eq_rtol",
@@ -101,14 +100,15 @@ constants = _Constants()
 
 class _Cells(ctypes.Structure):
     """krome.h krome_cells: the optional per-cell arrays"""
-    _fields_ = [("Phi", _D), ("Td", _D), ("adust", _D)]
+    _fields_ = [("Phi", _D), ("Td", _D), ("adust", _D), ("Phi_bg", _D)]
 
 
-def _cells(Phi, Td, adust):
+def _cells(Phi, Td, adust, Phi_bg=None):
     """a krome_cells for the given arrays (None: not used), or NULL"""
-    if Phi is None and Td is None and adust is None:
+    if Phi is None and Td is None and adust is None and Phi_bg is None:
         return None
-    return ctypes.pointer(_Cells(_dptr(Phi), _dptr(Td), _dptr(adust)))
+    return ctypes.pointer(_Cells(_dptr(Phi), _dptr(Td), _dptr(adust),
+                                 _dptr(Phi_bg)))
 
 
 class KromeError(RuntimeError):
@@ -168,6 +168,10 @@ class Network:
             "krome_opts_set_photo_broadening": (
                 ctypes.c_int, [ctypes.c_void_p, ctypes.c_double,
                                ctypes.c_double]),
+            "krome_opts_set_photo_dust_opacity": (
+                ctypes.c_int, [ctypes.c_void_p, _D]),
+            "krome_opts_set_photo_background": (
+                ctypes.c_int, [ctypes.c_void_p, _D]),
             "krome_opts_set_dustbins": (
                 ctypes.c_int, [ctypes.c_void_p, ctypes.c_int, ctypes.c_int,
                                ctypes.c_int, ctypes.c_double,
@@ -232,6 +236,7 @@ class Network:
             "krome_get_jeans_length": (ctypes.c_int, [ctypes.c_int, _D, _D,
                                                       _D]),
             "krome_x2n": (ctypes.c_int, [ctypes.c_int, _D, _D, _D]),
+            "krome_n2x": (ctypes.c_int, [ctypes.c_int, _D, _D, _D]),
             "krome_scale_Z": (ctypes.c_int, [ctypes.c_int, _D,
                                              ctypes.c_double]),
             "krome_nheat": (ctypes.c_int, []),
@@ -452,7 +457,7 @@ class Network:
             raise KromeError("no device backend in this library")
 
     def solve(self, n, Tgas, dt, par=None, Phi=None, opts=None, check=True,
-              Td=None, adust=None):
+              Td=None, adust=None, Phi_bg=None):
         """integrate every cell over its own dt [s].
 
         n     n[nspec] or n[ncell, nspec] [cm^-3]
@@ -471,6 +476,8 @@ class Network:
               bins' Td, opts.set_dust_Td)
         adust per-cell grain radii [cm] (dust.evolve), as Td: adust[ndust]
               or adust[ncell, ndust] (None: the bins' radii, opts.dust_a)
+        Phi_bg per-cell background fields with radiation.evolve, as Phi
+              (None: opts.set_photo_background's, if any); read only
 
         Returns a Result with new arrays n, Tgas, Phi (with radiation.evolve
         the evolved field), Td and adust (when given), the per-cell solver
@@ -481,13 +488,14 @@ class Network:
         opts = self._options(opts)
         P, stride = self._params(par, ncell)
         F = self._phi(Phi, ncell, opts)
+        G = None if Phi_bg is None else self._phi(Phi_bg, ncell, opts)
         D = self._td(Td, ncell, opts)
         A = self._td(adust, ncell, opts, "adust")
 
         flags = np.zeros(ncell, dtype=np.intc)
         ierr = self._lib.krome_solve_cells(
             ncell, _dptr(n), _dptr(T), _dptr(dtv), _dptr(P), stride,
-            _cells(F, D, A), flags.ctypes.data_as(_I), opts._h)
+            _cells(F, D, A, G), flags.ctypes.data_as(_I), opts._h)
         res = Result(n[0] if single else n, T[0] if single else T,
                      None if F is None else (F[0] if single else F),
                      flags[0] if single else flags, ierr,
@@ -503,7 +511,7 @@ class Network:
 
 
     def solve_x(self, x, rho, Tgas, dt, par=None, Phi=None, opts=None,
-                check=True, Td=None, adust=None):
+                check=True, Td=None, adust=None, Phi_bg=None):
         """solve() with mass fractions (legacy -useX): x[nspec] or
         x[ncell, nspec], and the gas density rho [g cm^-3], scalar or one
         per cell. n = rho x / m on the way in, x = m n / rho on the way out
@@ -518,12 +526,13 @@ class Network:
         opts = self._options(opts)
         P, stride = self._params(par, ncell)
         F = self._phi(Phi, ncell, opts)
+        G = None if Phi_bg is None else self._phi(Phi_bg, ncell, opts)
         D = self._td(Td, ncell, opts)
         A = self._td(adust, ncell, opts, "adust")
         flags = np.zeros(ncell, dtype=np.intc)
         ierr = self._lib.krome_solve_cells_x(
             ncell, _dptr(x), _dptr(rh), _dptr(T), _dptr(dtv), _dptr(P),
-            stride, _cells(F, D, A), flags.ctypes.data_as(_I), opts._h)
+            stride, _cells(F, D, A, G), flags.ctypes.data_as(_I), opts._h)
         res = Result(x[0] if single else x, T[0] if single else T,
                      None if F is None else (F[0] if single else F),
                      flags[0] if single else flags, ierr,
@@ -923,11 +932,13 @@ class Network:
                                                     bad.tolist()))
         return v[0] if single else v
 
-    def n2x(self, n):
-        """mass fractions from number densities"""
+    def n2x(self, n, rho):
+        """mass fractions from number densities and the gas density rho
+        [g cm^-3] (the caller's: the species need not carry all of it)"""
         single, n, ncell = self._cells(n)
+        r = self._per_cell(rho, ncell)
         out = np.zeros_like(n)
-        self._lib.krome_n2x(ncell, _dptr(n), _dptr(out))
+        self._lib.krome_n2x(ncell, _dptr(n), _dptr(r), _dptr(out))
         return out[0] if single else out
 
     def x2n(self, x, rho):
@@ -1346,6 +1357,36 @@ class Options:
         if self._net._lib.krome_opts_set_photo_broadening(
                 self._h, float(Tgas), float(vturb)) != 0:
             raise KromeError("broadening needs Tgas >= 0 and vturb >= 0")
+        return self
+
+    def set_photo_dust_opacity(self, kappa):
+        """dust opacity per photon bin [cm^2 per g of dust] (e.g.
+        net.dust_kappa(Elo, Ehi)): with radiation.evolve the field also
+        loses rho_gas d2g kappa c per unit time, unless binned dust with
+        Qabs on the bins absorbs instead; None removes it."""
+        k = None
+        if kappa is not None:
+            k = np.ascontiguousarray(kappa, dtype=np.float64)
+            if k.shape != (self.nbins,):
+                raise KromeError("kappa needs one value per photon bin")
+        if self._net._lib.krome_opts_set_photo_dust_opacity(
+                self._h, _dptr(k)) != 0:
+            raise KromeError("dust opacity needs photon bins and kappa >= 0")
+        return self
+
+    def set_photo_background(self, Phi_bg):
+        """radiation.evolve: a fixed background field per bin [cm^-2 s^-1]
+        added to the evolved field wherever it acts, never absorbed nor
+        returned (per cell: solve(..., Phi_bg=)); None removes it. The
+        evolved bins' speed of light is the c_red option (default c)."""
+        g = None
+        if Phi_bg is not None:
+            g = np.ascontiguousarray(Phi_bg, dtype=np.float64)
+            if g.shape != (self.nbins,):
+                raise KromeError("Phi_bg needs one value per photon bin")
+        if self._net._lib.krome_opts_set_photo_background(
+                self._h, _dptr(g)) != 0:
+            raise KromeError("background needs photon bins and Phi_bg >= 0")
         return self
 
     @property

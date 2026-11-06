@@ -435,6 +435,7 @@ PROCESS_PARAMS = {
     "heat_photoDust": ("G0", "Av"),
     "heat_netPhotoDust": ("G0", "Av"),
     "cool_dust": ("d2g",),
+    "cool_dustTab": ("d2g",),
     "cool_dust_bins": ("d2g", "Tcmb"),
     "cooling_floor": ("Tfloor",),
     "dust_evol": ("d2g", "Tcmb"),
@@ -448,6 +449,7 @@ EXTERN_PARAMS = {
     "shield_dust": ("d2g",),
     "krate_H2dust": ("d2g",),
     "krate_H2dust_Jura": ("d2g", "clump"),
+    "krate_H2dust_table": ("d2g",),
     **{"%s_recombination_on_dust" % x: ("d2g", "G0")
        for x in ("H", "He", "C", "Si", "O", "Fe")},
 }
@@ -6519,12 +6521,16 @@ class Codegen:
                       was never called, and its Av weight was not
                       normalized by the grid step, fixed here)
         Tdust = 10^fit and the H2 rate mu 10^fit ntot [s^-1] (log10
-        stored, as legacy); cooling = mu coolFit ntot^2. The cool tables:
-        MC and 3D store linear coefficients (legacy sign-aware linlog in
-        ntot, linear in Tgas and log Av); the HM2012 2D table stores log10
-        values, inconsistent with the linlog reader legacy applies to it
-        (user-confirmed), so it is read as 10^fit. Without the option the
-        functions are stubs (table_Tdust falls back to p.Tdust)."""
+        stored, as legacy); cooling = mu coolFit ntot^2 (Grassi et al. 2017
+        eqs. 26-27; the HM2012 tables, stored as totals, were converted by
+        tools/maintainer/tables/gen_dust_hm2012.py). The cooling and the
+        H2 rate are for the tables' dust-to-gas ratio D = 0.00934 and
+        scale with d2g / D (the tabulated Tdust does not: exact where the
+        dust is optically thin). The cool tables: MC and 3D store linear
+        coefficients (legacy sign-aware linlog in ntot, linear in Tgas and
+        log Av); the HM2012 2D table stores log10 values (read as 10^fit:
+        legacy applied linlog to them). Without the option the functions
+        are stubs (table_Tdust falls back to p.Tdust)."""
         mode = self.dust_tables
         uses_h2 = "krate_H2dust_table" in self.net.externs
         if uses_h2 and not mode:
@@ -6544,8 +6550,9 @@ class Codegen:
             w("  return p.Tdust;")
             w("}")
             w(self._tdust_define())
+            w("template <class P>")
             w("KROME_HD double inline cooling_dustTab(double, const double*, "
-              "const Params&) { return 0.0; }")
+              "const P&) { return 0.0; }")
         w("")
 
     def _emit_dust_tables_2d(self, w, mode, uses_h2):
@@ -6584,36 +6591,45 @@ class Codegen:
           "dusttab_td, %s));" % fit)
         w("}")
         log_stored = max(abs(v) for v in cl) > 1.0
+        self._emit_dtab_d2g(w)
+        w("template <class P>")
         w("KROME_HD double inline cooling_dustTab(double Tgas, const double* n, "
-          "const Params& p) {")
-        w("  (void)p;")
+          "const P& p) {")
         w("  const double nt = ntot_(n);")
         w("  if (nt <= 0.0) return 0.0;")
         w("  const double mu = rho_(n) / nt / constants::p_mass;")
         if log_stored:
             w("  // %s cool table stores log10 values -> 10^fit" % mode)
             w("  return mu * std::pow(10.0, dtab_fit2d_(dusttab_x, dusttab_t,"
-              " dusttab_cool, %s)) * nt * nt;" % fit)
+              " dusttab_cool, %s)) * nt * nt" % fit)
+            w("      * p.d2g / DUST_TABLE_D2G;")
         else:
             w("  // %s cool table stores linear values -> legacy linlog"
               % mode)
             w("  return mu * dtab_fit2d_ll_(dusttab_x, dusttab_t, "
-              "dusttab_cool, %s) * nt * nt;" % fit)
+              "dusttab_cool, %s) * nt * nt" % fit)
+            w("      * p.d2g / DUST_TABLE_D2G;")
         w("}")
         if h2 is not None:
             self._emit_h2dust_table(w, "dtab_fit2d_(dusttab_x, dusttab_t, "
                                        "dusttab_h2, %s)" % fit)
 
+    def _emit_dtab_d2g(self, w):
+        w("// the dust-to-gas mass ratio of the dust tables (Grassi et al.")
+        w("// 2017, D_sun): their cooling and H2 rate scale with d2g / D")
+        w("constexpr double DUST_TABLE_D2G = 0.00934;")
+
     def _emit_h2dust_table(self, w, fit_expr):
         w("// H2 formation on dust from the tables (legacy -dustTabs=H2):")
-        w("// nH2dust = mu n_H 10^fit ntot, the rate of H + {H} -> H2")
+        w("// nH2dust = mu n_H 10^fit ntot d2g / D, the rate of H + {H} -> H2")
         w("KROME_HD inline double krate_H2dust_table(double Tgas, const double* n, "
           "const Params& p) {")
         w("  (void)p;")
         w("  const double nt = ntot_(n);")
         w("  if (nt <= 0.0) return 0.0;")
         w("  const double mu = rho_(n) / nt / constants::p_mass;")
-        w("  return mu * std::pow(10.0, %s) * nt;" % fit_expr)
+        w("  return mu * std::pow(10.0, %s) * nt * p.d2g / DUST_TABLE_D2G;"
+          % fit_expr)
         w("}")
 
     def _emit_dust_tables_3d(self, w, mode, uses_h2):
@@ -6687,14 +6703,16 @@ class Codegen:
         w("  return std::pow(10.0, dust3_fit_<false>(dust3_td, "
           "std::log10(nt), std::log10(Tgas), %s));" % lav)
         w("}")
+        self._emit_dtab_d2g(w)
+        w("template <class P>")
         w("KROME_HD double inline cooling_dustTab(double Tgas, const double* n, "
-          "const Params& p) {")
-        w("  (void)p;")
+          "const P& p) {")
         w("  const double nt = ntot_(n);")
         w("  if (nt <= 0.0) return 0.0;")
         w("  const double mu = rho_(n) / nt / constants::p_mass;")
         w("  return mu * dust3_fit_<true>(dust3_cool, std::log10(nt), "
-          "std::log10(Tgas), %s) * nt * nt;" % lav)
+          "std::log10(Tgas), %s) * nt * nt" % lav)
+        w("      * p.d2g / DUST_TABLE_D2G;")
         w("}")
         if h2 is not None:
             self._emit_h2dust_table(

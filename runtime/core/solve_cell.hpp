@@ -18,7 +18,7 @@
 //
 //   dn/dt   = chemistry(n, k(T, n, Phi)) [+ secondary-ionization fluxes]
 //   dT/dt   = (gamma_ad - 1)(heat - cool) / (kB ntot)       (thermal_aux)
-//   du_b/dt = -c kabs_b(n)                                 (pure absorption)
+//   du_b/dt = -c_red kabs_b(n)  (pure absorption; SolverOpts::c_red)
 //   dTd/dt  = each grain's energy equation: gas collisions in, net
 //             radiation out (dust_dTdust, dust_bins.hpp)
 //   dN_b/dt = accretion, sputtering, sublimation (dust.evolve rates,
@@ -26,7 +26,9 @@
 //
 // Blocks absent from the state are inputs: a fixed Tgas, a field Phi held
 // at the caller's values (photochemistry, photoheating and grains still
-// use it), and per-bin Tdust from the radiative-balance bisection.
+// use it), and per-bin Tdust from the radiative-balance bisection. A
+// background field Phi_bg (SolverOpts) adds to the evolved one wherever
+// the field acts: Phi = exp(u) + Phi_bg.
 //
 // Jacobian (SolverOpts::jac):
 //   JAC_FD        the integrator's difference quotients (CVODE's dense
@@ -453,7 +455,9 @@ struct RhsCtx {
   double* kT = nullptr;
   double kT_T = 0.0;
   bool kT_ok = false;
-  double* Phi = nullptr;    // [B] the evolved field of the state
+  double* Phi = nullptr;    // [B] the field of the state: exp(u) + Phi_bg
+  const double* Phi_bg = nullptr;  // [B] the background (nullptr: none)
+  double crad = CLIGHT;     // the evolved bins' speed of light (c_red)
   double* kabs = nullptr;   // [B] photon removal coefficients
   double* arad = nullptr;   // [A] the radii of the state (from N_b)
   double* dnd = nullptr;    // [NSPEC] the key elements' exchange with grains
@@ -556,7 +560,9 @@ KROME_HD inline double thermal_T_(const double* y, const RhsCtx* c) {
 }
 
 KROME_HD inline void unpack_rad_(const double* y, RhsCtx* c) {
-  for (int b = 0; b < c->B; ++b) c->Phi[b] = std::exp(y[c->iu + b]);
+  for (int b = 0; b < c->B; ++b)
+    c->Phi[b] = std::exp(y[c->iu + b])
+        + (c->Phi_bg != nullptr ? c->Phi_bg[b] : 0.0);
 }
 
 // rate coefficients at state y: generated rates + photo rates of the
@@ -614,13 +620,49 @@ KROME_HD inline void eval_rates_(double T, const double* y, RhsCtx* c,
 }
 
 #ifdef KROME_PHOTO_HPP_INCLUDED
-// photon removal coefficient kabs[B] of the photochemistry at state y
-// (th->shield must hold the shields at y: eval_rates_ at y)
+// the dust's photon removal coefficient in bin b [cm^-1] at state y, and
+// into drho (nullptr: skipped) its derivative with respect to rho_gas:
+// the binned dust when it carries Qabs on these bins (sum_i pi a_i^2
+// n_d,i Qabs_i,b, the absorption that heats it; its counts rho_gas d2g,
+// fixed at the solve start with dust.evolve), else rho_gas d2g kdust_b
+// (PhotoModule::set_dust_opacity); 0 without either
+KROME_HD inline double photo_dust_kabs_(int b, const double* y,
+                                        const RhsCtx* c, double* drho) {
+  if (drho != nullptr) *drho = 0.0;
+#ifdef KROME_HAS_PAR_d2g
+  const ThermCtx& tc = *c->th;
+#ifdef KROME_DUST_BINS_HPP_INCLUDED
+  if (tc.dust_on && tc.dust.qmid != nullptr && tc.dust.B == c->B) {
+    const DustView& d = tc.dust;
+    double s = 0.0;
+    for (int i = 0; i < d.nb; ++i)
+      s += d.xw[i] * dust_a2_(d, i)
+          * d.qmid[static_cast<size_t>(i) * d.B + b];
+    s *= constants::pi;
+    if (d.xds_fix > 0.0) return s * d.xds_fix;
+    if (drho != nullptr) *drho = s * tc.p.d2g;
+    return s * rho_(y) * tc.p.d2g;
+  }
+#endif
+  if (tc.ph.kdust != nullptr) {
+    const double k = tc.ph.kdust[b] * tc.p.d2g;
+    if (drho != nullptr) *drho = k;
+    return k * rho_(y);
+  }
+#else
+  (void)b; (void)y; (void)c;
+#endif
+  return 0.0;
+}
+
+// photon removal coefficient kabs[B] at state y: the photochemistry (th->
+// shield must hold the shields at y: eval_rates_ at y) and the dust
 KROME_HD inline void photo_absorption_(double T, const double* y, RhsCtx* c,
                                        double* kabs) {
   ThermCtx& tc = *c->th;
   if constexpr (NLW > 0) lw_unit_rates(T, y, tc.p, tc.khat);
   photo_absorption(tc.ph, y, tc.shield, NLW > 0 ? tc.khat : nullptr, kabs);
+  for (int b = 0; b < c->B; ++b) kabs[b] += photo_dust_kabs_(b, y, c, nullptr);
 }
 #endif
 
@@ -745,7 +787,7 @@ KROME_HD inline void full_rhs_(const double* y, double* f, RhsCtx* c) {
     if constexpr (PHOTO_SHIELDED)  // secion_fixedT_ may have moved them
       photo_shields(T, y, tc.p, tc.shield);
     photo_absorption_(T, y, c, c->kabs);
-    for (int b = 0; b < c->B; ++b) f[c->iu + b] = -CLIGHT * c->kabs[b];
+    for (int b = 0; b < c->B; ++b) f[c->iu + b] = -c->crad * c->kabs[b];
   }
 #endif
   freeze_rows_(c, f);
@@ -904,7 +946,7 @@ KROME_HD inline int jac_assemble_(const double* y, DenseMat_ J, RhsCtx* c,
         for (int i = 0; i < NSPEC; ++i)
           if (dnf[i] != 0.0) KROME_JEL(J, i, j) += ds * u0[r] * dnf[i];
         if (c->iu >= 0) {
-          const double f = -CLIGHT * y[photo_reactant[r]] * ds
+          const double f = -c->crad * y[photo_reactant[r]] * ds
               / photo_pdiss[r];
           for (int b = 0; b < c->B; ++b)
             KROME_JEL(J, c->iu + b, j) +=
@@ -916,7 +958,7 @@ KROME_HD inline int jac_assemble_(const double* y, DenseMat_ J, RhsCtx* c,
           for (int q = 0; q < NLW; ++q) {
             const double dk = (kh1[q] - kh0[q]) / h;
             if (dk == 0.0) continue;
-            const double f = -CLIGHT * y[lw_reactant[q]] * dk / lw_pdiss[q];
+            const double f = -c->crad * y[lw_reactant[q]] * dk / lw_pdiss[q];
             for (int b = 0; b < c->B; ++b)
               KROME_JEL(J, c->iu + b, j) += f * ph.lww[b];
           }
@@ -932,8 +974,17 @@ KROME_HD inline int jac_assemble_(const double* y, DenseMat_ J, RhsCtx* c,
         const double srb = ph.sigma[static_cast<size_t>(r) * c->B + b];
         if (srb != 0.0)
           KROME_JEL(J, c->iu + b, photo_reactant[r]) +=
-              -CLIGHT * srb * tc.shield[r] / photo_pdiss[r];
+              -c->crad * srb * tc.shield[r] / photo_pdiss[r];
       }
+    // the dust's removal through rho_gas: d(du_b)/d(n_j) = -c drho_b m_j
+    // (its radii columns, dust.evolve, come with jac_dust_)
+    for (int b = 0; b < c->B; ++b) {
+      double drho;
+      photo_dust_kabs_(b, y, c, &drho);
+      if (drho == 0.0) continue;
+      for (int j = 0; j < NSPEC; ++j)
+        KROME_JEL(J, c->iu + b, j) += -c->crad * drho * agg_w_(2, j);
+    }
     double kh[NLW + 1];
     if constexpr (NLW > 0) {
       lw_unit_rates(T, y, tc.p, kh);
@@ -941,10 +992,11 @@ KROME_HD inline int jac_assemble_(const double* y, DenseMat_ J, RhsCtx* c,
         for (int b = 0; b < c->B; ++b)
           if (ph.lww[b] != 0.0)
             KROME_JEL(J, c->iu + b, lw_reactant[q]) +=
-                -CLIGHT * kh[q] * ph.lww[b] / lw_pdiss[q];
+                -c->crad * kh[q] * ph.lww[b] / lw_pdiss[q];
     }
-    // d(dn_i)/d(u_b) = S_ir s_r sigma_rb Phi_b n_reactant (photo) and
-    // S_iq khat_q lww_b Phi_b n_reactant (J_LW): the stoichiometric
+    // d(dn_i)/d(u_b) = S_ir s_r sigma_rb exp(u_b) n_reactant (photo) and
+    // S_iq khat_q lww_b exp(u_b) n_reactant (J_LW; exp(u_b): the evolved
+    // part of the field, without the background): the stoichiometric
     // column S_ir n_reactant comes from rhs() with a unit k on reaction r
     // (rhs is linear in k), so no product lists are needed
     double* kunit = c->kunit;
@@ -960,7 +1012,7 @@ KROME_HD inline int jac_assemble_(const double* y, DenseMat_ J, RhsCtx* c,
             ? ph.sigma[static_cast<size_t>(r) * c->B + b] * tc.shield[r]
             : kh[q] * ph.lww[b];
         if (srb == 0.0) continue;
-        const double fb = srb * c->Phi[b];
+        const double fb = srb * std::exp(y[c->iu + b]);
         for (int i = 0; i < NSPEC; ++i)
           if (dnf[i] != 0.0) KROME_JEL(J, i, c->iu + b) += fb * dnf[i];
       }
@@ -990,8 +1042,8 @@ KROME_HD inline int jac_assemble_(const double* y, DenseMat_ J, RhsCtx* c,
       }
       for (int b = 0; b < c->B; ++b) {
         const double keep = c->Phi[b];
-        const double du = 1e-7;  // d u_b of a relative Phi change of 1e-7
-        c->Phi[b] = keep * (1.0 + du);
+        const double du = 1e-7;  // d u_b: the evolved part changes by 1e-7
+        c->Phi[b] = keep + std::exp(y[c->iu + b]) * du;
         secion_fixedT_(y, c, dnx1);
         c->Phi[b] = keep;
         for (int i = 0; i < NSPEC; ++i)
@@ -1056,8 +1108,8 @@ KROME_HD inline int jac_assemble_(const double* y, DenseMat_ J, RhsCtx* c,
   // fluxes and grain radiation absorption all respond to Phi
   for (int b = 0; b < c->B; ++b) {
     const double keep = c->Phi[b];
-    const double du = 1e-7;  // d u_b of a relative Phi change of 1e-7
-    c->Phi[b] = keep * (1.0 + du);
+    const double du = 1e-7;  // d u_b: the evolved part changes by 1e-7
+    c->Phi[b] = keep + std::exp(y[c->iu + b]) * du;
     eval_rates_(T, y, c, kp);
     const double f1 = aux_(y, kp, c, dnx1, td1);
     c->Phi[b] = keep;
@@ -1126,10 +1178,18 @@ inline int init_ctx_(SolveCtx& c, double Tgas, const Params& params,
   if (o.photo) {
     if (o.Phi == nullptr) return FLAG_NO_FIELD;
     if constexpr (EvolveConfig::rad) {
+#ifndef KROME_HAS_PAR_d2g
+      // the dust opacity is per mass of dust: rho_gas d2g kappa
+      if (!o.photo->kdust.empty()) return FLAG_UNSUPPORTED;
+#endif
+      if (!(o.c_red > 0.0)) return FLAG_ILL_INPUT;
+      c.crad = o.c_red;
+      c.Phi_bg = o.Phi_bg;
       c.B = o.photo->B;
       c.iu = c.NEQ;
       c.NEQ += c.B;
     } else {
+      if (o.Phi_bg != nullptr) return FLAG_UNSUPPORTED;  // add it to Phi
       c.tc.Phi = o.Phi;
     }
   } else if (EvolveConfig::rad) {
@@ -1187,7 +1247,8 @@ inline int init_ctx_(SolveCtx& c, double Tgas, const Params& params,
     std::abort();  // rhs_work_doubles and rhs_bind_ disagree
 #ifdef KROME_PHOTO_HPP_INCLUDED
   if (c.B > 0) {  // the evolved field starts at the caller's
-    for (int b = 0; b < c.B; ++b) c.Phi[b] = o.Phi[b];
+    for (int b = 0; b < c.B; ++b)
+      c.Phi[b] = o.Phi[b] + (o.Phi_bg != nullptr ? o.Phi_bg[b] : 0.0);
     c.tc.Phi = c.Phi;
   }
 #endif
@@ -1205,8 +1266,8 @@ inline void pack_state_(const SolveCtx& c, const double* n, double Tgas,
                         const SolverOpts& o, double* y) {
   for (int i = 0; i < NSPEC; ++i) y[i] = n[i];
   if (c.iT >= 0) y[c.iT] = Tgas;
-  for (int b = 0; b < c.B; ++b)
-    y[c.iu + b] = std::log(std::fmax(c.Phi[b], 1e-300));
+  for (int b = 0; b < c.B; ++b)  // the evolved part (o.Phi)
+    y[c.iu + b] = std::log(std::fmax(o.Phi[b], 1e-300));
 #ifdef KROME_DUST_BINS_HPP_INCLUDED
   for (int b = 0; b < c.D; ++b) y[c.id + b] = o.dust->Td[b];
   for (int b = 0; b < c.A; ++b)
@@ -1864,6 +1925,14 @@ inline int write_error_report_(const bdf::Diag& d, const double* y,
     }
     std::fprintf(fp, "  PhotoModule photo;\n  photo.init(rad);\n"
                  "  o.photo = &photo;\n  o.Phi = rad.Phi.data();\n");
+    if (o.c_red != constants::clight)
+      std::fprintf(fp, "  o.c_red = %s;\n", cnum(o.c_red).c_str());
+    if (o.Phi_bg != nullptr) {
+      std::fprintf(fp, "  static const double Phi_bg_[] = {");
+      for (int b2 = 0; b2 < ph->B; ++b2)
+        std::fprintf(fp, "%s%s", b2 ? ", " : "", cnum(o.Phi_bg[b2]).c_str());
+      std::fprintf(fp, "};\n  o.Phi_bg = Phi_bg_;\n");
+    }
   }
   if (du != nullptr) {
     std::fprintf(fp, "  DustBins dust;\n  dust.nd = %d;\n  dust.useSi = %s;\n"

@@ -493,8 +493,8 @@ generation.
 | `Z_CIE`, `Z_CIENOUV` | Shen+13 CIE metal cooling tables (with and without UV background), always with their heating; scaled by `total_Z` |
 | `Z_EXTENDED` | `Z` below 1e4 K merged with `Z_CIE` above |
 | `CO`, `OH`, `H2O`, `HCN` | Neufeld & Kaufman molecular cooling tables (columns from `radiation.num2col`) |
-| `DUST` | gas-dust thermal exchange with the effective grain population (d2g, Tdust) |
-| `DUSTTAB` | tabulated dust cooling (`dust.tables`) |
+| `DUST` | gas-dust thermal exchange with the effective grain population (d2g, Tdust): 2 f v_gas kB (Tgas - Tdust) ntot sum n_d pi a^2, f = 0.5 (Grassi et al. 2017 eqs. 6-7; legacy omitted the pi) |
+| `DUSTTAB` | tabulated dust cooling (`dust.tables`), times d2g / 0.00934 (the tables' dust-to-gas ratio) |
 | `DUSTBINS` | gas-dust exchange of the binned dust (section 9) |
 | `DH` | reaction enthalpies at Tgas from Burcat's NASA polynomials (`data/thermo_burcat.toml`; alternative to CHEM) |
 
@@ -598,7 +598,7 @@ Coolant-file physics, and how it differs from legacy:
 
 | key | meaning |
 |---|---|
-| `tables` | embed the legacy dust tables (Tdust, dust cooling, `krate_H2dust_table()`): `"HM2012"` or `"MC"`, 2D for that field; `"3D"` with the per-cell Av; `"PHOTO3D"` with Av from the photon bins |
+| `tables` | embed the legacy dust tables of Grassi et al. 2017 (Tdust, dust cooling, `krate_H2dust_table()`): `"HM2012"` or `"MC"`, 2D for that field; `"3D"` with the per-cell Av; `"PHOTO3D"` with Av from the photon bins. They are computed for D = 0.00934 (MRN carbon grains): the cooling and the H2 rate scale with `d2g` / D, the tabulated Tdust does not (exact where the dust is optically thin) |
 | `evolve_Td` | `true`: per-bin dust temperatures as solver state (needs `DUSTBINS`); default: radiative-balance bisection |
 | `evolve` | the grain radii of the bins as solver state (section 9), by the processes listed: `["GROWTH", "SPUTTER", "EVAP"]`, plus `"KELVIN"` for the curvature correction to EVAP |
 | `gas_total` | `true`: each gas/surface pair's surface slot holds gas + surface (a stability option) |
@@ -678,6 +678,7 @@ These are runtime numerics.
 | `SolverOpts::atol_species`, `rtol_species` | C `krome_opts_set_atol_species`, `krome_opts_set_rtol_species` (getters `krome_opts_get_atol_species`, `krome_opts_get_rtol_species`); Fortran `krome_set_atol_species`, `krome_set_rtol_species` (`krome_get_atol_species`, `krome_get_rtol_species`); Python `opts.set_atol_species`, `set_rtol_species` (an array or a dict `{species: value}`; properties `opts.atol_species`, `opts.rtol_species`) | none, or codegen `solver.atol_file` / `solver.rtol_file` | per-species tolerances: NSPEC values replacing `atol_n` / `rtol` for the species; a negative entry (and every species without an array) takes the scalar. The C++ arrays are the caller's; the C, Fortran and Python setters copy them into the handle, NULL / no argument / `None` clears them, and the getters return the tolerance each species gets. With a per-species rtol the error weights use a per-slot rtol (CVODE's formula), on the host and on the device |
 | `SolverOpts::atol_T` | `atol_T` | 1e-6 | absolute tolerance of Tgas and dust temperatures [K] |
 | `SolverOpts::atol_u` | `atol_u` | 1e-10 | absolute tolerance of ln Phi (`radiation.evolve`) |
+| `SolverOpts::c_red` | `c_red` | c | speed of light of the evolved bins (`radiation.evolve`): d ln Phi/dt = -c_red kappa; pass Phi = c_red N, the flux of a reduced-speed-of-light transfer, so that the rates sigma Phi and the photons removed agree; <= 0 is refused (`FLAG_ILL_INPUT`) |
 | `SolverOpts::max_steps` | `max_steps` | 100000 | step budget; exhausting it is final (`FLAG_TOO_MUCH_WORK`) |
 | `SolverOpts::max_err_fails` | `max_err_fails` | 7 | error-test failures per step |
 | `SolverOpts::max_conv_fails` | `max_conv_fails` | 10 | Newton convergence failures per step |
@@ -695,6 +696,7 @@ These are runtime numerics.
 | `CellsOpts::min_interleave` | `min_interleave` | -1 | the device path's memory layout: interleaved across cells (coalesced on a GPU) for calls of at least this many cells, contiguous per cell below; -1: contiguous, and on CUDA interleaved above the cells the device holds resident at once (SMs x 256; 27 648 on an A100), with the launch bounds measured best for each (contiguous 32,1, interleaved 128,8). The results agree to roundoff (bitwise when built without FMA contraction) |
 | `CellsOpts::min_device` | `min_device` | 10000 | `PATH_AUTO`: calls from this many cells go to the device, when the build has one (section 6.5) |
 | `CellsOpts::Phi` | `krome_cells::Phi` (C), `phi=` / `Phi=` | none | per-cell fields `Phi[ncell][nbins]`, read (and with `radiation.evolve` updated). Without them every cell starts from `SolverOpts::Phi`; with `radiation.evolve` a single-cell call updates it, a call of several cells does not return the evolved fields |
+| `CellsOpts::Phi_bg` | `krome_cells::Phi_bg` (C), `phi_bg=` / `Phi_bg=` | none | per-cell background fields `Phi_bg[ncell][nbins]` (`radiation.evolve`, section 8), read only; instead of `SolverOpts::Phi_bg`. Not with device-resident data (`FLAG_UNSUPPORTED`) |
 | `CellsOpts::flags` | the `flags` argument | none | per-cell return flags |
 | `CellsOpts::stats` | (C++ only) | none | per-cell `SolveStats[ncell]` |
 | `CellsOpts::Td` | `krome_cells::Td` (C), Fortran `td=`, Python `Td=` | none | per-cell dust temperatures `Td[ncell][ndust]`: each cell starts from its row and the row receives its final Td (binned dust) |
@@ -810,7 +812,7 @@ The C functions:
 | group | functions |
 |---|---|
 | solving | `krome_solve_cells`, `krome_solve_cells_x`, `krome_equilibrium_cells`, `krome_flag_message` |
-| options | `krome_opts_new`, `krome_opts_free`, `krome_opts_set`, `krome_opts_get`, `krome_opts_set_error_file`, `krome_opts_set_photo`, `krome_opts_set_photo_broadening`, `krome_opts_nbins`, `krome_opts_set_dustbins`, `krome_opts_ndust`, `krome_opts_set_dust_Td`, `krome_opts_get_dust_Td` |
+| options | `krome_opts_new`, `krome_opts_free`, `krome_opts_set`, `krome_opts_get`, `krome_opts_set_error_file`, `krome_opts_set_photo`, `krome_opts_set_photo_broadening`, `krome_opts_set_photo_dust_opacity`, `krome_opts_set_photo_background`, `krome_opts_nbins`, `krome_opts_set_dustbins`, `krome_opts_ndust`, `krome_opts_set_dust_Td`, `krome_opts_get_dust_Td` |
 | device | `krome_has_device`, `krome_device_initialize`, `krome_device_finalize` |
 | network | `krome_version`, `krome_network_name`, `krome_nspec`, `krome_nrea`, `krome_npar`, `krome_species_name`, `krome_species_index`, `krome_param_name`, `krome_param_index`, `krome_params_default`, `krome_param_required_by`, `krome_species_mass`, `krome_species_charge`, `krome_nelem`, `krome_element_name`, `krome_species_natoms`, `krome_reaction_name` |
 | queries | section 7 |
@@ -851,7 +853,7 @@ The Fortran names that differ from C:
 | purpose | Fortran |
 |---|---|
 | solve | `krome_solve`, `krome_solve_x`, `krome_equilibrium` |
-| options | `krome_set(h, key, value)`, `krome_get(h, key)`, `krome_set_error_file`, `krome_set_photo`, `krome_set_photo_broadening`, `krome_nbins`, `krome_set_dustbins`, `krome_ndust`, `krome_set_dust_Td`, `krome_get_dust_Td`, `krome_photo_sigma` |
+| options | `krome_set(h, key, value)`, `krome_get(h, key)`, `krome_set_error_file`, `krome_set_photo`, `krome_set_photo_broadening`, `krome_set_photo_dust_opacity`, `krome_set_photo_background`, `krome_nbins`, `krome_set_dustbins`, `krome_ndust`, `krome_set_dust_Td`, `krome_get_dust_Td`, `krome_photo_sigma` |
 | counts (the constants are in `krome_net`) | `krome_nspec_c`, `krome_nrea_c`, `krome_npar_c`, `krome_nelem_c`, `krome_nheat_c`, `krome_ncool_c`, `krome_nphoto_c` |
 | index of a name (1-based) | `krome_species_idx`, `krome_param_idx` |
 | names by 1-based index (and the version, `krome_version_f`) | `krome_species_name_f`, `krome_param_name_f`, `krome_param_required_by_f`, `krome_reaction_name_f`, `krome_element_name_f`, `krome_heating_name_f`, `krome_cooling_name_f`, `krome_flag_message_f` |
@@ -1230,7 +1232,7 @@ temperature capped to [Tcmb, 1e9 K], the thermal terms and gamma capped to
 | a coolant's level populations [cm^-3] (legacy `krome_popcool_dump`; levels no transition connects to the ground are empty) | `get_coolant_populations` | `krome_get_coolant_populations` | `coolant_populations` |
 | photoheating per photo reaction [erg cm^-3 s^-1], summing to the PHOTO term (with `radiation.secondary_ionization`, each reaction's heat share; legacy `krome_get_photoBin_heats` gave it per absorber) | `get_photo_heating` | `krome_get_photo_heating` | `photo_heating` |
 | the field over the Draine ISRF (legacy `krome_get_ratioFluxDraine`) | `get_ratio_flux_draine` | `krome_get_ratio_flux_draine` | `ratio_flux_draine` |
-| n <-> mass fractions | `n2x`, `x2n` | `krome_n2x`, `krome_x2n` | `n2x`, `x2n` |
+| n <-> mass fractions with the gas density rho (the caller's, as legacy: the species need not carry all of it) | `n2x(n, rho, x)`, `x2n(x, rho, n)` | `krome_n2x`, `krome_x2n` | `n2x(n, rho)`, `x2n(x, rho)` |
 | optical depth per bin | `get_opacity` | `krome_get_opacity` | `opacity` |
 | photon removal per bin [cm^-1] | `get_absorption` | `krome_get_absorption` | `absorption` |
 | Habing flux of a field | `PhotoModule::habing` | `krome_get_habing` | `habing` |
@@ -1285,17 +1287,56 @@ array per cell.
 - **Fixed field (default):** the field is held constant during a
   solve.
 - **With `radiation.evolve`:** the field is co-evolved and written back.
-  The bins only absorb (d ln Phi_b/dt = -c kappa_b), so in a two-moment
+  It loses the photons the photochemistry absorbs and those the dust
+  absorbs: the binned dust when it is given (section 9: sum_i pi a_i^2
+  n_d,i Qabs_i, the absorption that heats it; C++ after
+  `dust.interp_qabs(rad)`, which the C, Fortran and Python handles call
+  themselves), else rho_gas d2g kappa_b
+  for a dust opacity per bin set with the photo bins (kappa [cm^2 per g
+  of dust], e.g. the Draine one of `dust_kappa_draine`; needs `d2g`):
+  - C++: `ph.set_dust_opacity(kappa)` after `ph.init(rad)`;
+  - C: `krome_opts_set_photo_dust_opacity(h, kappa)`;
+  - Fortran: `krome_set_photo_dust_opacity(h, kappa)`;
+  - Python: `opts.set_photo_dust_opacity(kappa)`.
+
+  Without either, the dust absorbs nothing during the solve (the caller
+  can attenuate the field outside; `get_absorption` gives the same
+  coefficients).
+- **Reduced speed of light** (`radiation.evolve`): the evolved bins lose
+  their photons at `SolverOpts::c_red` (C/Fortran key `c_red`, Python
+  `options(c_red=...)`; default c): d ln Phi_b/dt = -c_red kappa_b. Pass
+  Phi = c_red N, the photon flux of the transfer that uses that c_red
+  (RAMSES-RT convention): the rates sigma Phi and the photons removed then
+  agree, and the photons are conserved.
+- **Background field** (`radiation.evolve`): a fixed field per bin,
+  `SolverOpts::Phi_bg[nbins]` for every cell or `CellsOpts::Phi_bg[ncell]
+  [nbins]` per cell, adds to the evolved field wherever the field acts
+  (photo and J_LW rates, photoheating, secondary ionization, grain heating
+  and Td, the Habing flux, the queries), but is never absorbed nor written
+  back: Phi = exp(u) + Phi_bg, d ln Phi_ev/dt = -c_red kappa. E.g. an
+  optically thin UV background next to the field the transfer carries.
+  With a field held fixed it is refused (`FLAG_UNSUPPORTED`: add it to
+  Phi):
+  - C++: `o.Phi_bg = bg;` (per cell: `co.Phi_bg`);
+  - C: `krome_opts_set_photo_background(h, bg)` (per cell:
+    `krome_cells.Phi_bg`);
+  - Fortran: `krome_set_photo_background(h, bg)` (per cell: `krome_solve(...,
+    phi_bg=)`);
+  - Python: `opts.set_photo_background(bg)` (per cell: `net.solve(...,
+    Phi_bg=)`).
+
+  The bins only absorb (d ln Phi_b/dt = -c_red kappa_b), so in a two-moment
   (M1) radiation code the flux of each bin is attenuated by the same
   factor as its photon density: after the call, multiply every flux
-  component F_b by Phi_b(after) / Phi_b(before). This is exact, keeps the
+  component F_b by Phi_b(after) / Phi_b(before) (the evolved field: the
+  background is not part of it). This is exact, keeps the
   reduced flux |F_b| / (c N_b) unchanged, and needs no flux equations in
   the solver (the rates depend on the photon density only).
 
 Setting up the bins:
 - C++:
   ```cpp
-  Radiation rad = Radiation::log_bins(B, emin, emax);
+  Radiation rad = Radiation::log_bins(B, emin, emax);  // or set Elo, Ehi
   PhotoModule ph;
   ph.init(rad);
   o.photo = &ph;

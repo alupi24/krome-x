@@ -295,14 +295,16 @@ inline int get_opacity(const double* n, double Tgas, const Params& p,
 }
 
 // photon removal coefficient per photon bin, kabs[B] [cm^-1]: the
-// photochemistry (sum_r s_r sigma_rb n_r / pdiss_r + the J_LW channel,
-// exactly the radiation.evolve sink), the binned dust of o.dust (sum_i pi
-// a_i^2 n_d,i Qabs_i at the bin midpoint, legacy dust_opacity) and, when
-// kdust is given, rho_gas kdust_b with kdust_b the dust opacity per unit
-// GAS mass [cm^2 g^-1] (e.g. d2g kappa_b; legacy
-// krome_get_opacity_size_d2g). Times a length it is legacy's
-// krome_get_opacity_size(_d2g). With radiation.evolve the solver already
-// removed the photochemical part from the field it returns.
+// photochemistry (sum_r s_r sigma_rb n_r / pdiss_r + the J_LW channel),
+// the binned dust of o.dust (sum_i pi a_i^2 n_d,i Qabs_i at the bin
+// midpoint, legacy dust_opacity), else rho_gas d2g kappa_b of the photo
+// module's dust opacity (PhotoModule::set_dust_opacity) -- the
+// radiation.evolve sink, at the population's own radii -- and, when kdust
+// is given, rho_gas kdust_b with kdust_b an opacity per unit GAS mass
+// [cm^2 g^-1] (e.g. d2g kappa_b; legacy krome_get_opacity_size_d2g),
+// added. Times a length it is legacy's krome_get_opacity_size(_d2g). With
+// radiation.evolve the solver already removed all but kdust from the
+// field it returns.
 inline int get_absorption(const double* n, double Tgas, const Params& p,
                           const SolverOpts& o, const double* kdust,
                           double* kabs) {
@@ -311,15 +313,22 @@ inline int get_absorption(const double* n, double Tgas, const Params& p,
   const int B = o.photo->B;
   RadChannels_ rc(n, Tgas, p);
   o.photo->absorption(n, rc.sh, rc.kh, kabs);
-#if defined(KROME_DUST_BINS_HPP_INCLUDED) && defined(KROME_HAS_PAR_d2g)
+#ifdef KROME_HAS_PAR_d2g
+  bool bins = false;
+#ifdef KROME_DUST_BINS_HPP_INCLUDED
   if (o.dust != nullptr && !o.dust->qmid.empty()) {
     const DustBins& d = *o.dust;
     const double xs = rho_(n) * p.d2g;
     for (int i = 0; i < d.nb; ++i)
       for (int b = 0; b < B; ++b)
-        kabs[b] += DustBins::PI_ * d.asize2[i] * d.xw[i] * xs
+        kabs[b] += DustBins::PI_ * d.a[i] * d.a[i] * d.xw[i] * xs
             * d.qmid[static_cast<size_t>(i) * B + b];
+    bins = true;
   }
+#endif
+  if (!bins && !o.photo->kdust.empty())
+    for (int b = 0; b < B; ++b)
+      kabs[b] += rho_(n) * p.d2g * o.photo->kdust[b];
 #endif
   if (kdust != nullptr) {
     const double rr = rho_(n);
@@ -345,6 +354,11 @@ inline int get_photo_heating(const double* n, double Tgas, const Params& p,
   const PhotoView v = o.photo->view();
   RadChannels_ rc(n, Tgas, p);
   const double eV_to_erg = constants::eV_to_erg;
+  // the field the solver sees: Phi + Phi_bg (radiation.evolve)
+  std::vector<double> phv(o.Phi, o.Phi + v.B);
+  if (EvolveConfig::rad && o.Phi_bg != nullptr)
+    for (int b = 0; b < v.B; ++b) phv[b] += o.Phi_bg[b];
+  const double* Phi = phv.data();
 #ifdef KROME_HAS_SECION
   const double eta = photo_heat_eta_(n);
 #endif
@@ -354,12 +368,12 @@ inline int get_photo_heating(const double* n, double Tgas, const Params& p,
     const double nr = n[photo_reactant[r]] * rc.sh[r];
 #ifdef KROME_HAS_SECION
     double se, ss, sc, sp;
-    photo_sums_secondary_(v, o.Phi, r, nullptr, se, ss, sc, sp);
+    photo_sums_secondary_(v, Phi, r, nullptr, se, ss, sc, sp);
     heat[r] = ((se - ss) + eta * ss) * nr * eV_to_erg;
 #else
     double se = 0.0;
     for (int b = 0; b < v.B; ++b)
-      se += v.sigmaE[static_cast<size_t>(r) * v.B + b] * o.Phi[b];
+      se += v.sigmaE[static_cast<size_t>(r) * v.B + b] * Phi[b];
     heat[r] = se * nr * eV_to_erg;
 #endif
   }
@@ -369,13 +383,15 @@ inline int get_photo_heating(const double* n, double Tgas, const Params& p,
 
 // the field over the Draine ISRF (legacy krome_get_ratioFluxDraine: the
 // integrated flux / 7.95e-8, i.e. sum_b Phi_b h / (4 pi) / 7.95e-8, the
-// rate-expression function get_ratioFluxDraine). -1 without photon bins
-// or field
+// rate-expression function get_ratioFluxDraine; with radiation.evolve
+// Phi + Phi_bg). -1 without photon bins or field
 inline int get_ratio_flux_draine(const SolverOpts& o, double* ratio) {
 #ifdef KROME_PHOTO_HPP_INCLUDED
   if (o.photo == nullptr || o.Phi == nullptr) return -1;
   double s = 0.0;
-  for (int b = 0; b < o.photo->B; ++b) s += o.Phi[b];
+  for (int b = 0; b < o.photo->B; ++b)
+    s += o.Phi[b]
+        + (EvolveConfig::rad && o.Phi_bg != nullptr ? o.Phi_bg[b] : 0.0);
   *ratio = s * constants::planck_eV / (4.0 * constants::pi) / 7.95e-8;
   return 0;
 #else
@@ -429,10 +445,10 @@ inline int get_qeff(const double* n, double Tgas, const Params& p,
 }
 
 // number densities <-> mass fractions x_i = m_i n_i / rho (legacy
-// krome_n2x / krome_x2n); rho [g cm^-3]
-inline void n2x(const double* n, double* x) {
-  const double rr = std::fmax(rho_(n), 1e-40);
-  for (int i = 0; i < NSPEC; ++i) x[i] = species_mass_g[i] * n[i] / rr;
+// krome_n2x / krome_x2n); rho [g cm^-3] the caller's gas density (the
+// network's species need not carry all of it)
+inline void n2x(const double* n, double rho, double* x) {
+  for (int i = 0; i < NSPEC; ++i) x[i] = species_mass_g[i] * n[i] / rho;
 }
 inline void x2n(const double* x, double rho, double* n) {
   for (int i = 0; i < NSPEC; ++i)

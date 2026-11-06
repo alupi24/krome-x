@@ -201,7 +201,7 @@ int krome_device_finalize(void);
 int krome_device_initialize_id(int device_id);
 
 /* photon bins [eV edges] for photo rates, photoheating and grains;
- * nbins bins with edges Elo[b] < Ehi[b]. After this call, Phi arrays
+ * nbins bins with edges 0 < Elo[b] < Ehi[b] (-1 otherwise). After this call, Phi arrays
  * passed to krome_solve_cells have nbins entries per cell. */
 int krome_opts_set_photo(krome_opts* h, int nbins, const double* Elo,
                          const double* Ehi);
@@ -212,6 +212,21 @@ int krome_opts_nbins(const krome_opts* h);
  * none). Rebuilds the bins already set; -1 for negative values. */
 int krome_opts_set_photo_broadening(krome_opts* h, double Tgas,
                                     double vturb);
+/* dust opacity per photon bin kappa[nbins] [cm^2 per g of DUST] (e.g.
+ * krome_dust_kappa_draine): with radiation.evolve the field also loses
+ * rho_gas d2g kappa[b] c photons per unit time, unless binned dust with
+ * Qabs on the bins (krome_opts_set_dustbins) absorbs instead. NULL
+ * removes it. Kept when the bins are rebuilt with the same number; -1
+ * without photo bins or for a negative value. Needs the d2g parameter. */
+int krome_opts_set_photo_dust_opacity(krome_opts* h, const double* kappa);
+/* radiation.evolve: a fixed background field per bin Phi_bg[nbins]
+ * [cm^-2 s^-1] added to the evolved field wherever the field acts (rates,
+ * heating, grains), never absorbed nor written back (per-cell rows:
+ * krome_cells.Phi_bg). NULL removes it. Kept when the bins are rebuilt
+ * with the same number; -1 without photo bins or for a negative value.
+ * The evolved bins' speed of light is the "c_red" key (default c):
+ * d ln Phi/dt = -c_red kabs, for a field Phi = c_red N. */
+int krome_opts_set_photo_background(krome_opts* h, const double* Phi_bg);
 
 /* binned dust population (MRN bins per grain type, radiative-balance
  * Tdust by bisection, dust-chemistry coupling); nd bins per type.
@@ -255,11 +270,16 @@ int krome_opts_get_dust_types(const krome_opts* h, int* isC);
  *   adust  [ncell][ndust]  grain radii [cm] with dust.evolve, read and
  *                          updated like Td (0: an evaporated bin); NULL:
  *                          from the handle's radii (krome_opts_set_dust_a)
- * A failed cell's rows are untouched. */
+ *   Phi_bg [ncell][nbins]  background fields with radiation.evolve
+ *                          (instead of krome_opts_set_photo_background),
+ *                          read only; not with device-resident data
+ * A failed cell's rows are untouched. Members added later go at the end:
+ * initialize the struct ({0} or {Phi, Td, adust}), unused members NULL. */
 typedef struct {
   double* Phi;
   double* Td;
   double* adust;
+  const double* Phi_bg;
 } krome_cells;
 
 /* integrate ncell independent cells, each over its own dt[c] [s].
@@ -479,8 +499,10 @@ int krome_conserve_cells(int ncell, double* n, const double* ref,
 int krome_conserve_cells_x(int ncell, double* x, const double* ref,
                            int ref_stride, const double* par,
                            int par_stride, int* flags);
-/* number densities <-> mass fractions x = m n / rho; rho[ncell] */
-int krome_n2x(int ncell, const double* n, double* x);
+/* number densities <-> mass fractions x = m n / rho; rho[ncell] the gas
+ * density [g cm^-3] (the caller's: the species need not carry all of it,
+ * as legacy krome_n2x(n, rhogas)) */
+int krome_n2x(int ncell, const double* n, const double* rho, double* x);
 
 /* ---- legacy conveniences (krome_user) ----------------------------------
  * one cell: n[nspec], par one row (NULL: defaults), Phi[nbins] with photon

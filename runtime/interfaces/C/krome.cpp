@@ -54,6 +54,10 @@ struct krome_opts {
   krome::Radiation rad;
   krome::PhotoModule photo;
   std::vector<double> kdraine;  // Draine R_V=3.1 kappa per bin (get_opacity)
+  std::vector<double> kdust;    // krome_opts_set_photo_dust_opacity (empty:
+                                // none; kept while the bins keep their number)
+  std::vector<double> phbg;     // krome_opts_set_photo_background (as kdust;
+                                // so.Phi_bg points here)
   bool has_dust = false;
   krome::DustBins dust;
   std::vector<double> atol_sp, rtol_sp;  // so.atol_species / rtol_species
@@ -88,6 +92,7 @@ double* double_slot(krome_opts* h, const char* key) {
   if (!std::strcmp(key, "atol_n")) return &h->so.atol_n;
   if (!std::strcmp(key, "atol_T")) return &h->so.atol_T;
   if (!std::strcmp(key, "atol_u")) return &h->so.atol_u;
+  if (!std::strcmp(key, "c_red")) return &h->so.c_red;
   return nullptr;
 }
 
@@ -312,7 +317,7 @@ int krome_opts_set_photo(krome_opts* h, int nbins, const double* Elo,
     return -1;
   h->rad = krome::Radiation();
   for (int b = 0; b < nbins; ++b) {
-    if (!(Ehi[b] > Elo[b])) return -1;
+    if (!(Ehi[b] > Elo[b]) || !(Elo[b] > 0.0)) return -1;
     h->rad.Elo.push_back(Elo[b]);
     h->rad.Ehi.push_back(Ehi[b]);
     h->rad.Phi.push_back(0.0);
@@ -322,6 +327,12 @@ int krome_opts_set_photo(krome_opts* h, int nbins, const double* Elo,
   h->photo = krome::PhotoModule();
   h->photo.init(h->rad);
   h->has_photo = true;
+  if (static_cast<int>(h->kdust.size()) == nbins)
+    h->photo.set_dust_opacity(h->kdust.data());
+  else
+    h->kdust.clear();
+  if (static_cast<int>(h->phbg.size()) != nbins) h->phbg.clear();
+  h->so.Phi_bg = h->phbg.empty() ? nullptr : h->phbg.data();
   h->kdraine.assign(nbins, 0.0);
   if (krome::spectra::dust_kappa_draine(nbins, Elo, Ehi, h->kdraine.data())
       != 0)
@@ -339,6 +350,32 @@ int krome_opts_set_photo_broadening(krome_opts* h, double Tgas,
   std::vector<double> Elo = h->rad.Elo, Ehi = h->rad.Ehi;
   return krome_opts_set_photo(h, static_cast<int>(Elo.size()), Elo.data(),
                               Ehi.data());
+}
+
+int krome_opts_set_photo_dust_opacity(krome_opts* h, const double* kappa) {
+  if (h == nullptr || !h->has_photo) return -1;
+  if (kappa == nullptr) {
+    h->kdust.clear();
+  } else {
+    for (int b = 0; b < h->photo.B; ++b)
+      if (!(kappa[b] >= 0.0)) return -1;
+    h->kdust.assign(kappa, kappa + h->photo.B);
+  }
+  h->photo.set_dust_opacity(kappa);
+  return 0;
+}
+
+int krome_opts_set_photo_background(krome_opts* h, const double* Phi_bg) {
+  if (h == nullptr || !h->has_photo) return -1;
+  if (Phi_bg == nullptr) {
+    h->phbg.clear();
+  } else {
+    for (int b = 0; b < h->photo.B; ++b)
+      if (!(Phi_bg[b] >= 0.0)) return -1;
+    h->phbg.assign(Phi_bg, Phi_bg + h->photo.B);
+  }
+  h->so.Phi_bg = h->phbg.empty() ? nullptr : h->phbg.data();
+  return 0;
 }
 
 int krome_opts_nbins(const krome_opts* h) {
@@ -386,6 +423,7 @@ int krome_solve_cells(int ncell, double* n, double* Tgas, const double* dt,
     if (Phi == nullptr) return krome::FLAG_NO_FIELD;
     so.photo = &hc->photo;
     co.Phi = Phi;
+    co.Phi_bg = extra != nullptr ? extra->Phi_bg : nullptr;
   }
   if (hc->has_dust) {
     so.dust = const_cast<krome::DustBins*>(&hc->dust);  // copied per cell
@@ -945,10 +983,10 @@ int krome_conserve_cells_x(int ncell, double* x, const double* ref,
                            true);
 }
 
-int krome_n2x(int ncell, const double* n, double* x) {
-  if (ncell < 0 || n == nullptr || x == nullptr) return -1;
+int krome_n2x(int ncell, const double* n, const double* rho, double* x) {
+  if (ncell < 0 || n == nullptr || rho == nullptr || x == nullptr) return -1;
   for (int c = 0; c < ncell; ++c)
-    krome::n2x(n + static_cast<size_t>(c) * krome::NSPEC,
+    krome::n2x(n + static_cast<size_t>(c) * krome::NSPEC, rho[c],
                x + static_cast<size_t>(c) * krome::NSPEC);
   return 0;
 }
@@ -1234,6 +1272,9 @@ static int solve_cells_device_c_(int ncell, double* v, const double* rho,
   if (hc->has_photo) {
     so.photo = &hc->photo;
     a.Phi = extra != nullptr ? extra->Phi : nullptr;
+    // per-cell backgrounds are host rows: not with device-resident data
+    if (extra != nullptr && extra->Phi_bg != nullptr)
+      return krome::FLAG_UNSUPPORTED;
   }
   if (hc->has_dust) {
     so.dust = const_cast<krome::DustBins*>(&hc->dust);

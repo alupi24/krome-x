@@ -13,10 +13,14 @@ namespace krome {
 // dissociative tunneling, density-dependent interpolation between the
 // low- and high-density limits (Martin, Schwarz & Mandy 1996), legacy
 // dissH2_Martin96 with its exact fit coefficients. n_H is the total
-// hydrogen nuclei density.
-KROME_HD inline double dissH2_Martin96(double Tgas, const double* n,
+// hydrogen nuclei density. The fit is evaluated at min(Tgas, 4.5e4 K), as
+// in the original KROME: above ~1e5 K it runs away (at low density
+// 4e-9 cm^3 s^-1 at 2e5 K, 7e11 at 1e7 K; at high density it falls), so
+// the rate stays at its 4.5e4 K value (~1e-10 to 8e-10).
+KROME_HD inline double dissH2_Martin96(double Tgas_in, const double* n,
                               const Params& p) {
   (void)p;
+  const double Tgas = std::fmin(Tgas_in, 4.5e4);
   static constexpr double m[2][21] = {
       // collision-induced dissociation
       {-178.4239, -68.42243, 43.20243, -4.633167, 69.70086, 40870.38,

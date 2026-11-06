@@ -266,6 +266,7 @@ Live example: http://www.kromepackage.org/docmake_x/
 | `examples/` | `examples/tests/`: the legacy tests ported to KROME-X (`python3 -m kromex --test NAME`); `examples/coupling/`: the quick start's cell from C, C++ and Fortran, and the README's examples as Jupyter notebooks (`python/`) |
 | `kromex_convert/` | the converters of external data (commands, or `python3 -m kromex_convert.NAME`): `kida2krome` and `umist2krome` (networks from KIDA and the UMIST database), `lamda2krome` and `chianti2krome` (coolant files from LAMDA and CHIANTI) |
 | `docs/` | the manual and the network format |
+| `CHANGELOG.md` | the changes since 2.0.0 |
 
 The runtime:
 

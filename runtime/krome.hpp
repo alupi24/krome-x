@@ -242,6 +242,17 @@ struct SolverOpts {
   // written back when the network was generated with radiation.evolve
   const PhotoModule* photo = nullptr;
   double* Phi = nullptr;
+  // radiation.evolve: the speed of light of the evolved bins [cm s^-1]
+  // (a reduced one, as the radiative transfer's): d ln Phi_b/dt = -c_red
+  // kabs_b. With Phi = c_red N (the transfer's photon flux) the rates
+  // sigma Phi and the photons removed agree. Default the true c
+  double c_red = constants::clight;
+  // radiation.evolve: a fixed background field per bin Phi_bg[photo->B]
+  // [cm^-2 s^-1] (e.g. a UV background) added to the evolved field
+  // wherever the field acts (rates, heating, grains, J_LW), never absorbed
+  // nor written back; nullptr: none. With a fixed field FLAG_UNSUPPORTED
+  // (add it to Phi)
+  const double* Phi_bg = nullptr;
   // binned dust (cooling DUSTBINS, surface.bins, dust.evolve_Td): the size
   // distribution and per-bin temperatures (see DustBins below); with
   // dust.evolve_Td the Td are the initial state and are written back
@@ -305,6 +316,9 @@ struct CellsOpts {
   // radiation.evolve a single-cell call then updates it, and in a call of
   // several cells the evolved fields are not returned
   double* Phi = nullptr;
+  // per-cell background fields Phi_bg[ncell][photo->B] (radiation.evolve;
+  // instead of SolverOpts::Phi_bg), read only
+  const double* Phi_bg = nullptr;
   // per-cell dust temperatures Td[ncell][dust->nb] [K] (with
   // SolverOpts::dust): each cell's bins start from its row (with
   // dust.evolve_Td the initial state) and the row receives the cell's final
@@ -592,8 +606,10 @@ inline int get_absorption(const double* n, double Tgas, const Params& p,
 inline int get_qeff(const double* n, double Tgas, const Params& p,
                     double* q);
 
-// number densities <-> mass fractions: x = m n / rho(n); n = rho x / m
-inline void n2x(const double* n, double* x);
+// number densities <-> mass fractions with the gas density rho [g cm^-3]
+// (the caller's: the species need not carry all the mass): x = m n / rho;
+// n = rho x / m
+inline void n2x(const double* n, double rho, double* x);
 inline void x2n(const double* x, double rho, double* n);
 
 // ===========================================================================

@@ -17,8 +17,11 @@
 // sum_b lww_b Phi_b, acts on the bins as the cross section khat lww_b.
 // Each event absorbs 1/pdiss photons, so the photon removal is
 //   kabs_b = sum_r s_r sigma_rb n_r / pdiss_r + sum_q khat_q lww_b n_q / pdiss_q
+// and, with radiation.evolve, the dust's (solve_cell.hpp photo_dust_kabs_:
+// the binned dust's Qabs, else rho_gas d2g kdust_b of set_dust_opacity).
 #pragma once
 #include <cmath>
+#include <stdexcept>
 #include <vector>
 
 #define KROME_PHOTO_HPP_INCLUDED 1
@@ -45,6 +48,8 @@ struct PhotoView {
   const double* Elo = nullptr;
   const double* Ehi = nullptr;
   const double* lww = nullptr;
+  const double* kdust = nullptr;    // B dust opacity [cm^2 per g of dust],
+                                    // or nullptr (set_dust_opacity)
 };
 
 // the precomputed bin sums of a static field (PhotoSums) as a view
@@ -58,15 +63,17 @@ struct PhotoSumsView {
 };
 
 struct Radiation {
-  std::vector<double> Elo, Ehi;  // bin edges [eV]
-  std::vector<double> Phi;       // photon flux per bin [cm^-2 s^-1]
+  std::vector<double> Elo, Ehi;  // bin edges [eV]: they define the bins
+  std::vector<double> Phi;       // photon flux per bin [cm^-2 s^-1] (a
+                                 // convenience: PhotoModule::init does not
+                                 // read it; the field is SolverOpts::Phi)
   // Doppler broadening of the tabulated (file) cross sections, applied
   // once when the bins are built (legacy -useBroadening with the Tgas of
   // krome_set_photobinE_*): temperature [K] and turbulent velocity
   // [cm s^-1]; 0 and 0 = none
   double broad_T = 0.0;
   double broad_vturb = 0.0;
-  int nbins() const { return static_cast<int>(Phi.size()); }
+  int nbins() const { return static_cast<int>(Elo.size()); }
 
   // B logarithmic bins between emin and emax [eV], zero field
   static Radiation log_bins(int B, double emin, double emax) {
@@ -94,6 +101,10 @@ struct PhotoModule {
   std::vector<double> habw;     // per-bin weights of the Habing integral
   std::vector<double> Elo, Ehi; // bin edges [eV] (photo_J_ for pumping)
   std::vector<double> lww;      // J_LW = sum_b lww_b Phi_b (photo_J_LW_)
+  // dust opacity per bin [cm^2 per g of dust] (empty: none), absorbed with
+  // rho_gas d2g by the dust of a co-evolved field (radiation.evolve) when
+  // no binned dust with Qabs on these bins is given (set_dust_opacity)
+  std::vector<double> kdust;
 
   // Habing flux G [Habing units] of the current field: energy flux in
   // 6-13.6 eV over 1.6e-3 erg cm^-2 s^-1 (legacy GHabing_thin, but with
@@ -104,8 +115,26 @@ struct PhotoModule {
   // (PhotoSums), computed once instead of on every rhs evaluation
   void sums(const double* Phi, PhotoSums& ps) const;
 
+  // the dust opacity kappa[B] [cm^2 per g of dust] (e.g. spectra::
+  // dust_kappa_draine), or nullptr for none; set after init (which clears it)
+  void set_dust_opacity(const double* kappa) {
+    if (kappa == nullptr) {
+      kdust.clear();
+      return;
+    }
+    kdust.assign(kappa, kappa + B);
+  }
+
+  // the bins of rad's edges; std::invalid_argument when Elo and Ehi
+  // differ in length or a bin is not 0 < Elo < Ehi
   void init(const Radiation& rad, int quad_pts = 64) {
+    if (rad.Ehi.size() != rad.Elo.size())
+      throw std::invalid_argument("Radiation: Elo and Ehi differ in length");
+    for (size_t b = 0; b < rad.Elo.size(); ++b)
+      if (!(rad.Elo[b] > 0.0 && rad.Ehi[b] > rad.Elo[b]))
+        throw std::invalid_argument("Radiation: a bin is not 0 < Elo < Ehi");
     B = rad.nbins();
+    kdust.clear();
     Elo = rad.Elo;
     Ehi = rad.Ehi;
     const size_t NB = static_cast<size_t>(NPHOTO) * B;
@@ -207,6 +236,7 @@ struct PhotoModule {
     v.Elo = Elo.data();
     v.Ehi = Ehi.data();
     v.lww = lww.data();
+    v.kdust = kdust.empty() ? nullptr : kdust.data();
     return v;
   }
 

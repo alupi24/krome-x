@@ -164,7 +164,9 @@ KROME_HD inline double krate_evaporation(int sp, double Tgas, const double* n,
 
 // gas-dust collisional thermal exchange (Hollenbach & McKee 1979; legacy
 // cooling_dust / dustCool with fact = 0.5 mean-collider factor) for the
-// effective MRN population: 2 kB fact v_gas (Tgas - Tdust) ntot Sum n_d a^2,
+// effective MRN population: 2 kB fact v_gas (Tgas - Tdust) ntot
+// Sum n_d pi a^2 (Grassi et al. 2017 eqs. 6-7, as DUSTBINS and the dust
+// tables; legacy's useCoolingDustNoTdust omitted the pi),
 // with Sum n_d a^2 from the total dust mass rho_(n) * d2g and the same MRN
 // defaults as krate_stickSi (amin 5e-7, amax 2.5e-5 cm, p = -3.5,
 // rho0 = 3 g/cm3). Positive = gas cools (Tgas > Tdust), negative = dust
@@ -183,7 +185,7 @@ KROME_HD inline double cooling_dustExchange(double Tgas, double Tdust,
   // vgas = sqrt(8 kB Tgas / (pi m_p)), legacy sqrt(kvgas_erg * Tgas)
   const double vgas = PRE_KVGAS_SQRT * std::sqrt(Tgas / constants::p_mass);
   return 2.0 * constants::boltzmann_erg * 0.5 * vgas * (Tgas - Tdust)
-      * ntot_(n) * na2;
+      * ntot_(n) * constants::pi * na2;
 }
 
 #if defined(KROME_EXTERN_krate_H2dust)
