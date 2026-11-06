@@ -354,11 +354,6 @@ inline int get_photo_heating(const double* n, double Tgas, const Params& p,
   const PhotoView v = o.photo->view();
   RadChannels_ rc(n, Tgas, p);
   const double eV_to_erg = constants::eV_to_erg;
-  // the field the solver sees: Phi + Phi_bg (radiation.evolve)
-  std::vector<double> phv(o.Phi, o.Phi + v.B);
-  if (EvolveConfig::rad && o.Phi_bg != nullptr)
-    for (int b = 0; b < v.B; ++b) phv[b] += o.Phi_bg[b];
-  const double* Phi = phv.data();
 #ifdef KROME_HAS_SECION
   const double eta = photo_heat_eta_(n);
 #endif
@@ -368,12 +363,12 @@ inline int get_photo_heating(const double* n, double Tgas, const Params& p,
     const double nr = n[photo_reactant[r]] * rc.sh[r];
 #ifdef KROME_HAS_SECION
     double se, ss, sc, sp;
-    photo_sums_secondary_(v, Phi, r, nullptr, se, ss, sc, sp);
+    photo_sums_secondary_(v, o.Phi, r, nullptr, se, ss, sc, sp);
     heat[r] = ((se - ss) + eta * ss) * nr * eV_to_erg;
 #else
     double se = 0.0;
     for (int b = 0; b < v.B; ++b)
-      se += v.sigmaE[static_cast<size_t>(r) * v.B + b] * Phi[b];
+      se += v.sigmaE[static_cast<size_t>(r) * v.B + b] * o.Phi[b];
     heat[r] = se * nr * eV_to_erg;
 #endif
   }
@@ -383,15 +378,13 @@ inline int get_photo_heating(const double* n, double Tgas, const Params& p,
 
 // the field over the Draine ISRF (legacy krome_get_ratioFluxDraine: the
 // integrated flux / 7.95e-8, i.e. sum_b Phi_b h / (4 pi) / 7.95e-8, the
-// rate-expression function get_ratioFluxDraine; with radiation.evolve
-// Phi + Phi_bg). -1 without photon bins or field
+// rate-expression function get_ratioFluxDraine). -1 without photon bins
+// or field
 inline int get_ratio_flux_draine(const SolverOpts& o, double* ratio) {
 #ifdef KROME_PHOTO_HPP_INCLUDED
   if (o.photo == nullptr || o.Phi == nullptr) return -1;
   double s = 0.0;
-  for (int b = 0; b < o.photo->B; ++b)
-    s += o.Phi[b]
-        + (EvolveConfig::rad && o.Phi_bg != nullptr ? o.Phi_bg[b] : 0.0);
+  for (int b = 0; b < o.photo->B; ++b) s += o.Phi[b];
   *ratio = s * constants::planck_eV / (4.0 * constants::pi) / 7.95e-8;
   return 0;
 #else

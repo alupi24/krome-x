@@ -79,7 +79,6 @@ module krome
        krome_version_f, &
        krome_set_dustbins, krome_nbins, krome_solve, krome_solve_x, &
        krome_set_photo_broadening, krome_set_photo_dust_opacity, &
-       krome_set_photo_background, &
        krome_ndust, krome_set_dust_Td, &
        krome_set_dust_a, krome_get_dust_a, krome_get_dust_counts, &
        krome_get_dust_types, &
@@ -127,7 +126,6 @@ module krome
     type(c_ptr) :: phi = c_null_ptr
     type(c_ptr) :: td = c_null_ptr
     type(c_ptr) :: adust = c_null_ptr
-    type(c_ptr) :: phi_bg = c_null_ptr
   end type krome_cells_c
   ! the counts of a device-resident call (krome.h krome_device_summary)
   type, bind(C) :: krome_device_summary
@@ -276,12 +274,6 @@ module krome
       type(c_ptr), value :: h, k
       integer(c_int) :: r
     end function c_set_photo_dust_opacity
-    function c_set_photo_background(h, g) &
-         bind(C, name="krome_opts_set_photo_background") result(r)
-      import :: c_ptr, c_int
-      type(c_ptr), value :: h, g
-      integer(c_int) :: r
-    end function c_set_photo_background
     function c_nbins(h) bind(C, name="krome_opts_nbins") result(r)
       import :: c_ptr, c_int
       type(c_ptr), value :: h
@@ -1075,28 +1067,6 @@ contains
     if (present(ierr)) ierr = r
   end subroutine krome_set_photo_dust_opacity
 
-  ! radiation.evolve: a fixed background field per bin phi_bg(nbins)
-  ! [cm^-2 s^-1] added to the evolved field wherever it acts, never
-  ! absorbed nor returned (per cell: krome_solve's phi_bg); absent phi_bg
-  ! removes it. The evolved bins' speed of light: krome_set(h, "c_red", v)
-  subroutine krome_set_photo_background(h, phi_bg, ierr)
-    type(c_ptr), intent(in) :: h
-    real(c_double), intent(in), optional, target :: phi_bg(:)
-    integer, intent(out), optional :: ierr
-    integer(c_int) :: r
-    type(c_ptr) :: pg
-    pg = c_null_ptr
-    if (present(phi_bg)) then
-      if (size(phi_bg) /= c_nbins(h)) then
-        if (present(ierr)) ierr = -1
-        return
-      end if
-      pg = c_loc(phi_bg)
-    end if
-    r = c_set_photo_background(h, pg)
-    if (present(ierr)) ierr = r
-  end subroutine krome_set_photo_background
-
   function krome_nbins(h) result(nb)
     type(c_ptr), intent(in) :: h
     integer :: nb
@@ -1121,8 +1091,8 @@ contains
   ! integrate size(Tgas) cells. par: (npar) broadcast or (npar, ncell) per
   ! cell (pass as a rank-2 array; a single column broadcasts); Phi:
   ! (nbins, ncell); flags: per-cell solver flags. Returns 0 on success.
-  function krome_solve(n, Tgas, dt, h, par, phi, flags, td, adust, &
-       phi_bg) result(ierr)
+  function krome_solve(n, Tgas, dt, h, par, phi, flags, td, adust) &
+       result(ierr)
     real(c_double), intent(inout), target :: n(:, :)
     real(c_double), intent(inout), target :: Tgas(:)
     real(c_double), intent(in) :: dt(:)
@@ -1134,10 +1104,8 @@ contains
     real(c_double), intent(inout), optional, target :: td(:, :)
     ! per-cell grain radii adust(ndust, ncell) [cm] (dust.evolve)
     real(c_double), intent(inout), optional, target :: adust(:, :)
-    ! per-cell background fields phi_bg(nbins, ncell) (radiation.evolve)
-    real(c_double), intent(in), optional, target :: phi_bg(:, :)
     integer :: ierr
-    type(c_ptr) :: ppar, pphi, pflags, ptd, pad, ppbg
+    type(c_ptr) :: ppar, pphi, pflags, ptd, pad
     integer(c_int) :: stride
     ppar = c_null_ptr
     pphi = c_null_ptr
@@ -1153,18 +1121,16 @@ contains
     if (present(td)) ptd = c_loc(td)
     pad = c_null_ptr
     if (present(adust)) pad = c_loc(adust)
-    ppbg = c_null_ptr
-    if (present(phi_bg)) ppbg = c_loc(phi_bg)
     ierr = c_solve_cells(int(size(Tgas), c_int), n, Tgas, dt, ppar, stride, &
-         krome_cells_c(pphi, ptd, pad, ppbg), pflags, h)
+         krome_cells_c(pphi, ptd, pad), pflags, h)
   end function krome_solve
 
   ! krome_solve with mass fractions x(nspec, ncell) and the gas density
   ! rho(ncell) [g cm^-3] (legacy -useX): n = rho x / m in, x = m n / rho
   ! out (the caller's rho; renormalize_x rescales to the input sum) for the
   ! cells that succeed
-  function krome_solve_x(x, rho, Tgas, dt, h, par, phi, flags, td, adust, &
-       phi_bg) result(ierr)
+  function krome_solve_x(x, rho, Tgas, dt, h, par, phi, flags, td, adust) &
+       result(ierr)
     real(c_double), intent(inout), target :: x(:, :)
     real(c_double), intent(in) :: rho(:)
     real(c_double), intent(inout), target :: Tgas(:)
@@ -1175,10 +1141,8 @@ contains
     integer(c_int), intent(out), optional, target :: flags(:)
     real(c_double), intent(inout), optional, target :: td(:, :)
     real(c_double), intent(inout), optional, target :: adust(:, :)
-    ! per-cell background fields phi_bg(nbins, ncell) (radiation.evolve)
-    real(c_double), intent(in), optional, target :: phi_bg(:, :)
     integer :: ierr
-    type(c_ptr) :: ppar, pphi, pflags, ptd, pad, ppbg
+    type(c_ptr) :: ppar, pphi, pflags, ptd, pad
     integer(c_int) :: stride
     ppar = c_null_ptr
     pphi = c_null_ptr
@@ -1194,10 +1158,8 @@ contains
     if (present(td)) ptd = c_loc(td)
     pad = c_null_ptr
     if (present(adust)) pad = c_loc(adust)
-    ppbg = c_null_ptr
-    if (present(phi_bg)) ppbg = c_loc(phi_bg)
     ierr = c_solve_cells_x(int(size(Tgas), c_int), x, rho, Tgas, dt, ppar, &
-         stride, krome_cells_c(pphi, ptd, pad, ppbg), pflags, h)
+         stride, krome_cells_c(pphi, ptd, pad), pflags, h)
   end function krome_solve_x
 
   ! the error-report file (default "KROME_ERROR_REPORT"; in an MPI run

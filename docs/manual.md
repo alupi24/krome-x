@@ -696,7 +696,6 @@ These are runtime numerics.
 | `CellsOpts::min_interleave` | `min_interleave` | -1 | the device path's memory layout: interleaved across cells (coalesced on a GPU) for calls of at least this many cells, contiguous per cell below; -1: contiguous, and on CUDA interleaved above the cells the device holds resident at once (SMs x 256; 27 648 on an A100), with the launch bounds measured best for each (contiguous 32,1, interleaved 128,8). The results agree to roundoff (bitwise when built without FMA contraction) |
 | `CellsOpts::min_device` | `min_device` | 10000 | `PATH_AUTO`: calls from this many cells go to the device, when the build has one (section 6.5) |
 | `CellsOpts::Phi` | `krome_cells::Phi` (C), `phi=` / `Phi=` | none | per-cell fields `Phi[ncell][nbins]`, read (and with `radiation.evolve` updated). Without them every cell starts from `SolverOpts::Phi`; with `radiation.evolve` a single-cell call updates it, a call of several cells does not return the evolved fields |
-| `CellsOpts::Phi_bg` | `krome_cells::Phi_bg` (C), `phi_bg=` / `Phi_bg=` | none | per-cell background fields `Phi_bg[ncell][nbins]` (`radiation.evolve`, section 8), read only; instead of `SolverOpts::Phi_bg`. Not with device-resident data (`FLAG_UNSUPPORTED`) |
 | `CellsOpts::flags` | the `flags` argument | none | per-cell return flags |
 | `CellsOpts::stats` | (C++ only) | none | per-cell `SolveStats[ncell]` |
 | `CellsOpts::Td` | `krome_cells::Td` (C), Fortran `td=`, Python `Td=` | none | per-cell dust temperatures `Td[ncell][ndust]`: each cell starts from its row and the row receives its final Td (binned dust) |
@@ -812,7 +811,7 @@ The C functions:
 | group | functions |
 |---|---|
 | solving | `krome_solve_cells`, `krome_solve_cells_x`, `krome_equilibrium_cells`, `krome_flag_message` |
-| options | `krome_opts_new`, `krome_opts_free`, `krome_opts_set`, `krome_opts_get`, `krome_opts_set_error_file`, `krome_opts_set_photo`, `krome_opts_set_photo_broadening`, `krome_opts_set_photo_dust_opacity`, `krome_opts_set_photo_background`, `krome_opts_nbins`, `krome_opts_set_dustbins`, `krome_opts_ndust`, `krome_opts_set_dust_Td`, `krome_opts_get_dust_Td` |
+| options | `krome_opts_new`, `krome_opts_free`, `krome_opts_set`, `krome_opts_get`, `krome_opts_set_error_file`, `krome_opts_set_photo`, `krome_opts_set_photo_broadening`, `krome_opts_set_photo_dust_opacity`, `krome_opts_nbins`, `krome_opts_set_dustbins`, `krome_opts_ndust`, `krome_opts_set_dust_Td`, `krome_opts_get_dust_Td` |
 | device | `krome_has_device`, `krome_device_initialize`, `krome_device_finalize` |
 | network | `krome_version`, `krome_network_name`, `krome_nspec`, `krome_nrea`, `krome_npar`, `krome_species_name`, `krome_species_index`, `krome_param_name`, `krome_param_index`, `krome_params_default`, `krome_param_required_by`, `krome_species_mass`, `krome_species_charge`, `krome_nelem`, `krome_element_name`, `krome_species_natoms`, `krome_reaction_name` |
 | queries | section 7 |
@@ -853,7 +852,7 @@ The Fortran names that differ from C:
 | purpose | Fortran |
 |---|---|
 | solve | `krome_solve`, `krome_solve_x`, `krome_equilibrium` |
-| options | `krome_set(h, key, value)`, `krome_get(h, key)`, `krome_set_error_file`, `krome_set_photo`, `krome_set_photo_broadening`, `krome_set_photo_dust_opacity`, `krome_set_photo_background`, `krome_nbins`, `krome_set_dustbins`, `krome_ndust`, `krome_set_dust_Td`, `krome_get_dust_Td`, `krome_photo_sigma` |
+| options | `krome_set(h, key, value)`, `krome_get(h, key)`, `krome_set_error_file`, `krome_set_photo`, `krome_set_photo_broadening`, `krome_set_photo_dust_opacity`, `krome_nbins`, `krome_set_dustbins`, `krome_ndust`, `krome_set_dust_Td`, `krome_get_dust_Td`, `krome_photo_sigma` |
 | counts (the constants are in `krome_net`) | `krome_nspec_c`, `krome_nrea_c`, `krome_npar_c`, `krome_nelem_c`, `krome_nheat_c`, `krome_ncool_c`, `krome_nphoto_c` |
 | index of a name (1-based) | `krome_species_idx`, `krome_param_idx` |
 | names by 1-based index (and the version, `krome_version_f`) | `krome_species_name_f`, `krome_param_name_f`, `krome_param_required_by_f`, `krome_reaction_name_f`, `krome_element_name_f`, `krome_heating_name_f`, `krome_cooling_name_f`, `krome_flag_message_f` |
@@ -1308,28 +1307,29 @@ array per cell.
   Phi = c_red N, the photon flux of the transfer that uses that c_red
   (RAMSES-RT convention): the rates sigma Phi and the photons removed then
   agree, and the photons are conserved.
-- **Background field** (`radiation.evolve`): a fixed field per bin,
-  `SolverOpts::Phi_bg[nbins]` for every cell or `CellsOpts::Phi_bg[ncell]
-  [nbins]` per cell, adds to the evolved field wherever the field acts
-  (photo and J_LW rates, photoheating, secondary ionization, grain heating
-  and Td, the Habing flux, the queries), but is never absorbed nor written
-  back: Phi = exp(u) + Phi_bg, d ln Phi_ev/dt = -c_red kappa. E.g. an
-  optically thin UV background next to the field the transfer carries.
-  With a field held fixed it is refused (`FLAG_UNSUPPORTED`: add it to
-  Phi):
-  - C++: `o.Phi_bg = bg;` (per cell: `co.Phi_bg`);
-  - C: `krome_opts_set_photo_background(h, bg)` (per cell:
-    `krome_cells.Phi_bg`);
-  - Fortran: `krome_set_photo_background(h, bg)` (per cell: `krome_solve(...,
-    phi_bg=)`);
-  - Python: `opts.set_photo_background(bg)` (per cell: `net.solve(...,
-    Phi_bg=)`).
+- **A background field the transfer does not carry** (e.g. a UV
+  background) with `radiation.evolve`: inject it into the field you pass,
+  and take it out of the field returned. Per cell of size L and call of
+  length dt, with N_b the transported photon density:
+  - pass Phi_b = c_red (N_b + Phi_bg,b dt / L), the background photons
+    entering the cell over the step;
+  - after the call, keep the transported share r_b = c_red N_b / Phi_b of
+    the returned field (N_b = r_b Phi'_b / c_red) and drop the rest. The
+    absorption is linear in Phi with kappa_b independent of it, so both
+    shares decay by the same factor in every bin: the split is exact.
+
+  Optically thick cells then absorb exactly the inflow Phi_bg dt / L;
+  thin ones see the background at c_red dt / L times Phi_bg, i.e. exact
+  for a call at the transfer's step with Courant number near 1 (else
+  scale the injection by L / (c_red dt) in the bins where kappa_b L << 1,
+  from `get_absorption`). A background that is never absorbed (an
+  optically thin field, or one self-shielded by a prescription) is the
+  field of a build without `radiation.evolve`.
 
   The bins only absorb (d ln Phi_b/dt = -c_red kappa_b), so in a two-moment
   (M1) radiation code the flux of each bin is attenuated by the same
   factor as its photon density: after the call, multiply every flux
-  component F_b by Phi_b(after) / Phi_b(before) (the evolved field: the
-  background is not part of it). This is exact, keeps the
+  component F_b by Phi_b(after) / Phi_b(before). This is exact, keeps the
   reduced flux |F_b| / (c N_b) unchanged, and needs no flux equations in
   the solver (the rates depend on the photon density only).
 

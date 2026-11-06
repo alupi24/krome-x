@@ -70,8 +70,6 @@ inline int solve_cells_percell(int ncell, double* n, double* Tgas,
       phic.assign(o.Phi, o.Phi + B);
       oc.Phi = phic.data();
     }
-    if (co.Phi_bg != nullptr && o.photo != nullptr)
-      oc.Phi_bg = co.Phi_bg + static_cast<size_t>(c) * B;
 #endif
 #ifdef KROME_DUST_BINS_HPP_INCLUDED
     // binned dust carries per-cell state (Td): give each cell its own

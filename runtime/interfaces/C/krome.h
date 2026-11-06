@@ -219,14 +219,8 @@ int krome_opts_set_photo_broadening(krome_opts* h, double Tgas,
  * removes it. Kept when the bins are rebuilt with the same number; -1
  * without photo bins or for a negative value. Needs the d2g parameter. */
 int krome_opts_set_photo_dust_opacity(krome_opts* h, const double* kappa);
-/* radiation.evolve: a fixed background field per bin Phi_bg[nbins]
- * [cm^-2 s^-1] added to the evolved field wherever the field acts (rates,
- * heating, grains), never absorbed nor written back (per-cell rows:
- * krome_cells.Phi_bg). NULL removes it. Kept when the bins are rebuilt
- * with the same number; -1 without photo bins or for a negative value.
- * The evolved bins' speed of light is the "c_red" key (default c):
- * d ln Phi/dt = -c_red kabs, for a field Phi = c_red N. */
-int krome_opts_set_photo_background(krome_opts* h, const double* Phi_bg);
+/* radiation.evolve: the evolved bins' speed of light is the "c_red" key
+ * (default c): d ln Phi/dt = -c_red kabs, for a field Phi = c_red N. */
 
 /* binned dust population (MRN bins per grain type, radiative-balance
  * Tdust by bisection, dust-chemistry coupling); nd bins per type.
@@ -270,16 +264,11 @@ int krome_opts_get_dust_types(const krome_opts* h, int* isC);
  *   adust  [ncell][ndust]  grain radii [cm] with dust.evolve, read and
  *                          updated like Td (0: an evaporated bin); NULL:
  *                          from the handle's radii (krome_opts_set_dust_a)
- *   Phi_bg [ncell][nbins]  background fields with radiation.evolve
- *                          (instead of krome_opts_set_photo_background),
- *                          read only; not with device-resident data
- * A failed cell's rows are untouched. Members added later go at the end:
- * initialize the struct ({0} or {Phi, Td, adust}), unused members NULL. */
+ * A failed cell's rows are untouched. */
 typedef struct {
   double* Phi;
   double* Td;
   double* adust;
-  const double* Phi_bg;
 } krome_cells;
 
 /* integrate ncell independent cells, each over its own dt[c] [s].

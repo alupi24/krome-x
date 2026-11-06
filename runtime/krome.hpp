@@ -247,12 +247,6 @@ struct SolverOpts {
   // kabs_b. With Phi = c_red N (the transfer's photon flux) the rates
   // sigma Phi and the photons removed agree. Default the true c
   double c_red = constants::clight;
-  // radiation.evolve: a fixed background field per bin Phi_bg[photo->B]
-  // [cm^-2 s^-1] (e.g. a UV background) added to the evolved field
-  // wherever the field acts (rates, heating, grains, J_LW), never absorbed
-  // nor written back; nullptr: none. With a fixed field FLAG_UNSUPPORTED
-  // (add it to Phi)
-  const double* Phi_bg = nullptr;
   // binned dust (cooling DUSTBINS, surface.bins, dust.evolve_Td): the size
   // distribution and per-bin temperatures (see DustBins below); with
   // dust.evolve_Td the Td are the initial state and are written back
@@ -316,9 +310,6 @@ struct CellsOpts {
   // radiation.evolve a single-cell call then updates it, and in a call of
   // several cells the evolved fields are not returned
   double* Phi = nullptr;
-  // per-cell background fields Phi_bg[ncell][photo->B] (radiation.evolve;
-  // instead of SolverOpts::Phi_bg), read only
-  const double* Phi_bg = nullptr;
   // per-cell dust temperatures Td[ncell][dust->nb] [K] (with
   // SolverOpts::dust): each cell's bins start from its row (with
   // dust.evolve_Td the initial state) and the row receives the cell's final

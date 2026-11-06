@@ -86,8 +86,6 @@ struct Batch {
   DView dt, Tfix;                        // per cell
   DView2 n0;         // [ncell][NSPEC] input densities (n_global)
   DView2 phi;        // [ncell][B] per-cell photon field (radiation.evolve: out)
-  DView2 phbg;       // [ncell][B] background field (has_bg; radiation.evolve)
-  bool has_bg = false;
   double crad = constants::clight;  // the evolved bins' speed of light
   DView2 psum;       // [ncell][NPSUM_ * NPHOTO] static-field bin sums
 #ifdef KROME_PHOTO_HPP_INCLUDED
@@ -173,7 +171,8 @@ inline size_t buffers_bytes_(const DeviceBuffers_& D) {
          + (b.dt.span() + b.Tfix.span() + b.n0.span() + b.phi.span()
             + b.psum.span() + b.tdr.span() + b.adr.span() + b.dxw.span()
             + b.dibb.span() + b.dibbs.span() + b.dqmid.span()
-            + b.demid.span() + b.kdust.span() + b.phbg.span() + D.y.span() + D.scr.span() + D.work.span()
+            + b.demid.span() + b.kdust.span() + D.y.span() + D.scr.span()
+            + D.work.span()
             + D.atol.span() + D.rtolv.span()) * sizeof(double)
          + (D.iwork.span() + D.flags.span() + b.disC.span()) * sizeof(int)
          + D.stats.span() * sizeof(long);
@@ -351,10 +350,6 @@ inline int batch_shape_(const SolverOpts& o, const CellsOpts& co,
   } else if (EvolveConfig::rad) {
     return FLAG_NO_FIELD;
   }
-  // a background field adds to an evolved one only (with a fixed field:
-  // add it to Phi)
-  if (!EvolveConfig::rad && (o.Phi_bg != nullptr || co.Phi_bg != nullptr))
-    return FLAG_UNSUPPORTED;
 #endif
 #ifdef KROME_DUST_BINS_HPP_INCLUDED
   if constexpr (SURF_NB > 0)
@@ -514,27 +509,6 @@ inline void upload_tables_(DeviceBuffers_& D, const SolverOpts& o, int B,
 #endif
 }
 
-// the background field rows of the first ncell cells (radiation.evolve):
-// co.Phi_bg's rows, else o.Phi_bg in every row; none: has_bg off
-inline void upload_bg_(DeviceBuffers_& D, const SolverOpts& o,
-                       const CellsOpts& co, int ncell, int B) {
-  Batch& b = D.b;
-  b.has_bg = EvolveConfig::rad && B > 0
-      && (co.Phi_bg != nullptr || o.Phi_bg != nullptr);
-  if (!b.has_bg) return;
-  if (static_cast<int>(b.phbg.extent(0)) < ncell
-      || static_cast<int>(b.phbg.extent(1)) != B) {
-    b.phbg = DView2("krome_phbg", std::max(ncell, D.cap), B);
-    ++device_allocs_;
-  }
-  auto h = Kokkos::create_mirror_view(b.phbg);
-  for (int c = 0; c < ncell; ++c)
-    for (int q = 0; q < B; ++q)
-      h(c, q) = co.Phi_bg != nullptr
-          ? co.Phi_bg[static_cast<size_t>(c) * B + q] : o.Phi_bg[q];
-  Kokkos::deep_copy(rows2_(b.phbg, ncell), rows2_(h, ncell));
-}
-
 // the per-cell ThermCtx pointers of the first ncell cells, on the device:
 // the parameters' state hooks, the photo views and the static field's bin
 // sums, the dust views (the contexts themselves already in b.tc)
@@ -650,7 +624,6 @@ inline int setup_batch_(DeviceBuffers_& D, int& B, int ncell,
             ? co.Phi[static_cast<size_t>(c) * B + q] : o.Phi[q];
     Kokkos::deep_copy(rows2_(b.phi, ncell), rows2_(D.phh, ncell));
   }
-  upload_bg_(D, o, co, ncell, B);
 #endif
 #ifdef KROME_DUST_BINS_HPP_INCLUDED
   if (nb > 0) {
@@ -873,10 +846,9 @@ KOKKOS_INLINE_FUNCTION double* percell_begin_(const Batch& b, long c, long S,
   double* yp = rhs_bind_(&rc, w, b.nb, b.balance);
 #ifdef KROME_PHOTO_HPP_INCLUDED
   if (rc.B > 0) {  // the evolved field starts at the cell's row
-    if (b.has_bg) rc.Phi_bg = &b.phbg(c, 0);
     for (int q = 0; q < rc.B; ++q) {
-      rc.Phi[q] = b.phi(c, q) + (b.has_bg ? b.phbg(c, q) : 0.0);
-      yc[(rc.iu + q) * S] = Kokkos::log(Kokkos::fmax(b.phi(c, q), 1e-300));
+      rc.Phi[q] = b.phi(c, q);
+      yc[(rc.iu + q) * S] = Kokkos::log(Kokkos::fmax(rc.Phi[q], 1e-300));
     }
     tc.Phi = rc.Phi;
     tc.p.hk.phi = tc.Phi;
@@ -1148,7 +1120,6 @@ inline int solve_percell_layout_(DeviceBuffers_& D, int ncell, double* n,
     const int nb = b.nb;
     std::vector<double> nn(static_cast<size_t>(nf) * NSPEC), TT(nf), dd(nf),
         ph(co.Phi != nullptr ? static_cast<size_t>(nf) * Bp : 0),
-        pb(co.Phi_bg != nullptr ? static_cast<size_t>(nf) * Bp : 0),
         td(co.Td != nullptr ? static_cast<size_t>(nf) * nb : 0),
         ad(co.adust != nullptr ? static_cast<size_t>(nf) * nb : 0);
     std::vector<Params> pp(pstride != 0 ? nf : 1, P[0]);
@@ -1163,9 +1134,6 @@ inline int solve_percell_layout_(DeviceBuffers_& D, int ncell, double* n,
       for (int q = 0; !ph.empty() && q < Bp; ++q)
         ph[static_cast<size_t>(k) * Bp + q] =
             co.Phi[static_cast<size_t>(c) * Bp + q];
-      for (int q = 0; !pb.empty() && q < Bp; ++q)
-        pb[static_cast<size_t>(k) * Bp + q] =
-            co.Phi_bg[static_cast<size_t>(c) * Bp + q];
       for (int q = 0; !td.empty() && q < nb; ++q)
         td[static_cast<size_t>(k) * nb + q] =
             co.Td[static_cast<size_t>(c) * nb + q];
@@ -1180,7 +1148,6 @@ inline int solve_percell_layout_(DeviceBuffers_& D, int ncell, double* n,
     ck.flags = fk.data();
     ck.stats = sk.data();
     ck.Phi = co.Phi != nullptr ? ph.data() : nullptr;
-    ck.Phi_bg = co.Phi_bg != nullptr ? pb.data() : nullptr;
     ck.Td = co.Td != nullptr ? td.data() : nullptr;
     ck.adust = co.adust != nullptr ? ad.data() : nullptr;
     solve_cells_percell(nf, nn.data(), TT.data(), dd.data(), pp.data(),
@@ -1344,8 +1311,6 @@ inline int solve_cells_kokkos(int ncell, double* n, double* Tgas,
     const int m = std::min(chunk, ncell - c0);
     CellsOpts cc = c1;
     if (c1.Phi != nullptr) cc.Phi = c1.Phi + static_cast<size_t>(c0) * B;
-    if (co.Phi_bg != nullptr)
-      cc.Phi_bg = co.Phi_bg + static_cast<size_t>(c0) * B;
     if (co.Td != nullptr) cc.Td = co.Td + static_cast<size_t>(c0) * nb;
     if (co.adust != nullptr)
       cc.adust = co.adust + static_cast<size_t>(c0) * nb;
@@ -1448,8 +1413,6 @@ inline int solve_chunk_device_(DeviceBuffers_& D, int m, const DeviceCells& a,
                                DeviceSummary& sum) {
   CellsOpts cs = co;
   cs.Phi = a.Phi;
-  // device-resident cells: the background of SolverOpts only
-  if (co.Phi_bg != nullptr) return FLAG_UNSUPPORTED;
   Shape_ sh;
   const int sflag = batch_shape_(o, cs, sh);
   if (sflag != 0) return sflag;
@@ -1457,9 +1420,6 @@ inline int solve_chunk_device_(DeviceBuffers_& D, int m, const DeviceCells& a,
   set_shape_(D, sh, m);
   Batch& b = D.b;
   upload_tables_(D, o, B, nb);
-#ifdef KROME_PHOTO_HPP_INCLUDED
-  upload_bg_(D, o, cs, m, B);
-#endif
   // the rows' defaults: the options' field, the population's Td and radii
   DView phi0, td0, a0, xin("krome_xin", m);
   std::vector<double> hphi, htd, ha;
