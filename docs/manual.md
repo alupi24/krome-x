@@ -1310,28 +1310,34 @@ array per cell.
 - **A background field the transfer does not carry** (e.g. a UV
   background) with `radiation.evolve`: inject it into the field you pass,
   and take it out of the field returned. Per cell of size L and call of
-  length dt, with N_b the transported photon density:
-  - pass Phi_b = c_red (N_b + Phi_bg,b dt / L), the background photons
-    entering the cell over the step;
+  length dt, with N_b the transported photon density, C = c_red dt / L
+  (the Courant number of the call) and tau_b = kappa_b L (`get_absorption`
+  times L, at the start of the step):
+  - pass Phi_b = c_red N_b + Phi_inj,b with
+
+        Phi_inj,b = Phi_bg,b C (1 - exp(-tau_b)) / (1 - exp(-C tau_b))
+
+    (as C expm1(-tau_b) / expm1(-C tau_b) when C tau_b is small);
   - after the call, keep the transported share r_b = c_red N_b / Phi_b of
     the returned field (N_b = r_b Phi'_b / c_red) and drop the rest. The
     absorption is linear in Phi with kappa_b independent of it, so both
     shares decay by the same factor in every bin: the split is exact.
 
-  With C = c_red dt / L, the Courant number of the call:
-  - optically thick bins (kappa_b L >> 1) absorb exactly the inflow
-    Phi_bg,b dt / L, for any C;
-  - optically thin bins (kappa_b L << 1) see the background at C Phi_bg,b
-    instead of Phi_bg,b, so their rates are off by the factor C: exact
-    only for a call at the transfer's step with C near 1.
+  With kappa_b constant over the step, the cell then absorbs (Phi_bg,b
+  dt / L)(1 - exp(-tau_b)), the inflow times the fraction a beam loses
+  across the cell, and the chemistry sees on average Phi_bg,b (1 -
+  exp(-tau_b)) / tau_b, the beam's mean over the cell, whatever C: the
+  thin limit is Phi_inj = Phi_bg (the field starts at the background),
+  the thick one Phi_inj = C Phi_bg (the inflow, all absorbed). Caveats:
+  - kappa_b is that of the start of the step: when the absorbers change
+    much within it (an ionization front crossing the cell), the budget is
+    approximate; shorter calls fix it;
+  - it is a beam crossing the cell along L: for an isotropic background
+    use an effective chord length for L.
 
-  For thin bins at C < 1, inject the background times 1/C, i.e. pass
-  Phi_b = c_red N_b + Phi_bg,b: the field starts at the background
-  itself. Keep the inflow injection, Phi_bg,b dt / L, in thick bins (1/C
-  there would give them too many photons). kappa_b L per bin is
-  `get_absorption` times L. A background that is never absorbed (an
-  optically thin field, or one self-shielded by a prescription) is the
-  field of a build without `radiation.evolve`.
+  A background that is never absorbed (an optically thin field, or one
+  self-shielded by a prescription) is the field of a build without
+  `radiation.evolve`.
 
   The bins only absorb (d ln Phi_b/dt = -c_red kappa_b), so in a two-moment
   (M1) radiation code the flux of each bin is attenuated by the same
