@@ -605,9 +605,12 @@ H2 -> H + H   []  photo(xsec=H2_sigmaLW(E_eV), Emin=14.159, Emax=17.7)
   attenuated by the caller (radiative transfer, or `get_opacity` /
   `get_absorption` with dust), the dust must not also be in that
   opacity, or it is counted twice.
-- `J_LW`: the band-mean intensity of the photon bins over 11.2-13.6 eV,
-  J_LW = sum_b J_b ln(overlap_b) / ln(13.6/11.2), with each bin constant in
-  J. A flat J gives J_LW = J, and without photon bins J_LW = 0. A rate using
+- `J_LW`: the band's log-mean intensity of the photon bins over
+  11.2-13.6 eV, J_LW = (1 / ln(13.6/11.2)) int J dlnE, with the in-bin
+  photon spectrum dN/dE ~ E^-alpha of the bins (manual section 8; alpha =
+  1, the default: J constant across each bin, J_LW = sum_b J_b
+  ln(overlap_b) / ln(13.6/11.2)). A flat J gives J_LW = J, and without
+  photon bins J_LW = 0. A rate using
   it acts on the bins as a photo reaction: it must be **linear** in J_LW
   (J_LW times a J_LW-free factor, or through a linear extern such as
   `H2_solomonLW`), with one kinetic reactant (the absorber), no temperature
@@ -615,11 +618,10 @@ H2 -> H + H   []  photo(xsec=H2_sigmaLW(E_eV), Emin=14.159, Emax=17.7)
   photons are taken only from the Lyman-Werner bins, in proportion to the
   photons each has in the band. `J_LW` may appear only in reaction rates
   (not in `var`s or cooling/heating terms).
-- Bins: put photon-bin edges at 11.2 and 13.6 eV. In a bin straddling a
-  band edge, `J_LW` counts the in-band part with J constant across the
-  bin, while photo() cross sections take the photons as uniform in E, so
-  the two Solomon forms agree exactly only with aligned edges (the
-  difference is confined to the two edge bins).
+- Bins: `J_LW` and the photo() cross sections average over the bins
+  with the same in-bin spectrum, so the two Solomon forms agree in every
+  bin, edge bins included; edges at 11.2 and 13.6 eV still avoid
+  assuming a shape for the in-band part of a straddling bin.
 - Heating: the Solomon process (a `J_LW` or `H2_solomonLW` rate, or a
   photo() H2 -> H + H with its window inside 11.2-13.6 eV) deposits no
   photoelectron energy. Its heating is the Solomon term of

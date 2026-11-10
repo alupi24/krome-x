@@ -6,8 +6,11 @@
 // photo_edep[]).
 //
 // Conventions:
-//   Phi_b   photon flux in bin b [photons cm^-2 s^-1], flat in E inside bin
-//   sigma_rb = (1/w_b) * Int_{bin b  intersect [Emin_r, Emax_r]} sigma_r(E) dE
+//   Phi_b   photon flux in bin b [photons cm^-2 s^-1], distributed inside
+//           the bin as dN/dE ~ E^-alpha (Radiation::alpha; 1: constant
+//           photons per ln E)
+//   sigma_rb = Int_{bin b  intersect [Emin_r, Emax_r]} sigma_r(E) E^-alpha dE
+//              / Int_{bin b} E^-alpha dE
 //   k_r     = sum_b sigma_rb * Phi_b                       [s^-1]
 //   kabs_b  = sum_r sigma_rb * n[reactant_r]               [cm^-1]
 //   (photon number density in bin: Phi_b / c)
@@ -73,6 +76,13 @@ struct Radiation {
   // [cm s^-1]; 0 and 0 = none
   double broad_T = 0.0;
   double broad_vturb = 0.0;
+  // the photon spectrum assumed inside each bin, dN/dE ~ E^-alpha, for
+  // every bin average (cross sections, photoheating, J_LW, h2pd lines,
+  // grain Qabs): 1 (default) constant photons per ln E (J constant: legacy
+  // photoBinJ); 2 constant energy per ln E (flat nu F_nu, He, Wibking &
+  // Krumholz 2024's fixed slope for energy groups); 0 constant photons
+  // per eV (KROME-X 2.0.0's photo() averages)
+  double alpha = 1.0;
   int nbins() const { return static_cast<int>(Elo.size()); }
 
   // B logarithmic bins between emin and emax [eV], zero field
@@ -91,6 +101,7 @@ struct Radiation {
 
 struct PhotoModule {
   int B = 0;
+  double alpha = 1.0;           // the in-bin spectrum of init's Radiation
   double Esec = 100.0;          // photoelectron energy [eV] above which the
                                 // SvS85 secondary split applies (below: heat)
   std::vector<double> sigma;    // NPHOTO x B, bin-averaged [cm^2]
@@ -135,6 +146,7 @@ struct PhotoModule {
         throw std::invalid_argument("Radiation: a bin is not 0 < Elo < Ehi");
     B = rad.nbins();
     kdust.clear();
+    alpha = rad.alpha;
     Elo = rad.Elo;
     Ehi = rad.Ehi;
     const size_t NB = static_cast<size_t>(NPHOTO) * B;
@@ -148,22 +160,37 @@ struct PhotoModule {
     for (int b = 0; b < B; ++b) {
       const double a = std::fmax(rad.Elo[b], LW_EMIN);
       const double c = std::fmin(rad.Ehi[b], LW_EMAX);
-      if (c > a)  // photo_Jbin_(b) ln(c/a) / ln(LW_EMAX/LW_EMIN) per Phi_b
+      if (c <= a) continue;
+      // J_LW per Phi_b: (h / 4 pi) int_overlap E^-alpha dE / int_bin
+      // E^-alpha dE / ln(LW_EMAX/LW_EMIN) (photo_J_LW_)
+      if (alpha == 1.0)
         lww[b] = constants::planck_eV * std::log(c / a)
             / (4.0 * constants::pi * std::log(rad.Ehi[b] / rad.Elo[b])
                * std::log(LW_EMAX / LW_EMIN));
+      else
+        lww[b] = constants::planck_eV * photo_wint_(alpha, a, c)
+            / (4.0 * constants::pi
+               * photo_wint_(alpha, rad.Elo[b], rad.Ehi[b])
+               * std::log(LW_EMAX / LW_EMIN));
     }
     for (int b = 0; b < B; ++b) {
-      const double w = rad.Ehi[b] - rad.Elo[b];
       const double a = std::fmax(rad.Elo[b], 6.0);
       const double c = std::fmin(rad.Ehi[b], 13.6);
-      if (c > a)  // Int E * (Phi/w) dE over the overlap, in Habing units
-        habw[b] = (c * c - a * a) / (2.0 * w) * constants::eV_to_erg / 1.6e-3;
+      if (c <= a) continue;
+      // the energy flux in the overlap per Phi_b, int E^(1-alpha) dE /
+      // int_bin E^-alpha dE, in Habing units
+      if (alpha == 0.0)
+        habw[b] = (c * c - a * a) / (2.0 * (rad.Ehi[b] - rad.Elo[b]))
+            * constants::eV_to_erg / 1.6e-3;
+      else
+        habw[b] = photo_wint_(alpha - 1.0, a, c)
+            / photo_wint_(alpha, rad.Elo[b], rad.Ehi[b])
+            * constants::eV_to_erg / 1.6e-3;
     }
     for (int r = 0; r < NPHOTO; ++r) {
       if (photo_binned[r] >= 0) {  // lines given per bin (h2pd): no
         // photoelectron (Solomon: no deposit), sigmaE* stay 0
-        photo_bin_xsec(r, B, rad.Elo.data(), rad.Ehi.data(),
+        photo_bin_xsec(r, B, rad.Elo.data(), rad.Ehi.data(), alpha,
                        sigma.data() + static_cast<size_t>(r) * B);
         continue;
       }
@@ -189,15 +216,24 @@ struct PhotoModule {
       const double Elo_r = photo_Emin[r] * (1.0 - 0.5 * dsh);
       const double Ehi_r = photo_Emax[r] * (1.0 + 0.5 * dsh);
       for (int b = 0; b < B; ++b) {
-        const double w = rad.Ehi[b] - rad.Elo[b];
+        // the bin's weight int E^-alpha dE (alpha = 0: its width)
+        const double w = photo_wint_(alpha, rad.Elo[b], rad.Ehi[b]);
         const double a = std::fmax(rad.Elo[b], Elo_r);
         const double c = std::fmin(rad.Ehi[b], Ehi_r);
         if (c <= a) continue;
         double s = 0.0, se = 0.0, ss = 0.0, sc = 0.0, sp = 0.0;
-        const double dE = (c - a) / quad_pts;  // midpoint rule over [a, c]
+        // midpoint rule over [a, c]: for alpha = 0 in E; otherwise in ln
+        // E, each cell with its exact weight int E^-alpha dE (a constant
+        // cross section averages exactly)
+        const double dE = (c - a) / quad_pts;
+        const double dl = std::log(c / a) / quad_pts;
         for (int q = 0; q < quad_pts; ++q) {
-          const double E = a + (q + 0.5) * dE;
-          const double x = xs(E) * dE;
+          const double E = alpha == 0.0 ? a + (q + 0.5) * dE
+                                         : a * std::exp((q + 0.5) * dl);
+          const double x = xs(E) * (alpha == 0.0 ? dE
+              : photo_wint_(alpha, a * std::exp(q * dl),
+                            q + 1 == quad_pts ? c
+                                : a * std::exp((q + 1) * dl)));
           // photoelectron energy (>= 0: a broadened threshold); above an
           // inner-shell edge, the shells' photoelectrons and Auger
           // electrons (photo_edep)

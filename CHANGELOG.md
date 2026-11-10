@@ -13,3 +13,14 @@
   it already counts are no longer in the reaction-enthalpy terms; the
   generator lists them among its warnings, and a reaction's `; dh=0|1`
   overrides the choice.
+- **In-bin photon spectrum** (changes results with coarse bins). Every bin
+  average (photo cross sections, photoheating, `J_LW`, `h2pd()` lines,
+  the Habing flux, grain Qabs) now assumes the same photon spectrum inside
+  the bin, dN/dE ~ E^-alpha, set when the bins are built (C++
+  `Radiation::alpha`, C `krome_opts_set_photo_alpha`, Fortran
+  `krome_set_photo_alpha`, Python `opts.set_photo_alpha`). The default
+  alpha = 1 (constant photons per ln E, J constant: legacy KROME) replaces
+  2.0.0's flat photon spectrum (alpha = 0) of the photo() averages and
+  the grain Qabs taken at the bin midpoint; alpha = 2 is the flat
+  nu F_nu of He, Wibking & Krumholz (2024). The two Solomon forms
+  (`J_LW` rates and photo()) now agree in bins straddling the band edges.

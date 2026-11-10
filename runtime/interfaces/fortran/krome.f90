@@ -79,6 +79,7 @@ module krome
        krome_version_f, &
        krome_set_dustbins, krome_nbins, krome_solve, krome_solve_x, &
        krome_set_photo_broadening, krome_set_photo_dust_opacity, &
+       krome_set_photo_alpha, &
        krome_ndust, krome_set_dust_Td, &
        krome_set_dust_a, krome_get_dust_a, krome_get_dust_counts, &
        krome_get_dust_types, &
@@ -268,6 +269,13 @@ module krome
       real(c_double), value :: T, v
       integer(c_int) :: r
     end function c_set_photo_broadening
+    function c_set_photo_alpha(h, a) &
+         bind(C, name="krome_opts_set_photo_alpha") result(r)
+      import :: c_ptr, c_int, c_double
+      type(c_ptr), value :: h
+      real(c_double), value :: a
+      integer(c_int) :: r
+    end function c_set_photo_alpha
     function c_set_photo_dust_opacity(h, k) &
          bind(C, name="krome_opts_set_photo_dust_opacity") result(r)
       import :: c_ptr, c_int
@@ -1044,6 +1052,18 @@ contains
     r = c_set_photo_broadening(h, Tgas, vturb)
     if (present(ierr)) ierr = r
   end subroutine krome_set_photo_broadening
+
+  ! the photon spectrum assumed inside each bin, dN/dE ~ E^-alpha (1,
+  ! default: constant photons per ln E; 2: constant energy per ln E; 0:
+  ! constant photons per eV); rebuilds set bins
+  subroutine krome_set_photo_alpha(h, alpha, ierr)
+    type(c_ptr), intent(in) :: h
+    real(c_double), intent(in) :: alpha
+    integer, intent(out), optional :: ierr
+    integer(c_int) :: r
+    r = c_set_photo_alpha(h, alpha)
+    if (present(ierr)) ierr = r
+  end subroutine krome_set_photo_alpha
 
   ! dust opacity per photon bin kappa(nbins) [cm^2 per g of dust] (e.g.
   ! krome_dust_kappa_draine): with radiation.evolve the field also loses

@@ -1281,6 +1281,7 @@ inline void install_hooks_(SolveCtx& c, const double* n0,
 #ifdef KROME_PHOTO_HPP_INCLUDED
   h.phi = c.tc.Phi;
   h.nbins = o.photo ? o.photo->B : 0;
+  h.alpha = o.photo ? o.photo->alpha : 1.0;
   h.elo = o.photo ? o.photo->Elo.data() : nullptr;
   h.ehi = o.photo ? o.photo->Ehi.data() : nullptr;
 #endif
@@ -1914,6 +1915,8 @@ inline int write_error_report_(const bdf::Diag& d, const double* y,
       }
       std::fprintf(fp, "};\n");
     }
+    if (ph->alpha != 1.0)
+      std::fprintf(fp, "  rad.alpha = %s;\n", cnum(ph->alpha).c_str());
     std::fprintf(fp, "  PhotoModule photo;\n  photo.init(rad);\n"
                  "  o.photo = &photo;\n  o.Phi = rad.Phi.data();\n");
     if (o.c_red != constants::clight)

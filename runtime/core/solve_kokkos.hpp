@@ -87,6 +87,7 @@ struct Batch {
   DView2 n0;         // [ncell][NSPEC] input densities (n_global)
   DView2 phi;        // [ncell][B] per-cell photon field (radiation.evolve: out)
   double crad = constants::clight;  // the evolved bins' speed of light
+  double alpha = 1.0;  // the photo module's in-bin spectrum
   DView2 psum;       // [ncell][NPSUM_ * NPHOTO] static-field bin sums
 #ifdef KROME_PHOTO_HPP_INCLUDED
   Kokkos::View<PhotoSumsView*, MemSpace> psv;  // per cell: views of psum
@@ -471,6 +472,7 @@ inline void upload_tables_(DeviceBuffers_& D, const SolverOpts& o, int B,
   b.crad = o.c_red;
   const PhotoModule* ph = o.photo;
   if (ph != nullptr) {
+    b.alpha = ph->alpha;
     upload_(b.sigma, ph->sigma, "krome_sigma");
     upload_(b.sigmaE, ph->sigmaE, "krome_sigmaE");
     upload_(b.sigmaEs, ph->sigmaEs, "krome_sigmaEs");
@@ -501,7 +503,7 @@ inline void upload_tables_(DeviceBuffers_& D, const SolverOpts& o, int B,
     upload_(b.dqmid, du.qmid, "krome_dust_qmid");
     upload_(b.demid, du.emid, "krome_dust_emid");
     b.dnT = du.nT;
-    b.dB = du.qmid.empty() ? 0 : static_cast<int>(du.emid.size());
+    b.dB = du.qmid.empty() ? 0 : static_cast<int>(du.qmid.size() / nb);
     b.dTmin = du.TbbMin;
     b.dTmax = du.TbbMax;
     b.dTmult = du.TbbMult;
@@ -540,6 +542,7 @@ inline void setup_ctx_(const Batch& b, int B, int ncell) {
             t.Phi = &bb.phi(c, 0);
             t.p.hk.phi = t.Phi;
             t.p.hk.nbins = Bb;
+            t.p.hk.alpha = bb.alpha;
             t.p.hk.elo = v.Elo;
             t.p.hk.ehi = v.Ehi;
             if (bb.Bev == 0) {

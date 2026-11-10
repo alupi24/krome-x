@@ -811,7 +811,7 @@ The C functions:
 | group | functions |
 |---|---|
 | solving | `krome_solve_cells`, `krome_solve_cells_x`, `krome_equilibrium_cells`, `krome_flag_message` |
-| options | `krome_opts_new`, `krome_opts_free`, `krome_opts_set`, `krome_opts_get`, `krome_opts_set_error_file`, `krome_opts_set_photo`, `krome_opts_set_photo_broadening`, `krome_opts_set_photo_dust_opacity`, `krome_opts_nbins`, `krome_opts_set_dustbins`, `krome_opts_ndust`, `krome_opts_set_dust_Td`, `krome_opts_get_dust_Td` |
+| options | `krome_opts_new`, `krome_opts_free`, `krome_opts_set`, `krome_opts_get`, `krome_opts_set_error_file`, `krome_opts_set_photo`, `krome_opts_set_photo_broadening`, `krome_opts_set_photo_alpha`, `krome_opts_set_photo_dust_opacity`, `krome_opts_nbins`, `krome_opts_set_dustbins`, `krome_opts_ndust`, `krome_opts_set_dust_Td`, `krome_opts_get_dust_Td` |
 | device | `krome_has_device`, `krome_device_initialize`, `krome_device_finalize` |
 | network | `krome_version`, `krome_network_name`, `krome_nspec`, `krome_nrea`, `krome_npar`, `krome_species_name`, `krome_species_index`, `krome_param_name`, `krome_param_index`, `krome_params_default`, `krome_param_required_by`, `krome_species_mass`, `krome_species_charge`, `krome_nelem`, `krome_element_name`, `krome_species_natoms`, `krome_reaction_name` |
 | queries | section 7 |
@@ -852,7 +852,7 @@ The Fortran names that differ from C:
 | purpose | Fortran |
 |---|---|
 | solve | `krome_solve`, `krome_solve_x`, `krome_equilibrium` |
-| options | `krome_set(h, key, value)`, `krome_get(h, key)`, `krome_set_error_file`, `krome_set_photo`, `krome_set_photo_broadening`, `krome_set_photo_dust_opacity`, `krome_nbins`, `krome_set_dustbins`, `krome_ndust`, `krome_set_dust_Td`, `krome_get_dust_Td`, `krome_photo_sigma` |
+| options | `krome_set(h, key, value)`, `krome_get(h, key)`, `krome_set_error_file`, `krome_set_photo`, `krome_set_photo_broadening`, `krome_set_photo_alpha`, `krome_set_photo_dust_opacity`, `krome_nbins`, `krome_set_dustbins`, `krome_ndust`, `krome_set_dust_Td`, `krome_get_dust_Td`, `krome_photo_sigma` |
 | counts (the constants are in `krome_net`) | `krome_nspec_c`, `krome_nrea_c`, `krome_npar_c`, `krome_nelem_c`, `krome_nheat_c`, `krome_ncool_c`, `krome_nphoto_c` |
 | index of a name (1-based) | `krome_species_idx`, `krome_param_idx` |
 | names by 1-based index (and the version, `krome_version_f`) | `krome_species_name_f`, `krome_param_name_f`, `krome_param_required_by_f`, `krome_reaction_name_f`, `krome_element_name_f`, `krome_heating_name_f`, `krome_cooling_name_f`, `krome_flag_message_f` |
@@ -1359,6 +1359,35 @@ Setting up the bins:
   solve.
 - Python: `opts.set_photo(Elo, Ehi)`.
 
+Inside each bin the photons are distributed as dN/dE ~ E^-alpha, and
+every bin average uses that shape: the photo cross sections and
+photoheating (sigma_b = int sigma E^-alpha dE / int_bin E^-alpha dE over
+the reaction's window), `J_LW`, the `h2pd()` lines (J at the line
+energy), the Habing flux and the binned dust's Qabs. Phi_b stays the
+bin's total photon flux; only its distribution inside the bin is
+assumed:
+- `alpha = 1` (default): constant photons per ln E, J constant across
+  the bin (legacy photoBinJ; the self-weighted mean slope of a photon
+  spectrum, He, Wibking & Krumholz 2024, applied to photon numbers);
+- `alpha = 2`: constant energy per ln E (flat nu F_nu), He, Wibking &
+  Krumholz (2024)'s fixed slope for energy groups: use it with a
+  transfer that assumes it;
+- `alpha = 0`: constant photons per eV (KROME-X 2.0.0's photo() averages);
+- any other value: a power law of that slope (e.g. a known source).
+
+It matters only for coarse bins (over 13.6-24.6 eV, a hydrogenic sigma =
+sigma_0 (E/13.6 eV)^-3 averages to 0.43, 0.47 and 0.51 sigma_0 for alpha
+= 0, 1, 2); with a
+transfer code, use the shape its groups assume. Set it before the bins
+are built:
+- C++: `rad.alpha` before `ph.init(rad)` (and `dust.interp_qabs(rad)`);
+- C: `krome_opts_set_photo_alpha(h, alpha)` (rebuilds the bins);
+- Fortran: `krome_set_photo_alpha(h, alpha)`;
+- Python: `opts.set_photo_alpha(alpha)`.
+
+The J <-> Phi conversions below use the bin's log-mean J, Phi_b = 4 pi
+J_b ln(Ehi/Elo) / h, which holds for any alpha.
+
 Doppler broadening of the tabulated (Leiden/SWRI) cross sections,
 legacy `-useBroadening`, is applied once when the bins are built, as in
 legacy. It uses a temperature and a turbulent velocity [cm s^-1]:
@@ -1376,7 +1405,7 @@ Building fields:
 | | C++ (`spectra::`) | C | Python |
 |---|---|---|---|
 | bins | `bins_lin`, `bins_log` | `krome_bins_lin`, `krome_bins_log` | `bins_lin`, `bins_log` |
-| J <-> Phi (J constant in a bin) | `J_to_phi`, `phi_to_J` | `krome_J_to_phi`, `krome_phi_to_J` | `phi_to_J` |
+| J <-> Phi (the bin's log-mean J) | `J_to_phi`, `phi_to_J` | `krome_J_to_phi`, `krome_phi_to_J` | `phi_to_J` |
 | blackbody | `blackbody`, `planck_J`, `blackbody_range` | `krome_spectrum_blackbody`, `krome_blackbody_range` | `spectrum_blackbody`, `blackbody_range` |
 | Draine 1978 ISRF | `draine` | `krome_spectrum_draine` | `spectrum_draine` |
 | J21 power law | `j21` | `krome_spectrum_j21` | `spectrum_j21` |

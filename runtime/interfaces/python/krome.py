@@ -169,6 +169,8 @@ class Network:
                                ctypes.c_double]),
             "krome_opts_set_photo_dust_opacity": (
                 ctypes.c_int, [ctypes.c_void_p, _D]),
+            "krome_opts_set_photo_alpha": (
+                ctypes.c_int, [ctypes.c_void_p, ctypes.c_double]),
             "krome_opts_set_dustbins": (
                 ctypes.c_int, [ctypes.c_void_p, ctypes.c_int, ctypes.c_int,
                                ctypes.c_int, ctypes.c_double,
@@ -1350,6 +1352,16 @@ class Options:
         if self._net._lib.krome_opts_set_photo_broadening(
                 self._h, float(Tgas), float(vturb)) != 0:
             raise KromeError("broadening needs Tgas >= 0 and vturb >= 0")
+        return self
+
+    def set_photo_alpha(self, alpha):
+        """the photon spectrum assumed inside each bin, dN/dE ~ E^-alpha,
+        for every bin average: 1 (default) constant photons per ln E, 2
+        constant energy per ln E (flat nu F_nu), 0 constant photons per
+        eV; rebuilds the bins already set."""
+        if self._net._lib.krome_opts_set_photo_alpha(
+                self._h, float(alpha)) != 0:
+            raise KromeError("alpha must be finite")
         return self
 
     def set_photo_dust_opacity(self, kappa):

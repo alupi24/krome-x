@@ -47,8 +47,8 @@ struct DustView {
   const double* ibb = nullptr;    // [nb * nT] intBB tables
   const double* ibb_sig = nullptr;
   int B = 0;                      // photon bins of qmid / emid (0: none)
-  const double* qmid = nullptr;   // [nb * B] Qabs at the bin midpoints
-  const double* emid = nullptr;   // [B] the bin midpoints [eV]
+  const double* qmid = nullptr;   // [nb * B] <Qabs> over each photon bin
+  const double* emid = nullptr;   // [nb * B] <E Qabs> / <Qabs> [eV]
 };
 
 // linear interpolation on the uniform Tbb grid (legacy get_dust_intBB).
@@ -144,7 +144,8 @@ KROME_HD inline double dust_intJ(const DustView& v, int b, const double* Phi) {
   if (Phi == nullptr || v.B == 0) return 0.0;
   double s = 0.0;
   for (int i = 0; i < v.B; ++i)
-    s += Phi[i] * v.emid[i] * v.qmid[static_cast<size_t>(b) * v.B + i];
+    s += Phi[i] * v.emid[static_cast<size_t>(b) * v.B + i]
+        * v.qmid[static_cast<size_t>(b) * v.B + i];
   return 0.25 * s * constants::eV_to_erg;
 }
 
@@ -466,8 +467,9 @@ struct DustBins {
   double xds_fix = -1.0;
   std::vector<double> awcur;  // area weights xw a^2 at the current radii
   std::vector<double> qb;        // Qabs per bin on the data E grid
-  std::vector<double> qmid;      // Qabs per bin at photobin midpoints
-  std::vector<double> emid;      // photobin midpoints [eV] (interp_qabs)
+  std::vector<double> qmid;      // [nb * B] <Qabs> per photon bin
+  std::vector<double> emid;      // [nb * B] <E Qabs> / <Qabs> [eV]
+                                 // (interp_qabs)
   // intBB tables [bin][nT]: read-only after init(), shared by the copies
   // (solve_cells gives every cell its own bins for its Td; copying these
   // ~3 nb nT doubles per cell would cost ~48 MB each with the defaults)
@@ -613,7 +615,7 @@ struct DustBins {
       v.ibb_sig = tab_->ibb_sig.data();
     }
     if (!qmid.empty()) {
-      v.B = static_cast<int>(emid.size());
+      v.B = static_cast<int>(qmid.size() / nb);
       v.qmid = qmid.data();
       v.emid = emid.data();
     }
@@ -659,28 +661,49 @@ struct DustBins {
     dust_dTdust(view(), Tgas, n, p, Tds, Phi, out);
   }
 
-  // interpolate Qabs of every bin onto photobin midpoints (legacy
-  // interp_qabs); call once after init when radiation is co-evolved
+  // Qabs of every grain bin averaged over each photon bin with the
+  // in-bin photon spectrum dN/dE ~ E^-alpha (rad.alpha): qmid = <Qabs>
+  // (absorptions per photon), emid = <E Qabs> / <Qabs> (the mean energy
+  // of the photons that grain bin absorbs; the bin midpoint where Qabs =
+  // 0), so that Phi emid qmid is its absorbed energy (legacy interp_qabs
+  // took Qabs at the midpoint). Qabs is the table's linear interpolation
+  // in E (extrapolated below its first point, its last value above, as
+  // legacy). Call once after init when radiation is co-evolved
   template <class Rad>
-  void interp_qabs(const Rad& rad) {
+  void interp_qabs(const Rad& rad, int quad_pts = 64) {
     const int B = rad.nbins();
+    const double alpha = rad.alpha;
     qmid.assign(static_cast<size_t>(nb) * B, 0.0);
-    emid.resize(B);
-    for (int i = 0; i < B; ++i)
-      emid[i] = 0.5 * (rad.Elo[i] + rad.Ehi[i]);
+    emid.assign(static_cast<size_t>(nb) * B, 0.0);
     for (int b = 0; b < nb; ++b) {
       const double* q = &qb[static_cast<size_t>(b) * nE];
       const double* Egrid = eg[b];
-      for (int i = 0; i < B; ++i) {
-        const double E = emid[i];
-        double v = q[nE - 1];
+      auto qabs = [&](double E) {
         for (int j = 1; j < nE; ++j)
-          if (E < Egrid[j]) {
-            v = (E - Egrid[j - 1]) / (Egrid[j] - Egrid[j - 1])
+          if (E < Egrid[j])
+            return (E - Egrid[j - 1]) / (Egrid[j] - Egrid[j - 1])
                 * (q[j] - q[j - 1]) + q[j - 1];
-            break;
-          }
-        qmid[static_cast<size_t>(b) * B + i] = v;
+        return q[nE - 1];
+      };
+      for (int i = 0; i < B; ++i) {
+        const double lo = rad.Elo[i], hi = rad.Ehi[i];
+        // midpoint rule in ln E, each cell with its exact weight int
+        // E^-alpha dE
+        const double dl = std::log(hi / lo) / quad_pts;
+        double w = 0.0, s = 0.0, se = 0.0;
+        for (int k = 0; k < quad_pts; ++k) {
+          const double E = lo * std::exp((k + 0.5) * dl);
+          const double g = photo_wint_(alpha, lo * std::exp(k * dl),
+                                       k + 1 == quad_pts ? hi
+                                           : lo * std::exp((k + 1) * dl));
+          const double Q = qabs(E);
+          w += g;
+          s += Q * g;
+          se += Q * E * g;
+        }
+        const size_t o = static_cast<size_t>(b) * B + i;
+        qmid[o] = s / w;
+        emid[o] = s > 0.0 ? se / s : 0.5 * (lo + hi);
       }
     }
   }

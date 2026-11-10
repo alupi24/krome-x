@@ -3452,6 +3452,8 @@ class Codegen:
                "  int nbins = 0;",
                "  const double* elo = nullptr;",
                "  const double* ehi = nullptr;",
+               "  double alpha = 1.0;  // in-bin photon spectrum dN/dE ~ "
+               "E^-alpha",
                "  DustBinsHook dust;",
                "};",
                "// runtime parameters of this network (per cell); a NaN",
@@ -4578,25 +4580,39 @@ class Codegen:
         w("// hook) lives in Params::hk (StateHooks, defined with Params),")
         w("// set in the solver's own copy of the parameters: per cell and")
         w("// device-safe")
-        w("// mean intensity J_nu [eV cm^-2 s^-1 Hz^-1 sr^-1] of photon bin b,")
-        w("// constant across the bin as legacy photoBinJ: the photon flux")
-        w("// Phi_b = 4 pi J_b ln(Ehi/Elo) / h")
+        w("// int_a^c E^-alpha dE: the in-bin photon spectrum dN/dE ~ E^-alpha")
+        w("// (Radiation::alpha; 1: constant photons per ln E, J constant)")
+        w("KROME_HD inline double photo_wint_(double alpha, double a, "
+          "double c) {")
+        w("  if (alpha == 1.0) return std::log(c / a);")
+        w("  if (alpha == 0.0) return c - a;")
+        w("  const double q = 1.0 - alpha;")
+        w("  return (std::pow(c, q) - std::pow(a, q)) / q;")
+        w("}")
+        w("// log-mean intensity J_nu [eV cm^-2 s^-1 Hz^-1 sr^-1] of photon bin")
+        w("// b, (1 / ln(Ehi/Elo)) int J dlnE = Phi_b h / (4 pi ln(Ehi/Elo))")
+        w("// whatever the in-bin spectrum (legacy photoBinJ: J constant)")
         w("KROME_HD inline double photo_Jbin_(const Params& p, int b) {")
         w("  return p.hk.phi[b] * constants::planck_eV")
         w("      / (4.0 * constants::pi * std::log(p.hk.ehi[b] "
           "/ p.hk.elo[b]));")
         w("}")
-        w("// ... at E [eV]: the bin containing E (legacy get_photoIntensity);")
+        w("// ... at E [eV], in the bin containing E (legacy")
+        w("// get_photoIntensity): J(E) ~ E^(1-alpha), constant for alpha = 1;")
         w("// 0 outside the bins or without a field")
         w("KROME_HD inline double photo_J_(const Params& p, double E) {")
         w("  for (int b = 0; b < p.hk.nbins; ++b)")
-        w("    if (p.hk.elo[b] <= E && E <= p.hk.ehi[b])")
-        w("      return photo_Jbin_(p, b);")
+        w("    if (p.hk.elo[b] <= E && E <= p.hk.ehi[b]) {")
+        w("      if (p.hk.alpha == 1.0) return photo_Jbin_(p, b);")
+        w("      return photo_Jbin_(p, b) * std::pow(E, 1.0 - p.hk.alpha)")
+        w("          * std::log(p.hk.ehi[b] / p.hk.elo[b])")
+        w("          / photo_wint_(p.hk.alpha, p.hk.elo[b], p.hk.ehi[b]);")
+        w("    }")
         w("  return 0.0;")
         w("}")
-        w("// Lyman-Werner band (11.2-13.6 eV) mean intensity of the bins,")
-        w("// J_LW = sum_b J_b ln(overlap_b) / ln(13.6/11.2): each bin")
-        w("// constant in J (legacy photoBinJ); a flat J gives J_LW = J")
+        w("// Lyman-Werner band (11.2-13.6 eV) log-mean intensity of the bins,")
+        w("// J_LW = (1 / ln(13.6/11.2)) int J dlnE over the band, with the")
+        w("// in-bin spectrum (alpha); a flat J gives J_LW = J")
         w("constexpr double LW_EMIN = %s, LW_EMAX = %s;"
           % tuple(self.cnum(x) for x in knet.LW_BAND))
         w("KROME_HD inline double photo_J_LW_(const Params& p) {")
@@ -4604,7 +4620,14 @@ class Codegen:
         w("  for (int b = 0; b < p.hk.nbins; ++b) {")
         w("    const double a = std::fmax(p.hk.elo[b], LW_EMIN);")
         w("    const double c = std::fmin(p.hk.ehi[b], LW_EMAX);")
-        w("    if (c > a) s += photo_Jbin_(p, b) * std::log(c / a);")
+        w("    if (c <= a) continue;")
+        w("    if (p.hk.alpha == 1.0) {")
+        w("      s += photo_Jbin_(p, b) * std::log(c / a);")
+        w("    } else {")
+        w("      s += photo_Jbin_(p, b) * std::log(p.hk.ehi[b] / p.hk.elo[b])")
+        w("          * photo_wint_(p.hk.alpha, a, c)")
+        w("          / photo_wint_(p.hk.alpha, p.hk.elo[b], p.hk.ehi[b]);")
+        w("    }")
         w("  }")
         w("  return s / std::log(LW_EMAX / LW_EMIN);")
         w("}")
@@ -7128,7 +7151,7 @@ class Codegen:
         if not binned:
             w("constexpr bool PHOTO_BINNED = false;")
             w("inline void photo_bin_xsec(int, int, const double*, "
-              "const double*, double*) {}")
+              "const double*, double, double*) {}")
             return
         nx, EX, lines = self.load_h2pd()
         w("constexpr bool PHOTO_BINNED = true;")
@@ -7143,13 +7166,14 @@ class Codegen:
         w("inline const int h2pd_X[%d] = {%s};"
           % (len(lines), ", ".join(str(r[0]) for r in lines)))
         w("// bin cross sections of the lines of X level j: legacy k = pre")
-        w("// J(dE), with J constant across the bin (legacy photoBinJ), so")
-        w("// sigma_b = sum_lines pre h / (4 pi ln(Ehi/Elo)) and k = sum_b")
+        w("// J(dE), with J(E) = Phi_b h E^(1-alpha) / (4 pi int_bin E^-alpha")
+        w("// dE) (alpha = 1, legacy photoBinJ: J constant across the bin,")
+        w("// sigma_b = sum_lines pre h / (4 pi ln(Ehi/Elo))) and k = sum_b")
         w("// sigma_b Phi_b. A line on a shared edge goes to the upper bin")
         w("// (legacy: the last match); a line outside every bin absorbs")
         w("// nothing (legacy stopped)")
         w("inline void photo_bin_xsec(int r, int B, const double* Elo, "
-          "const double* Ehi, double* sig) {")
+          "const double* Ehi, double alpha, double* sig) {")
         w("  const int j = photo_binned[r];")
         w("  for (int b = 0; b < B; ++b) sig[b] = 0.0;")
         w("  if (j < 0) return;")
@@ -7158,9 +7182,15 @@ class Codegen:
         w("    int bl = -1;")
         w("    for (int b = 0; b < B; ++b)")
         w("      if (Elo[b] <= h2pd_dE[l] && Ehi[b] >= h2pd_dE[l]) bl = b;")
-        w("    if (bl >= 0)")
+        w("    if (bl < 0) continue;")
+        w("    if (alpha == 1.0)")
         w("      sig[bl] += h2pd_pre[l] * constants::planck_eV / (4.0 * "
           "constants::pi * std::log(Ehi[bl] / Elo[bl]));")
+        w("    else")
+        w("      sig[bl] += h2pd_pre[l] * constants::planck_eV")
+        w("          * std::pow(h2pd_dE[l], 1.0 - alpha)")
+        w("          / (4.0 * constants::pi * photo_wint_(alpha, Elo[bl], "
+          "Ehi[bl]));")
         w("  }")
         w("}")
         w("// normalized Boltzmann population of X level j at Tgas (legacy")

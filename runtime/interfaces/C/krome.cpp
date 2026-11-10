@@ -51,6 +51,7 @@ struct krome_opts {
   krome::EquilOpts eq;
   bool has_photo = false;
   double broad_T = 0.0, broad_vturb = 0.0;  // krome_opts_set_photo_broadening
+  double alpha = 1.0;                       // krome_opts_set_photo_alpha
   krome::Radiation rad;
   krome::PhotoModule photo;
   std::vector<double> kdraine;  // Draine R_V=3.1 kappa per bin (get_opacity)
@@ -322,6 +323,7 @@ int krome_opts_set_photo(krome_opts* h, int nbins, const double* Elo,
   }
   h->rad.broad_T = h->broad_T;
   h->rad.broad_vturb = h->broad_vturb;
+  h->rad.alpha = h->alpha;
   h->photo = krome::PhotoModule();
   h->photo.init(h->rad);
   h->has_photo = true;
@@ -359,6 +361,15 @@ int krome_opts_set_photo_dust_opacity(krome_opts* h, const double* kappa) {
   }
   h->photo.set_dust_opacity(kappa);
   return 0;
+}
+
+int krome_opts_set_photo_alpha(krome_opts* h, double alpha) {
+  if (h == nullptr || !std::isfinite(alpha)) return -1;
+  h->alpha = alpha;
+  if (!h->has_photo) return 0;  // applied by krome_opts_set_photo
+  std::vector<double> Elo = h->rad.Elo, Ehi = h->rad.Ehi;
+  return krome_opts_set_photo(h, static_cast<int>(Elo.size()), Elo.data(),
+                              Ehi.data());
 }
 
 int krome_opts_nbins(const krome_opts* h) {

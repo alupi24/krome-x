@@ -212,6 +212,13 @@ int krome_opts_nbins(const krome_opts* h);
  * none). Rebuilds the bins already set; -1 for negative values. */
 int krome_opts_set_photo_broadening(krome_opts* h, double Tgas,
                                     double vturb);
+/* the photon spectrum assumed inside each bin, dN/dE ~ E^-alpha, for every
+ * bin average (cross sections, photoheating, J_LW, h2pd lines, grain
+ * Qabs): 1 (default) constant photons per ln E (J constant); 2 constant
+ * energy per ln E (flat nu F_nu: He, Wibking & Krumholz 2024's fixed
+ * slope for energy groups); 0 constant photons per eV. Rebuilds the bins
+ * already set; -1 for a non-finite value. */
+int krome_opts_set_photo_alpha(krome_opts* h, double alpha);
 /* dust opacity per photon bin kappa[nbins] [cm^2 per g of DUST] (e.g.
  * krome_dust_kappa_draine): with radiation.evolve the field also loses
  * rho_gas d2g kappa[b] c photons per unit time, unless binned dust with
