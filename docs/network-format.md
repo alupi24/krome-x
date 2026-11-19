@@ -1,8 +1,8 @@
-# KROME v2 network format — specification draft (v1)
+# The KROME-X network format (`.knet`)
 
-Status: **draft v2** (Step 1 of the rewrite; decisions from the first review
-round are folded in: `clamp` out-of-range default, `Tgas_eV`, electron `e-`,
-case-sensitive species, `.knet` extension).
+The specification of the network files of KROME-X 2.x (files starting with
+`krome_format 1`): the reactions, the rate language, the photo, X-ray,
+cosmic-ray and grain-surface processes, and the network-level directives.
 Scope: gas-phase chemistry, photochemistry, X-ray and cosmic-ray chemistry,
 freezeout/evaporation surface chemistry, nuclear networks, custom
 cooling/heating terms, reverse (thermochemical) reactions (§3.2), and
@@ -188,10 +188,12 @@ collected into the build report (bibliography of the generated network).
   lower limits in practice belong to barrier reactions whose true rate
   collapses — clamping would inflate it by orders of magnitude), above the
   upper bound the rate is **clamped** to its value at the bound (fits blow
-  up beyond their validity; saturation is the safe continuation). Uniform
-  `clamp` and uniform `zero` (legacy KROME behavior) are build-time options,
-  globally or per reaction. This default was chosen after measuring an 86%
-  HD error from low-T clamping in the primordial regression at 100 K.
+  up beyond their validity; saturation is the safe continuation). The rule
+  is a build option for the whole network, `rates.outside`: `"asym"` (the
+  default), `"clamp"` (the value at the nearest bound on both sides) or
+  `"zero"` (zero on both sides, the legacy KROME behavior). This default
+  was chosen after measuring an 86% HD error from low-T clamping in the
+  primordial regression at 100 K.
 
 ### 3.2 Reverse reactions: `<->`
 

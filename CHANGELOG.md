@@ -1,7 +1,11 @@
 # Changelog
 
-## Unreleased (after 2.0.0)
+## 2.1.0 (2026-11-19)
 
+- **Network-format specification** (`docs/network-format.md`) no longer
+  a draft. It now says that the out-of-range rule of temperature-limited
+  rates is a build option for the whole network, `rates.outside` (`"asym"`
+  by default, `"clamp"`, `"zero"`), not a per-reaction choice.
 - **`n2x` takes the gas density** (interface change). Mass fractions are
   now x = m n / rho with the caller's rho, as in `x2n` and in the original
   KROME, since the network's species need not carry all the gas mass:
